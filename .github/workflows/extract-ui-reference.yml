@@ -1,9 +1,10 @@
-name: Extract UI Reference Package
+name: Build UI Reference Previews
 
 on:
   push:
     paths:
-      - 'docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Package-V1.zip'
+      - 'docs/UI_REFERENCE_PACKAGE_V1/images/**'
+      - 'docs/UI_REFERENCE_PACKAGE_V1/sources/**'
       - '.github/workflows/extract-ui-reference.yml'
   workflow_dispatch:
 
@@ -11,33 +12,51 @@ permissions:
   contents: write
 
 jobs:
-  extract-ui-reference:
+  build-ui-previews:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Extract UI reference package
+      - name: Decode UI reference images
         shell: bash
         run: |
           set -euo pipefail
-          SRC='docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Package-V1.zip'
-          DEST='docs/UI_REFERENCE_PACKAGE_V1/extracted'
+          SRC='docs/UI_REFERENCE_PACKAGE_V1/images'
+          SOURCES='docs/UI_REFERENCE_PACKAGE_V1/sources'
+          DEST='docs/UI_REFERENCE_PACKAGE_V1/previews'
+
           rm -rf "$DEST"
           mkdir -p "$DEST"
-          unzip -q "$SRC" -d "$DEST"
-          find "$DEST" -type f -print
 
-      - name: Commit extracted references
+          base64 -d "$SRC/01-Dashboard.jpg.b64" > "$DEST/01-Dashboard.jpg"
+          base64 -d "$SRC/02-Sejarah-Sistem.jpg.b64" > "$DEST/02-Sejarah-Sistem.jpg"
+          cat "$SRC/03-Per-Prompt"/part-*.b64 | base64 -d > "$DEST/03-Per-Prompt.jpg"
+          base64 -d "$SOURCES/04-Backup-Recovery.jpg.b64" > "$DEST/04-Backup-Recovery.jpg"
+          base64 -d "$SRC/05-Pengaturan.jpg.b64" > "$DEST/05-Pengaturan.jpg"
+
+          echo 'Decoded files:'
+          ls -lh "$DEST"
+          file "$DEST"/*.jpg
+
+          # Fail if any output is not recognized as JPEG.
+          for f in "$DEST"/*.jpg; do
+            file "$f" | grep -q 'JPEG image data'
+          done
+
+      - name: Commit generated previews
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/UI_REFERENCE_PACKAGE_V1/extracted
+          git add docs/UI_REFERENCE_PACKAGE_V1/previews
           if git diff --cached --quiet; then
-            echo 'No extracted changes to commit.'
+            echo 'No preview changes to commit.'
             exit 0
           fi
-          git commit -m 'Extract Prompt Action UI reference assets'
-          git push
+          git commit -m 'Build Prompt Action UI reference previews'
+          git pull --rebase origin main
+          git push origin main
