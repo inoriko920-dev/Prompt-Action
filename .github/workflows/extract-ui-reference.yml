@@ -1,0 +1,43 @@
+name: Extract UI Reference Package
+
+on:
+  push:
+    paths:
+      - 'docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Package-V1.zip'
+      - '.github/workflows/extract-ui-reference.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract-ui-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract UI reference package
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC='docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Package-V1.zip'
+          DEST='docs/UI_REFERENCE_PACKAGE_V1/extracted'
+          rm -rf "$DEST"
+          mkdir -p "$DEST"
+          unzip -q "$SRC" -d "$DEST"
+          find "$DEST" -type f -print
+
+      - name: Commit extracted references
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/UI_REFERENCE_PACKAGE_V1/extracted
+          if git diff --cached --quiet; then
+            echo 'No extracted changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Extract Prompt Action UI reference assets'
+          git push
