@@ -28,7 +28,7 @@ jobs:
 
           base64 -d "$SRC/01-Dashboard.jpg.b64" > "$OUT/01-Dashboard.jpg"
           base64 -d "$SRC/02-Sejarah-Sistem.jpg.b64" > "$OUT/02-Sejarah-Sistem.jpg"
-          cat "$SRC/03-Per-Prompt"/part-*.b64 | base64 -d > "$OUT/03-Per-Prompt.jpg"
+          base64 -d "$SRC/03-Per-Prompt.jpg.b64" > "$OUT/03-Per-Prompt.jpg"
           base64 -d "$SRC/04-Backup-Recovery.jpg.b64" > "$OUT/04-Backup-Recovery.jpg"
           base64 -d "$SRC/05-Pengaturan.jpg.b64" > "$OUT/05-Pengaturan.jpg"
 
