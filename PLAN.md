@@ -1,238 +1,688 @@
-# Prompt Action — ASTRA UI Plan
+# Prompt Action — ASTRA MASTER PLAN V1
 
-Status: PLANNED
-Peran pemilik plan: ASTRA
-Baseline repo saat plan dibuat: main @ dd58008c17637e910b461e2fbacf4212c85a2c2e
-Tanggal: 2026-10-01
+Status: **PLANNED / SOURCE OF TRUTH UNTUK SOL**  
+Peran pemilik plan: **ASTRA**  
+Tanggal baseline: **1 Oktober 2026**
+
+> Dokumen ini menggantikan plan lama yang masih memakai versi V22.5.2 sebagai versi aktif. Mulai sekarang V22.5.1 hanya `LEGACY SOURCE`; Prompt Action dimulai ulang sebagai `SYSTEM V1`.
+
+---
 
 ## 1. Tujuan produk
-Membangun aplikasi desktop Windows bernama **Prompt Action** untuk melihat sejarah versi prompt secara visual, memahami perubahan, memilih versi aktif, mengunduh file prompt yang tersedia, dan mengunduh backup penuh untuk recovery bila GitHub bermasalah.
 
-Fokus utama UI adalah **mudah dibaca oleh pemilik produk**, bukan menampilkan database teknis seperti Excel.
+Prompt Action adalah aplikasi desktop Windows untuk:
 
-## 2. Keputusan desain yang dikunci
+- melihat sejarah sistem dan perubahan prompt secara visual;
+- melihat revisi setiap Prompt tanpa membaca spreadsheet teknis;
+- mengetahui `PRIMARY CHANGE` dan prompt lain yang hanya ikut menyesuaikan (`SYNC CHANGE`);
+- mengunduh prompt aktif maupun revisi lama yang benar-benar tersedia;
+- membandingkan revisi;
+- membuat dan memverifikasi Full Backup;
+- membangun ulang repository bila GitHub hilang atau akun suspend.
 
-### Referensi visual resmi
-Gunakan mockup biru-putih Prompt Action yang disetujui pemilik produk sebagai **source of truth visual**.
+Aplikasi V1 adalah **Version Manager + Prompt Library + Backup/Recovery Manager**, bukan editor prompt panjang.
 
-Referensi desain:
-- ukuran referensi: 1672 × 941 px;
-- tema: putih + biru;
-- sidebar biru vertikal di kiri;
-- area kerja utama putih terang;
-- kartu putih dengan border tipis, radius lembut, dan shadow sangat halus;
-- tampilan utama `Per Prompt`;
-- hierarchy harus sama dengan mockup: header → Pohon Versi + Ringkasan Versi → tiga kartu bawah.
+---
 
-Sol tidak boleh mengganti gaya menjadi dashboard lain hanya karena lebih mudah diimplementasikan.
+## 2. Aturan versioning resmi
 
-### Arsitektur UI
-- Desktop Windows.
-- **PySide6 + Qt Quick/QML**.
-- Python menjadi backend untuk file/version/backup operations.
-- QML menjadi presentation layer untuk mencapai layout modern dan konsisten.
-- Data versi tidak di-hardcode di komponen UI; UI membaca satu sumber data JSON.
-- Distribusi akhir: **portable folder multi-file dalam satu ZIP**, bukan installer dan bukan single-file EXE.
+Gunakan tiga lapis identitas. Jangan gunakan angka seperti `1.1.1.1.1`.
 
-## 3. Struktur layar utama
+### 2.1 System Version — `V`
 
-### 3.1 Sidebar kiri
-Lebar target pada viewport referensi: sekitar 270 px.
+Contoh: `V1`, `V2`, `V3`.
 
-Elemen, dari atas ke bawah:
-1. Judul `Prompt Action`.
-2. Subtitle: `Kelola prompt, versi, dan perubahan dengan lebih baik.`
-3. Menu:
-   - Dashboard
-   - Sejarah Sistem
-   - Per Prompt
-   - Backup
-   - Pengaturan
-4. `Per Prompt` aktif dengan panel biru lebih terang.
-5. Status card kecil di bawah: `Siap bekerja`.
+Naik hanya jika arsitektur/workflow global berubah secara material. Perubahan satu prompt tidak membuat System Version baru.
 
-Sidebar menggunakan gradasi biru gelap → biru terang yang lembut, bukan neon.
+Titik awal:
 
-### 3.2 Header
-- icon dokumen;
-- judul halaman: `Prompt 3`;
-- subjudul: `Riwayat versi dan perubahan`;
-- kotak pencarian di kanan;
-- notification icon;
-- avatar/status;
-- custom titlebar Windows dengan minimize / maximize / close bila diperlukan untuk menyamai mockup.
+```text
+Legacy V22.5.1
+      │
+      ▼
+System V1
+```
 
-### 3.3 Kartu `Pohon Versi`
-Ini adalah fokus utama layar.
+### 2.2 Snapshot — `S`
 
-Urutan sejarah sistem yang wajib bisa ditampilkan:
-`V21.5 → V22 → V22.1 → V22.2 → V22.3 → V22.4 → V22.5 → V22.5.1 → V22.5.2`
+Contoh: `S001`, `S002`, `S003`.
 
-Status node:
-- abu/pucat = riwayat saja / file tidak tersedia;
-- biru muda = file tersedia;
-- biru utama = aktif;
-- garis putus-putus = draft.
+Snapshot naik setiap release resmi pada System Version yang sama.
 
-Untuk Prompt 3:
-- versi sejarah sebelum V22.5.1 tetap ditampilkan walaupun file fisiknya tidak tersedia;
-- V22.5.1 = file tersedia;
-- V22.5.2 = aktif;
-- draft V22.6 dan V22.6.1 boleh tampil sebagai cabang draft, bukan sebagai rilis resmi.
+Contoh:
 
-Node harus bisa diklik. Saat node dipilih, panel ringkasan dan kartu perubahan diperbarui.
+```text
+SYSTEM V1
+  ├─ S001  Baseline
+  ├─ S002  Update Prompt 3
+  ├─ S003  Update Prompt 2
+  └─ S004  Update Prompt 3
+```
 
-### 3.4 `Ringkasan Versi`
-Panel kanan atas berisi:
-- Versi aktif/terpilih;
-- Parent;
-- Status;
-- Prompt;
-- Deskripsi perubahan singkat.
+### 2.3 Prompt Revision — `R`
 
-Jangan tampilkan informasi teknis berlebihan di panel ini.
+Contoh: `R1`, `R2`, `R3`.
 
-### 3.5 `Apa yang Berubah?`
-Kartu kiri bawah.
+Revision naik pada setiap file prompt yang **isi aktualnya berubah**.
 
-Untuk V22.5.2 Prompt 3 contoh ringkasan:
-- Verifikasi 1B2 ke MP4 per frasa;
-- Slow 0,50× tetap;
-- Ambil-lewati ±50% per frasa;
-- Freeze maksimal 5 detik;
-- Acak menjadi tahap terakhir.
+Contoh keadaan sistem:
 
-Tujuan kartu ini adalah menjawab pertanyaan pemilik produk: **"Apa bedanya versi ini dengan versi sebelumnya?"**
+```text
+Prompt 1A   R1
+Prompt 1B   R1
+Prompt 1B1  R1
+Prompt 1B2  R3
+Prompt 2    R2
+Prompt 3    R3
+Prompt 4    R3
+Prompt 5    R2
+```
 
-### 3.6 `File Tersedia`
-Kartu tengah bawah.
+### 2.4 PRIMARY CHANGE vs SYNC CHANGE
 
-Tombol minimum:
-- Download Prompt [versi terpilih];
-- Download Full Backup terbaru;
-- Lihat Changelog;
-- Lihat Recovery Guide.
+Nama update mengikuti `PRIMARY CHANGE`, sedangkan nomor revision mengikuti semua file yang isinya benar-benar berubah.
 
-Jika node hanya `riwayat saja`, tombol download prompt disabled dan tampilkan `File versi ini tidak tersedia di backup`.
+Contoh:
 
-### 3.7 `Aturan Backup`
-Kartu kanan bawah.
+```text
+S002 — Update Prompt 3
 
-Checklist:
-- Arsipkan versi lama;
-- Simpan versi baru;
-- Update changelog;
-- Buat ZIP backup penuh;
-- Buat SHA256;
-- Simpan salinan kedua.
+PRIMARY
+Prompt 3      R1 → R2
 
-Footer wajib:
-`Perubahan belum dianggap selesai sebelum backup dibuat.`
+SYNC
+Prompt 1B2    R1 → R2
+Prompt 4      R1 → R2
+Prompt 5      R1 → R2
+```
 
-## 4. Sistem data agar app ikut berubah setiap ada versi baru
+Release tetap disebut **Update Prompt 3** karena Prompt 3 adalah alasan utama perubahan. Prompt 1B2/4/5 hanyalah penyesuaian kompatibilitas, tetapi revision mereka tetap naik karena isi file berubah.
 
-Buat satu file canonical, misalnya:
-`data/version_history.json`
+Jika nanti hanya Prompt 2 berubah:
 
-Minimal model data:
+```text
+S003 — Update Prompt 2
+PRIMARY: Prompt 2 R1 → R2
+```
+
+Prompt lain mempertahankan revision sebelumnya apabila kontennya tidak berubah.
+
+### 2.5 Kapan V1 menjadi V2
+
+Hanya jika struktur sistem berubah besar, misalnya:
+
+- alur 1B → 1B1 → 1B2 → Prompt 2 → Prompt 3 → Prompt 4 → Prompt 5 berubah;
+- peran Jangkar/Narasi berubah total;
+- format output global berubah;
+- model ownership visual berubah;
+- hampir seluruh prompt harus beradaptasi secara struktural.
+
+Saat itu buat `SYSTEM V2 / S001` dan jadikan V1 arsip utuh.
+
+---
+
+## 3. Aturan release dan backup
+
+Snapshot resmi **belum COMPLETE** sampai seluruh backup selesai.
+
+Urutan wajib:
+
+1. tentukan `PRIMARY CHANGE`;
+2. identifikasi `SYNC CHANGE`;
+3. arsipkan revision lama;
+4. simpan revision baru;
+5. update metadata/version history;
+6. buat Snapshot baru dengan status `BACKUP REQUIRED`;
+7. buat Full Backup ZIP;
+8. buat SHA256;
+9. verifikasi ZIP;
+10. simpan salinan kedua;
+11. baru ubah status Snapshot menjadi `COMPLETE`.
+
+Aturan mutlak:
+
+> **Perubahan belum dianggap selesai sebelum Full Backup + SHA256 + verifikasi dibuat.**
+
+GitHub bukan satu-satunya backup.
+
+---
+
+## 4. Arsitektur aplikasi
+
+Target: Windows 11, portable multi-file ZIP.
+
+Rekomendasi implementasi:
+
+- **PySide6 + Qt Quick/QML** untuk UI;
+- Python backend untuk version/file/backup/recovery operations;
+- QML hanya presentation layer;
+- data tree/status harus berasal dari JSON lokal, bukan hardcoded;
+- tidak membutuhkan server/cloud untuk operasi inti;
+- portable folder multi-file, bukan single EXE.
+
+Sumber data canonical, misalnya:
+
+```text
+data/
+  version_history.json
+  settings.json
+```
+
+Model minimal:
+
 ```json
 {
-  "system_versions": [],
+  "active_system": "V1",
+  "active_snapshot": "S004",
+  "systems": [],
+  "snapshots": [],
   "prompts": {},
-  "latest_backup": {},
+  "backups": [],
   "release_policy": {}
 }
 ```
 
-Setiap version node minimal punya:
-- `version`;
-- `parent`;
-- `status`: history | available | active | draft;
-- `release_date`;
-- `summary`;
-- `changes[]`;
-- `artifact_available`;
-- `prompt_file`;
-- `backup_file` bila relevan;
-- `official_release` boolean.
+---
 
-UI tidak boleh diubah manual hanya karena versi baru muncul. Release process yang memperbarui JSON harus otomatis membuat pohon versi berubah.
+## 5. MASTER DESIGN LOCK
 
-## 5. Aturan sumber sejarah
-- Riwayat lama berasal dari dokumen riwayat V22.5.1 yang sudah tersedia di backup.
-- Jangan mengarang keberadaan file versi lama.
-- Node versi lama boleh ada meski hanya metadata sejarah.
-- Download hanya aktif untuk file fisik yang benar-benar ada.
-- Rilis resmi saat ini: `Prompt 3 V22.5.2`, parent resmi `V22.5.1`.
-- `Draft V22.6` dan `Draft V22.6.1` bukan parent resmi V22.5.2.
+Semua layar harus terlihat sebagai aplikasi yang sama.
 
-## 6. Warna dan token visual awal
-Nilai di bawah adalah target awal; Sol boleh fine-tune berdasarkan screenshot comparison, bukan mengubah karakter desain.
+### Karakter visual
 
-- main background: `#F6FAFF` sampai `#FFFFFF`;
-- card background: `#FFFFFF`;
-- sidebar dark: sekitar `#0759B8`;
-- sidebar bright: sekitar `#0C7FF2`;
-- primary/action blue: sekitar `#0B7CF2`;
-- active blue: sekitar `#087BF2`;
-- light blue surface: sekitar `#EAF4FF`;
-- dark heading: sekitar `#0B1835`;
-- secondary text: sekitar `#60779B`;
-- border: sekitar `#DCE9F7`;
-- success: hijau lembut, hanya untuk status aktif/siap.
+- perpaduan **putih + biru**;
+- sidebar biru gelap → medium;
+- workspace putih / biru-abu sangat muda;
+- card putih, border biru-abu tipis;
+- radius sekitar 12–16 px;
+- shadow sangat halus;
+- heading navy gelap;
+- teks sekunder abu kebiruan;
+- primary action vivid blue;
+- hijau hanya untuk status aman/valid;
+- amber hanya untuk warning/Backup Required;
+- merah hanya untuk error/destructive;
+- font Segoe UI / Segoe UI Variable / Inter-like;
+- nyaman dibaca lama, tidak padat.
 
-Typography target: Segoe UI / Segoe UI Variable di Windows, dengan ukuran dan berat mengikuti screenshot.
+### Layout global
 
-## 7. Perilaku UX
-- Hover lembut, tidak agresif.
-- Klik node menyimpan selected version sampai user memilih node lain.
-- Search dapat mencari prompt, versi, atau kata kunci perubahan.
-- Semua aksi download/copy harus memberi feedback sukses/gagal.
-- Jangan melakukan network/background scan pada UI thread.
-- App harus tetap nyaman pada scaling 100%, 125%, dan 150%.
+Sidebar kiri selalu berisi:
 
-## 8. Kriteria kesamaan UI
-Reference viewport utama: **1672×941**.
+1. Prompt Action;
+2. subtitle `Kelola prompt, versi, dan backup dengan jelas.`;
+3. Dashboard;
+4. Sejarah Sistem;
+5. Per Prompt;
+6. Backup;
+7. Pengaturan;
+8. status bawah `Siap bekerja`.
 
-Acceptance visual:
-1. Struktur, posisi kelompok, rasio sidebar, ukuran kartu, spacing, radius, dan hierarchy harus sangat dekat dengan mockup.
-2. Warna harus tetap putih-biru dan tidak bergeser ke tema gelap/ungu/hijau.
-3. Pohon versi harus menjadi fokus visual utama.
-4. Tidak boleh ada tabel Excel/data grid sebagai halaman utama.
-5. Screenshot aplikasi nyata pada 1672×941 dibandingkan dengan referensi sebelum UI dinyatakan selesai.
-6. Perbedaan kecil rasterisasi font/icon boleh diterima; perubahan layout, ukuran panel, warna utama, atau hierarchy tidak boleh dianggap setara.
+Topbar **tidak memakai avatar dan notification bell**.
 
-## 9. Fase implementasi
+Topbar berisi:
 
-### Fase A — Shell pixel-match
-Bangun window, sidebar, header, kartu, tipografi, warna, spacing, dan titlebar. Gunakan data dummy saja. Fokus pada visual.
+```text
+[Judul + subtitle]        [Cari...]   System V1 • S004   ● Backup Aman
+```
 
-### Fase B — Version tree data-driven
-Implementasikan version_history.json, node status, parent/branch, selection, ringkasan, dan perubahan per versi.
+Reference viewport utama: sekitar **1672 × 941** (16:9).
 
-### Fase C — File & backup actions
-Hubungkan prompt file, full backup, changelog, recovery guide, Save Copy/download lokal, dan error handling.
+---
 
-### Fase D — Release automation
-Setiap perubahan prompt wajib:
-1. arsipkan versi lama;
-2. simpan versi baru;
-3. update metadata/history;
-4. update changelog;
-5. regenerate app data;
-6. buat full backup ZIP;
-7. buat SHA256;
-8. baru commit/push.
+## 6. SCREEN 01 — DASHBOARD
 
-### Fase E — Portable build & verification
-Build Windows x64 portable folder, ZIP seluruh folder, lalu uji ekstrak → run → buka versi → download/copy prompt → akses backup.
+Tujuan: menjawab `Sekarang kondisi Prompt Action bagaimana?`
 
-## 10. Pemicu review Astra
-Minta review Astra sebelum melanjutkan bila:
-- Sol ingin mengganti stack QML ke framework lain;
-- layout utama harus berbeda dari mockup;
-- model data versi tidak mampu mewakili cabang/draft/history-only;
-- release automation berpotensi menimpa atau kehilangan versi lama;
-- packaging membutuhkan installer/single-file.
+Header:
 
-Selain itu Sol boleh mengimplementasikan detail lokal tanpa menunggu Astra.
+- Dashboard;
+- `Ringkasan kondisi Prompt Action`.
+
+KPI:
+
+- System Aktif — V1;
+- Snapshot Aktif — S004;
+- Prompt Aktif — 8;
+- Backup — AMAN.
+
+Card `Perubahan Terakhir`:
+
+```text
+S004 — Update Prompt 3
+PRIMARY CHANGE
+Prompt 3 R2 → R3
+
+SYNC CHANGE
+Prompt 1B2 R2 → R3
+Prompt 4   R2 → R3
+```
+
+Tombol:
+
+- Lihat Snapshot;
+- Buka Prompt Aktif;
+- Lihat Perubahan Terakhir;
+- Download Full Backup;
+- Buka Backup;
+- Buat Backup Sekarang.
+
+Card `Prompt Aktif` menampilkan delapan prompt beserta revision aktif.
+
+Card `Status Backup` menampilkan:
+
+- Full Backup;
+- SHA256;
+- Verifikasi ZIP;
+- Salinan Kedua;
+- Recovery: AMAN / BELUM AMAN.
+
+---
+
+## 7. SCREEN 02 — SEJARAH SISTEM
+
+Header:
+
+- Sejarah Sistem;
+- `System, snapshot, dan kesinambungan perubahan`.
+
+Pohon utama:
+
+```text
+Legacy V22.5.1  →  System V1
+                       │
+                       ├─ S001 Baseline
+                       ├─ S002 Update Prompt 3
+                       ├─ S003 Update Prompt 2
+                       └─ S004 Update Prompt 3  ← aktif
+```
+
+Jangan tampilkan V21.5/V22.x sebagai cabang utama. Detail sejarah lama boleh tetap ada sebagai arsip metadata, tetapi UI utama dimulai dari satu node `Legacy V22.5.1`.
+
+Panel `Detail Snapshot`:
+
+- System;
+- Snapshot;
+- Status;
+- Primary Change;
+- Sync Change;
+- Backup;
+- alasan perubahan.
+
+Tombol:
+
+- Buka Detail;
+- Lihat Prompt yang Berubah;
+- Download Snapshot Backup;
+- Bandingkan dengan snapshot sebelumnya;
+- Lihat Changelog.
+
+---
+
+## 8. SCREEN 03 — PER PROMPT
+
+Ini halaman utama untuk penggunaan sehari-hari.
+
+Header contoh:
+
+```text
+Prompt 3
+Eksekusi Langsung Satu Narasi
+System V1 • Revision Aktif R3
+```
+
+Selector atas:
+
+- Prompt 1A;
+- Prompt 1B;
+- Prompt 1B1;
+- Prompt 1B2;
+- Prompt 2;
+- Prompt 3;
+- Prompt 4;
+- Prompt 5.
+
+`Pohon Revision` contoh:
+
+```text
+R1 ───→ R2 ───→ R3
+         │        AKTIF
+         └── Draft A (Eksperimen)
+```
+
+Draft tidak masuk mainline resmi sampai dipromosikan menjadi release.
+
+Panel `Detail Revision`:
+
+- Revision;
+- Parent;
+- Snapshot;
+- Status;
+- Primary Change;
+- Apa yang berubah?;
+- Menyesuaikan / sync impacts.
+
+Contoh ringkasan Prompt 3:
+
+- verifikasi 1B2 ke MP4 per frasa;
+- moving visual maksimal 3 detik final;
+- slow 0,50× tetap;
+- ambil-lewati ±50% per frasa;
+- freeze maksimal 5 detik;
+- acak menjadi tahap paling terakhir.
+
+Card `File Tersedia`:
+
+- Download Prompt Aktif;
+- Download Revision Ini;
+- Bandingkan R2 vs R3;
+- Lihat Snapshot;
+- Buka Changelog;
+- Tambah Revisi.
+
+UI ini **bukan text editor**. Jangan tampilkan textarea besar berisi seluruh prompt.
+
+---
+
+## 9. SCREEN 04 — BACKUP & RECOVERY
+
+Header:
+
+- Backup & Recovery;
+- `Pastikan Prompt Action dapat dibangun ulang kapan pun`.
+
+Status besar:
+
+```text
+STATUS PEMULIHAN
+AMAN
+Snapshot S004 sudah memiliki backup terverifikasi.
+```
+
+Checklist `Kelengkapan Recovery`:
+
+- Prompt aktif tersimpan;
+- Revision lama tersimpan;
+- VERSION_DATA tersimpan;
+- Changelog tersimpan;
+- Full Backup ZIP;
+- SHA256;
+- ZIP terverifikasi;
+- Salinan kedua.
+
+Card `Backup Terbaru`:
+
+- nama ZIP;
+- System;
+- Snapshot;
+- tanggal;
+- ukuran;
+- SHA256 VALID;
+- verify PASS;
+- second copy tersedia.
+
+Tombol:
+
+- Download Full Backup;
+- Download SHA256;
+- Verifikasi Backup;
+- Buka Recovery Guide;
+- Buka Folder Backup;
+- Buat Backup Baru.
+
+Riwayat Backup menampilkan S001, S002, S003, S004 beserta status VALID/FAILED/REQUIRED.
+
+---
+
+## 10. SCREEN 05 — PENGATURAN
+
+Bagian `Umum`:
+
+- Folder Root Prompt Action;
+- Folder Prompt;
+- Folder Backup;
+- tombol Pilih Folder;
+- indikator Valid/Invalid.
+
+Bagian `Backup`:
+
+- Buat backup setiap release;
+- Buat SHA256;
+- Verifikasi ZIP setelah dibuat;
+- Simpan salinan kedua;
+- Second Copy Location.
+
+Bagian `GitHub`:
+
+- Repository `inoriko920-dev/Prompt-Action`;
+- Branch `main`;
+- Status Terhubung;
+- Buka Repository;
+- Tes Koneksi;
+- catatan `GitHub bukan satu-satunya backup.`
+
+Bagian `Tampilan`:
+
+- Theme = `Light — Prompt Action Blue`;
+- UI Scale = 100%;
+- Tree Density = Comfortable.
+
+Advanced:
+
+- Buka Log;
+- Reset Layout;
+- Export Diagnostics.
+
+Footer:
+
+- Batal;
+- Simpan Pengaturan.
+
+---
+
+## 11. Dialog / modal minimum
+
+Implementasikan state berikut dengan design system yang sama:
+
+- Tambah Revisi / Release Prompt;
+- Detail Version/Snapshot;
+- Compare Revision;
+- Backup Progress;
+- Backup Success;
+- Backup Failed;
+- Restore Backup;
+- Delete Draft confirmation;
+- GitHub Connection Error;
+- empty state;
+- loading state;
+- disabled state + alasan.
+
+Contoh `Tambah Revisi`:
+
+```text
+Prompt: Prompt 3
+Revision sekarang: R2
+Revision baru: R3
+Primary Change: Prompt 3
+Affected Prompt:
+  [x] Prompt 1B2
+  [x] Prompt 4
+  [ ] Prompt 5
+Ringkasan perubahan: ...
+Alasan: ...
+[Batal] [Lanjutkan]
+```
+
+Setelah release dibuat, Snapshot berstatus `BACKUP REQUIRED`; hanya berubah menjadi `COMPLETE` setelah workflow backup lolos.
+
+---
+
+## 12. Search
+
+Search awal dapat mencari:
+
+- nama Prompt;
+- Revision;
+- Snapshot;
+- ringkasan perubahan;
+- alasan perubahan.
+
+Full-text seluruh isi TXT tidak wajib pada implementasi pertama.
+
+---
+
+## 13. File/folder target
+
+```text
+Prompt-Action/
+├─ app/
+├─ data/
+│  ├─ version_history.json
+│  └─ settings.json
+├─ prompts/
+│  ├─ V1/
+│  │  ├─ Prompt-1A/
+│  │  ├─ Prompt-1B/
+│  │  ├─ Prompt-1B1/
+│  │  ├─ Prompt-1B2/
+│  │  ├─ Prompt-2/
+│  │  ├─ Prompt-3/
+│  │  ├─ Prompt-4/
+│  │  └─ Prompt-5/
+│  └─ legacy/V22.5.1/
+├─ backups/
+├─ docs/
+└─ scripts/
+```
+
+Nama prompt release:
+
+```text
+Prompt-3_V1_R1.txt
+Prompt-3_V1_R2.txt
+Prompt-2_V1_R1.txt
+Prompt-2_V1_R2.txt
+```
+
+Snapshot tidak wajib masuk ke nama file prompt karena Snapshot adalah keadaan seluruh sistem.
+
+---
+
+## 14. Reference UI resmi
+
+Folder repo:
+
+```text
+docs/UI_REFERENCE_PACKAGE_V1/
+```
+
+Reference screens yang wajib diikuti:
+
+1. Dashboard;
+2. Sejarah Sistem;
+3. Per Prompt;
+4. Backup & Recovery;
+5. Pengaturan.
+
+Jika ada konflik antara improvisasi implementer dan reference image, **reference image + MASTER DESIGN LOCK menang** selama tidak merusak fungsi.
+
+---
+
+## 15. Fase implementasi SOL
+
+### UI-001 — Repo/data foundation
+- struktur app/data/prompts/backups/docs/scripts;
+- schema JSON;
+- model V/S/R;
+- dummy data S001–S004.
+
+### UI-002 — Shell pixel-match
+- Windows shell;
+- sidebar;
+- topbar;
+- typography;
+- card/button/toggle/input tokens.
+
+### UI-003 — Dashboard
+- KPI;
+- perubahan terakhir;
+- prompt aktif;
+- backup health.
+
+### UI-004 — Sejarah Sistem
+- System Tree;
+- Snapshot Tree;
+- detail selection.
+
+### UI-005 — Per Prompt
+- selector Prompt;
+- Revision Tree;
+- Draft branch;
+- Detail Revision;
+- File Tersedia.
+
+### UI-006 — Backup & Recovery
+- Full Backup;
+- SHA256;
+- verify;
+- second-copy status;
+- history.
+
+### UI-007 — Pengaturan
+- folder settings;
+- backup policies;
+- GitHub info;
+- UI scale/density.
+
+### UI-008 — Dialog/state
+- release wizard;
+- compare;
+- loading/success/error/disabled;
+- restore.
+
+### UI-009 — Visual parity pass
+Ambil screenshot aplikasi nyata pada viewport reference dan bandingkan dengan lima gambar referensi. Perbaiki spacing, font size, radius, border, alignment, density, dan hierarchy sebelum UI dianggap selesai.
+
+### UI-010 — Portable smoke test
+- build onedir;
+- ZIP portable;
+- extract pada folder baru;
+- launch tanpa Python manual;
+- navigasi seluruh halaman;
+- cek tombol minimum.
+
+---
+
+## 16. Acceptance criteria
+
+UI belum dianggap selesai jika salah satu berikut gagal:
+
+1. kelima halaman utama dapat dibuka;
+2. semua halaman memakai design language yang sama;
+3. tree berasal dari data terstruktur, bukan hardcoded;
+4. perubahan satu Prompt tidak otomatis membuat System V baru;
+5. Primary vs Sync Change terlihat jelas;
+6. Snapshot belum COMPLETE sebelum backup valid;
+7. setiap tombol visible mempunyai aksi nyata atau disabled reason;
+8. tidak ada avatar/bell SaaS yang tidak diperlukan;
+9. UI nyaman pada scaling Windows 100%, 125%, 150%;
+10. portable ZIP dapat diekstrak dan dijalankan;
+11. screenshot implementasi dibandingkan dengan reference UI;
+12. tidak ada token/API key/cookie pribadi di repo/log/backup.
+
+---
+
+## 17. Handoff ASTRA → SOL
+
+SOL harus menganggap dokumen ini sebagai plan utama. Jangan mengubah keputusan arsitektur/versioning/design lock tanpa alasan teknis yang jelas.
+
+Urutan prioritas:
+
+1. data/versioning benar;
+2. shell UI semirip mungkin dengan reference;
+3. lima screen utama selesai;
+4. release + backup workflow aman;
+5. portable package;
+6. visual parity pass.
+
+Jika implementasi menemukan konflik teknis yang memerlukan perubahan arsitektur, hentikan bagian tersebut dan dokumentasikan masalah untuk review ASTRA; jangan diam-diam mengganti model V/S/R atau design language.
