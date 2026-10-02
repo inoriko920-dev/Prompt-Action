@@ -10,6 +10,7 @@ import sys
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtCore import QTimer
+from PySide6.QtQuick import QQuickWindow
 
 from prompt_action.bootstrap.app_paths import resolve_app_paths
 from prompt_action.bootstrap.qml_boot import create_application, load_qml
@@ -26,7 +27,8 @@ def _run_module(repo_root: Path, runtime_root: Path, *args: str) -> subprocess.C
     env = os.environ.copy()
     env["PROMPT_ACTION_RUNTIME_ROOT"] = str(runtime_root)
     env["QT_QPA_PLATFORM"] = "offscreen"
-    env["QSG_RHI_BACKEND"] = "software"
+    env["QT_QUICK_BACKEND"] = "software"
+    env["QSG_RENDER_LOOP"] = "basic"
     return subprocess.run(
         [sys.executable, "-m", "prompt_action", *args],
         cwd=repo_root.parent,
@@ -39,6 +41,7 @@ def _run_module(repo_root: Path, runtime_root: Path, *args: str) -> subprocess.C
 
 
 def _capture_screenshot(path: Path) -> int:
+    QQuickWindow.setSceneGraphBackend("software")
     paths = resolve_app_paths()
     app = create_application([])
     engine = load_qml(paths.resource_root / "qml" / "App.qml")
@@ -54,7 +57,7 @@ def _capture_screenshot(path: Path) -> int:
             return
         app.quit()
 
-    QTimer.singleShot(500, capture)
+    QTimer.singleShot(800, capture)
     return int(app.exec())
 
 
@@ -84,8 +87,9 @@ def main() -> int:
 
     screenshot = output / "minimal-window.png"
     screenshot_env = os.environ.copy()
-    screenshot_env["QT_QPA_PLATFORM"] = "minimal"
-    screenshot_env["QSG_RHI_BACKEND"] = "software"
+    screenshot_env["QT_QPA_PLATFORM"] = "offscreen"
+    screenshot_env["QT_QUICK_BACKEND"] = "software"
+    screenshot_env["QSG_RENDER_LOOP"] = "basic"
     screenshot_result = subprocess.run(
         [sys.executable, str(Path(__file__).resolve()), "--screenshot-only", str(screenshot)],
         cwd=repo_root,
@@ -104,8 +108,8 @@ def main() -> int:
     environment = {
         "python": sys.version,
         "platform": sys.platform,
-        "success_backend": "offscreen/software",
-        "screenshot_backend": "minimal/software",
+        "success_backend": "offscreen + Qt Quick software + basic render loop",
+        "screenshot_backend": "offscreen + Qt Quick software + basic render loop",
         "success_returncode": success.returncode,
         "failure_returncode": failure.returncode,
         "expected_window_title": "Prompt Action",
