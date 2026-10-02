@@ -2,17 +2,17 @@
 
 **Repo:** `inoriko920-dev/Prompt-Action`  
 **Branch:** `sol/step01-app-skeleton-20261002`  
-**Final implementation commit tested by Windows CI:** `c9da53c4c16248256783468aeb04d53b16913866`  
 **STEP 00 baseline merged to main:** `74cb295faecbdf4d6a59a681ed8135b16076f405`  
+**Latest foundation + Windows gate-helper commit verified by CI:** `9a361df400258df150f9db809fa0c402a09a8c2e`  
 **Final gate:** **BLOCKED — DO NOT START STEP 02**
 
 ## 1. Summary
 
-STEP 01 implementation is complete within its allowed scope. The repository now contains a modular Python/PySide6 foundation, deterministic module entry point, portable path resolution, runtime writability checks, startup/error logging, fixed exit-code contract, minimal QML shell, exact dependency lock, PowerShell developer scripts, tests, Windows CI, CI evidence capture, and a dedicated Windows 11 non-admin verifier.
+STEP 01 implementation is complete within its allowed scope. The repository now contains a modular Python/PySide6 foundation, deterministic module entry point, portable path resolution, runtime writability checks, startup/error logging, fixed exit-code contract, minimal QML shell, exact dependency lock, PowerShell developer scripts, tests, Windows CI, CI evidence capture, and a strict one-click Windows 11 non-admin gate verifier.
 
 No STEP 02+ feature was implemented. No Dashboard, Sejarah Sistem, Per Prompt product UI, version engine, backup engine, GitHub runtime sync, or final portable packaging was added.
 
-The gate is intentionally **BLOCKED**, not PASS, because the ASTRA plan requires target validation on **local Windows 11** and the non-admin case cannot be replaced by GitHub-hosted Windows Server CI. All other executable STEP 01 checks have evidence.
+The gate remains intentionally **BLOCKED**, not PASS, because the target compatibility requirement still needs actual execution on **Windows 11 from a non-admin session**. GitHub-hosted Windows Server CI is strong compatibility evidence but is not treated as that target-machine proof.
 
 ## 2. Runtime/dependency lock
 
@@ -59,124 +59,106 @@ Important contracts implemented:
 - minimal QML shell only: title `Prompt Action`, 1280×720, placeholder `Prompt Action — Foundation Build`;
 - no final app UI or product feature implementation.
 
-## 4. Windows CI proof
+## 4. Latest Windows CI proof
 
-Successful workflow:
+Latest successful hardened workflow:
 
 - workflow: `STEP 01 Foundation CI`
-- run ID: `37016217751`
-- job ID: `110867609593`
+- run ID: `37018351536`
+- job ID: `110874729579`
 - result: `success`
-- runner: `Microsoft Windows Server 2025`, version `10.0.26100`
-- runner image: `windows-2025-vs2026`
-- tested branch commit: `c9da53c4c16248256783468aeb04d53b16913866`
+- runner: Microsoft Windows Server 2025
+- tested branch commit: `9a361df400258df150f9db809fa0c402a09a8c2e`
 
 The successful run proved:
 
-- CPython `3.13.16` installed and asserted exactly;
-- exact dependency lock installed successfully;
-- PySide6 `6.11.2` imported successfully;
-- pytest `9.1.1` installed;
-- editable Prompt Action package built/installed;
-- STEP 01 suite: **9 passed**;
-- `python -m prompt_action --smoke-test-ms 100`: success;
-- CI evidence capture: success;
-- artifact upload: success.
+- CPython `3.13.16` x64 setup succeeds;
+- exact dependency lock installs;
+- PySide6 `6.11.2` imports;
+- full STEP 01 test suite passes;
+- module smoke passes;
+- CI screenshot/log evidence capture passes;
+- the local Windows 11 verifier parses without PowerShell syntax errors;
+- the one-click BAT launcher exists;
+- static privacy check confirms the verifier does not intentionally record the Windows account name;
+- the verifier deliberately rejects Windows Server CI with the expected Windows 11 requirement, so CI cannot accidentally close T09;
+- both CI evidence and the local Windows 11 verifier bundle upload successfully.
 
-## 5. Windows CI evidence artifact
+## 5. CI artifacts
 
-Artifact:
+### A. STEP 01 Windows CI evidence
 
 - name: `step01-windows-evidence`
-- artifact ID: `11230425186`
-- workflow run: `37016217751`
-- final ZIP size: `2525` bytes
-- artifact SHA256: `24ef2d1d1da1efef4607016c692ec1f568acade63d85efe39e99376722853efc`
-- retention configured: 30 days
+- artifact ID: `11232441027`
+- SHA256: `a5cf7c37a058a1319ac54489bae77077915bb422aace9572c9b91e1b5384fc51`
 
-Verified extracted contents:
+It contains the CI minimal-window screenshot, success/failure startup logs and environment evidence.
 
-- `minimal-window.png` — 1280×720 RGB, 4409 bytes;
-- `startup-success.log` — startup ready and normal exit `0`;
-- `startup-failure.log` — intentional missing-QML fatal evidence;
-- `environment.json` — Python/runtime/backend and expected exit results;
-- raw success runtime log;
-- raw failure runtime log.
+### B. Windows 11 local verifier bundle
 
-`environment.json` records:
+- name: `step01-windows11-verifier-bundle`
+- artifact ID: `11232401037`
+- SHA256: `b2dbf20b4f52598b5c36a4a823677dc73f8a9613fdb8028a6b25497999363257`
 
-- Python `3.13.16` (64-bit AMD64);
-- platform `win32`;
-- success return code `0`;
-- invalid-QML return code `21`;
-- expected window title `Prompt Action`;
-- screenshot bytes `4409`.
+It contains the STEP 01 foundation source, tests, dependency lock and developer/verifier scripts needed to run the target-machine gate without needing a final packaged release.
 
-The screenshot is a headless Qt Quick software-render smoke artifact. It proves a 1280×720 render was produced; local Windows 11 validation remains required for native desktop/typography acceptance.
+This artifact is a **verification source bundle**, not the final portable application release. Final portable packaging remains out of STEP 01 scope.
 
-## 6. Startup log proof
-
-Successful startup log proves:
-
-- `app_version=0.1.0-dev`;
-- Python `3.13.16`;
-- PySide6 `6.11.2`;
-- Qt `6.11.2`;
-- project/resource/runtime/log/temp paths resolved from the live checkout;
-- `startup.ready` points to `src/prompt_action/ui/qml/App.qml`;
-- `shutdown.normal exit_code=0`.
-
-Failure log proves:
-
-- identical locked runtime metadata;
-- isolated failure runtime path;
-- deliberate missing QML path;
-- `CRITICAL | qml.file_missing`;
-- process result `21`.
-
-## 7. T01–T15 final matrix
+## 6. T01–T15 final matrix
 
 | Test | Result | Evidence |
 |---|---|---|
-| T01 import package | PASS | `test_imports.py`; Windows suite 9 passed |
-| T02 module entry point | PASS | repeated `python -m prompt_action` subprocess test + CI module smoke |
-| T03 window title | PASS | QML root title asserted exactly as `Prompt Action` |
-| T04 QML root load | PASS | `engine.rootObjects()` asserted non-empty |
-| T05 invalid QML → non-zero + log | PASS | exit `21`, `qml.file_missing` log |
-| T06 different cwd | PASS | root resolution and module subprocess from unrelated cwd |
-| T07 path with spaces | PASS | path test + relocation target |
-| T08 Unicode path | PASS | `Folder With Spaces — Bojonegoro` and `Relocated Prompt Action Ω` |
-| T09 no admin on target Windows 11 | **BLOCKED** | GitHub runner is Windows Server 2025; local Windows 11 non-admin run not available from this execution environment |
-| T10 runtime write | PASS | log/temp creation and write probe |
-| T11 read-only runtime simulation | PASS | simulated denial raises `RuntimeDirectoryError` |
-| T12 clean install from lock | PASS | Windows CI exact lock install succeeded |
-| T13 repeated start/close | PASS | two module starts return `0` |
-| T14 relocation | PASS | copied tree with spaces/Unicode, unrelated cwd, resolved relocated path logged |
-| T15 CI smoke | PASS | run `37016217751`, job success |
+| T01 import package | PASS | Windows suite |
+| T02 module entry point | PASS | repeated subprocess + module smoke |
+| T03 window title | PASS | exact `Prompt Action` assertion |
+| T04 QML root load | PASS | non-empty root objects |
+| T05 invalid QML → non-zero + log | PASS | exit `21`, fatal log |
+| T06 different cwd | PASS | root resolver + unrelated cwd subprocess |
+| T07 path with spaces | PASS | path tests |
+| T08 Unicode path | PASS | Unicode path + relocation test |
+| T09 no admin / Windows 11 target compatibility | **BLOCKED** | requires real Windows 11 non-admin run |
+| T10 runtime write | PASS | log/temp write tests |
+| T11 read-only runtime simulation | PASS | controlled failure test |
+| T12 clean install from dependency lock | PASS | Windows CI exact lock install |
+| T13 repeated start/close | PASS | repeated start test |
+| T14 relocation | PASS | copied tree + unrelated cwd |
+| T15 CI smoke | PASS | successful hardened workflow |
 
 Result: **14 PASS / 1 BLOCKED**.
 
-## 8. Remaining gate closer
+## 7. One-click Windows 11 gate closer
 
-The repository contains:
+Run on the target Windows 11 PC by normal double-click:
+
+`scripts/dev/STEP_01_VERIFY_WINDOWS11.bat`
+
+Do **not** use “Run as administrator”.
+
+The BAT launches:
 
 `scripts/dev/verify_step01_windows11.ps1`
 
-It is intentionally strict and will only PASS when:
+The verifier:
 
-1. the machine reports Windows 11;
-2. the PowerShell session is **not elevated/admin**;
-3. Python is exactly `3.13.16`;
-4. PySide6 is exactly `6.11.2`;
-5. the full STEP 01 test suite passes;
-6. local evidence capture completes;
-7. a result file is written under `evidence/step01/local-windows11/`.
+1. rejects non-Windows-11 systems;
+2. rejects elevated/admin sessions;
+3. prepares/reuses the exact locked `.venv`;
+4. requires CPython `3.13.16` and PySide6 `6.11.2`;
+5. runs the full STEP 01 tests;
+6. runs native Windows startup and requires exit `0`;
+7. runs intentional missing-QML startup and requires exit `21`;
+8. captures a native Windows minimal-window screenshot;
+9. redacts repository-root and user-profile paths from packaged text logs;
+10. does not intentionally record Windows account name, email, API keys, tokens, or credentials;
+11. creates `sha256_manifest.txt`;
+12. creates `evidence/step01/STEP01_WINDOWS11_LOCAL_EVIDENCE.zip`;
+13. creates the companion `.sha256.txt` checksum file.
 
-Until that actual target-machine proof exists, T09 and the Windows 11 local acceptance condition remain BLOCKED.
+To close the gate, SOL must receive and verify both generated files.
 
-## 9. Protected-source integrity
+## 8. Protected-source integrity
 
-Comparison against `main` shows STEP 01 only adds foundation/test/evidence files in the approved scope. It does **not** modify:
+Comparison against `main` shows STEP 01 adds only foundation/test/evidence/helper files in the approved scope. It does **not** modify:
 
 - Legacy V22.5.1 prompt source;
 - Prompt 1A, 1B, 1B1, 1B2, 2, 3, 4, 5 baseline content;
@@ -184,12 +166,17 @@ Comparison against `main` shows STEP 01 only adds foundation/test/evidence files
 - STEP 00 verified recovery evidence;
 - bootstrap/rebuild recovery chunks.
 
-## 10. Final decision
+## 9. Final decision
 
 **STEP 01 = BLOCKED**
 
-Reason: target Windows 11 non-admin validation is still missing. GitHub Actions success on Windows Server 2025 is strong compatibility evidence but is not substituted for the required local Windows 11 target evidence.
+Remaining blocker: actual Windows 11 non-admin target proof.
 
 **STEP 02 MUST NOT START.**
 
-When `scripts/dev/verify_step01_windows11.ps1` is successfully run on a standard-user Windows 11 environment and its evidence is verified, re-open/finalize the gate. No redesign or STEP 02 implementation is required to close this blocker.
+When `STEP_01_VERIFY_WINDOWS11.bat` completes successfully on the target Windows 11 PC, return:
+
+- `STEP01_WINDOWS11_LOCAL_EVIDENCE.zip`
+- `STEP01_WINDOWS11_LOCAL_EVIDENCE.zip.sha256.txt`
+
+SOL will verify those bytes/evidence, change STEP 01 to PASS only if valid, then merge STEP 01 before any STEP 02 work begins.
