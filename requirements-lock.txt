@@ -1,0 +1,14 @@
+# Prompt Action STEP 01 reproducible dependency lock
+# Target interpreter for Windows 11 evidence: CPython 3.13.16 x64
+# Install with: python -m pip install -r requirements-lock.txt
+setuptools==80.9.0
+PySide6==6.11.2
+PySide6_Addons==6.11.2
+PySide6_Essentials==6.11.2
+shiboken6==6.11.2
+pytest==9.1.1
+colorama==0.4.6; sys_platform == "win32"
+iniconfig==2.1.0
+packaging==25.0
+pluggy==1.6.0
+Pygments==2.19.2

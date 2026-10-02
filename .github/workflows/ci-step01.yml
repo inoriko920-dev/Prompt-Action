@@ -1,0 +1,107 @@
+name: STEP 01 Foundation CI
+
+on:
+  push:
+    branches:
+      - "sol/step01-*"
+  pull_request:
+    paths:
+      - "pyproject.toml"
+      - "requirements-lock.txt"
+      - "src/**"
+      - "scripts/dev/**"
+      - "tests/step01/**"
+      - ".github/workflows/ci-step01.yml"
+
+jobs:
+  windows-step01:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13.16"
+          architecture: "x64"
+          cache: "pip"
+      - name: Verify Python
+        shell: pwsh
+        run: |
+          python --version
+          python -c "import platform; assert platform.python_version() == '3.13.16', platform.python_version()"
+      - name: Validate local Windows 11 gate scripts
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path "scripts/dev/verify_step01_windows11.ps1"),
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            throw "verify_step01_windows11.ps1 has PowerShell syntax errors."
+          }
+          if (-not (Test-Path "scripts/dev/STEP_01_VERIFY_WINDOWS11.bat")) {
+            throw "One-click Windows 11 launcher is missing."
+          }
+          $VerifierText = Get-Content -Raw "scripts/dev/verify_step01_windows11.ps1"
+          if ($VerifierText -match 'Identity\.Name' -or $VerifierText -match '(?m)^\s*user\s*=') {
+            throw "Local evidence verifier must not record the Windows account name."
+          }
+          $Output = & powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "scripts/dev/verify_step01_windows11.ps1" 2>&1
+          $Rc = $LASTEXITCODE
+          $OutputText = ($Output | Out-String)
+          if ($Rc -eq 0) {
+            throw "Windows Server CI must not be accepted as the Windows 11 local gate."
+          }
+          if ($OutputText -notmatch 'requires Windows 11') {
+            Write-Host $OutputText
+            throw "Verifier rejected CI for an unexpected reason."
+          }
+          Write-Host "Expected rejection confirmed: Windows Server CI cannot close T09."
+          $global:LASTEXITCODE = 0
+      - name: Install exact lock
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-lock.txt
+          python -m pip install -e . --no-deps --no-build-isolation
+      - name: Dependency evidence
+        run: |
+          python -c "import PySide6, platform; print('Python', platform.python_version()); print('PySide6', PySide6.__version__)"
+          python -m pip show PySide6 pytest
+      - name: STEP 01 tests
+        shell: pwsh
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          ./scripts/dev/test_step01.ps1
+      - name: Module smoke
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python -m prompt_action --smoke-test-ms 100
+      - name: Capture STEP 01 evidence
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python scripts/dev/capture_step01_evidence.py
+      - name: Upload STEP 01 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: step01-windows-evidence
+          path: evidence/step01/ci-generated
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload Windows 11 local verifier bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: step01-windows11-verifier-bundle
+          path: |
+            pyproject.toml
+            requirements-lock.txt
+            src/
+            tests/step01/
+            scripts/dev/
+            runtime/.gitkeep
+          if-no-files-found: error
+          retention-days: 30
