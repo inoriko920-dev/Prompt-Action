@@ -1,0 +1,29 @@
+{
+  "step": "STEP_00_BASELINE_RECOVERY_GATE",
+  "audit_mode": "GITHUB_REMOTE_PLUS_LOCAL_RESCUE_STAGING",
+  "repository": "inoriko920-dev/Prompt-Action",
+  "repository_id": 1399744212,
+  "visibility": "public",
+  "default_branch": "main",
+  "initial_audited_main_head": "350e5428afe8ec435f52f12189faf7ef0e9b4ea0",
+  "initial_audited_main_tree": "4cf13f57a5a0e5812cf1ecec9e217989af1cc3ca",
+  "initial_head_message": "Add STEP 13 GitHub refresh and sync spec",
+  "final_recheck_main_head": "82e11f8d78b76819ef55c838e5372bba26b1f958",
+  "final_recheck_main_tree": "657abc5894ff803f6e424f10ae0accd586752e9f",
+  "final_head_message": "Add STEP 16 final acceptance and release spec",
+  "main_drift_during_audit": {
+    "commit_count": 3,
+    "paths_added": [
+      "docs/implementation/STEP_14_HARDENING_FULL_SYSTEM_TESTING.md",
+      "docs/implementation/STEP_15_PORTABLE_WINDOWS_BUILD.md",
+      "docs/implementation/STEP_16_FINAL_ACCEPTANCE_RELEASE.md"
+    ],
+    "baseline_artifacts_changed": false
+  },
+  "audit_branch": "sol/step00-baseline-audit-20261002",
+  "audit_branch_sync_commit": "4ea0b18e4df83c5f2977bc5d72289c5f720f59ed",
+  "remote": "https://github.com/inoriko920-dev/Prompt-Action.git",
+  "preservation_rule": "No source, bootstrap, rebuild chunks, workflow, prompt or UI reference was modified during STEP 00 audit. Main advancement was preserved and merged into the audit branch without force update.",
+  "timestamp_local_initial": "2026-10-02T19:25:00+07:00",
+  "final_gate": "PASS"
+}

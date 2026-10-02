@@ -1,0 +1,116 @@
+{
+  "schema_version": "step00-1.2",
+  "step": "STEP_00_BASELINE_RECOVERY_GATE",
+  "result": "PASS",
+  "recommendation": "READY_FOR_ASTRA_REVIEW",
+  "repository": {
+    "full_name": "inoriko920-dev/Prompt-Action",
+    "default_branch": "main",
+    "initial_audited_head": "350e5428afe8ec435f52f12189faf7ef0e9b4ea0",
+    "initial_audited_tree": "4cf13f57a5a0e5812cf1ecec9e217989af1cc3ca",
+    "initial_audited_head_message": "Add STEP 13 GitHub refresh and sync spec",
+    "final_recheck_head": "82e11f8d78b76819ef55c838e5372bba26b1f958",
+    "final_recheck_tree": "657abc5894ff803f6e424f10ae0accd586752e9f",
+    "final_recheck_head_message": "Add STEP 16 final acceptance and release spec",
+    "main_drift_paths": [
+      "docs/implementation/STEP_14_HARDENING_FULL_SYSTEM_TESTING.md",
+      "docs/implementation/STEP_15_PORTABLE_WINDOWS_BUILD.md",
+      "docs/implementation/STEP_16_FINAL_ACCEPTANCE_RELEASE.md"
+    ],
+    "baseline_artifacts_changed_during_drift": false,
+    "audit_branch": "sol/step00-baseline-audit-20261002",
+    "audit_mode": "GITHUB_REMOTE_PLUS_LOCAL_RESCUE_STAGING"
+  },
+  "source_of_truth": {
+    "master_plan": {
+      "path": "PLAN.md",
+      "status": "VERIFIED_SOURCE",
+      "git_blob": "70b9fa63d7816b5efe4936ea07698479133c6b70"
+    },
+    "versioning_rules": {
+      "path": "docs/VERSIONING_RULES.md",
+      "status": "VERIFIED_SOURCE",
+      "git_blob": "766961c0b9f5ffa3b9a494c6d8128b3e278109d7"
+    },
+    "ui_index": {
+      "path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/INDEX.md",
+      "status": "VERIFIED_SOURCE",
+      "git_blob": "e2bf99636ce08bdbf5a7b4564ef05da561ab9bbf"
+    }
+  },
+  "ui_reference": {
+    "status": "VERIFIED_5_OF_5",
+    "workflow_validation": "JPEG_320x180_ALL_5",
+    "integrity_basis": "Exact Git blob identities for all five materialized JPGs plus successful materialization workflow and verified canonical package SHA256.",
+    "files": [
+      {"path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/01-Dashboard.jpg", "bytes": 2883, "git_blob": "35b32a6964d19550ddaa75b9d3ed2ef78140cb22"},
+      {"path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/02-Sejarah-Sistem.jpg", "bytes": 2720, "git_blob": "bf53fb88743426ac0058527387c1399b8df917b6"},
+      {"path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/03-Per-Prompt.jpg", "bytes": 2706, "git_blob": "32b4ec3c6b941a10e410f826baf018735358713b"},
+      {"path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/04-Backup-Recovery.jpg", "bytes": 3124, "git_blob": "ee47b7cf821cb3170208d718634f43f9eeacf15b"},
+      {"path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/05-Pengaturan.jpg", "bytes": 2903, "git_blob": "742a03965fd00a2282f95a9f82a0fd1046231bf4"}
+    ],
+    "canonical_package": {
+      "path": "docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Materialized-V1.zip",
+      "bytes": 125042,
+      "sha256": "2797cf5993ba6e38532d028135f5f8ab12f99bc55ed0b643b441e57ca5eeebb0",
+      "status": "PASS_FOR_CLAIMED_UI_REFERENCE_SCOPE"
+    }
+  },
+  "legacy": {
+    "required_version": "V22.5.1",
+    "status": "VERIFIED_SOURCE",
+    "verification_class": "VERIFIED_RESCUE_ZIP",
+    "rescue_zip": "V22_5_1_Update_1B_Dialog_Campuran,_Audit_Jangkar_Aksi_Terlewat,(1).zip",
+    "zip_bytes": 69158,
+    "zip_sha256": "f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2",
+    "index_version": "V22.5.1",
+    "index_date": "2026-09-01",
+    "based_on": "V22.5",
+    "manifest_match": true,
+    "manifest_entries": 15,
+    "extract_test": "PASS",
+    "nested_archives": 0
+  },
+  "prompts": {
+    "Prompt 1A": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 5401, "sha256": "65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5"},
+    "Prompt 1B": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 43390, "sha256": "7064081b9a264ba66da2c4eb297cc00f0f2d4133a97c84bed6f0171318d870cf"},
+    "Prompt 1B1": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 25510, "sha256": "a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6"},
+    "Prompt 1B2": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 19437, "sha256": "12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576"},
+    "Prompt 2": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 15810, "sha256": "d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98"},
+    "Prompt 3": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 23652, "sha256": "de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8"},
+    "Prompt 4": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 6514, "sha256": "a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0"},
+    "Prompt 5": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 6107, "sha256": "bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786"}
+  },
+  "recovery": {
+    "ui_reference_package": "PASS_FOR_CLAIMED_UI_REFERENCE_SCOPE",
+    "v22_5_1_rescue_zip": "PASS_FULL_REQUIRED_LEGACY_PROMPT_SCOPE",
+    "old_ui_package": "EXCLUDE_FROM_BASELINE",
+    "zz_BOOTSTRAP": "VERSION_UNKNOWN_EVIDENCE_ONLY",
+    "zz_REBUILD": "VERSION_UNKNOWN_EVIDENCE_ONLY",
+    "full_step00_required_recovery_scope": "PASS"
+  },
+  "preservation": {
+    "status": "PASS",
+    "main_modified_by_step00": false,
+    "uploaded_original_hash_before": "f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2",
+    "uploaded_original_hash_after": "f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2",
+    "readonly_copy_hash_match": true,
+    "recovery_chunks_modified": false,
+    "replacement_prompt_source_created": false,
+    "main_drift_preserved_by_merge_sync": true
+  },
+  "blocking_tests": {
+    "T00-01_repo_identity": "PASS",
+    "T00-02_working_tree_preservation": "PASS",
+    "T00-03_master_docs": "PASS",
+    "T00-04_five_ui_refs": "PASS",
+    "T00-05_legacy_v22_5_1": "PASS",
+    "T00-06_eight_prompt_corpus": "PASS",
+    "T00-07_recovery_extract_checksum": "PASS",
+    "T00-08_manifest_repeatability": "PASS",
+    "T00-09_conflict_register": "PASS",
+    "T00-10_no_feature_code_created": "PASS"
+  },
+  "blocking_reasons": [],
+  "next_allowed_action": "READY FOR ASTRA/USER REVIEW. Do not start STEP 01 automatically."
+}

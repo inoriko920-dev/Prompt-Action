@@ -1,0 +1,52 @@
+# STEP 00 original identity / hash evidence
+
+AUDITED_MAIN_HEAD=350e5428afe8ec435f52f12189faf7ef0e9b4ea0
+AUDITED_MAIN_TREE=4cf13f57a5a0e5812cf1ecec9e217989af1cc3ca
+
+# Repository-native immutable Git identities
+PLAN.md git_blob=70b9fa63d7816b5efe4936ea07698479133c6b70
+START_HERE.txt git_blob=9291a98409c526f93d42698e6888f20180d2e2ed
+docs/VERSIONING_RULES.md git_blob=766961c0b9f5ffa3b9a494c6d8128b3e278109d7
+docs/implementation/STEP_00_BASELINE_RECOVERY_GATE.md git_blob=2a4977348f9a53295c2098af80dae0769bd6e4bb
+docs/UI_REFERENCE_PACKAGE_V1/materialized/INDEX.md git_blob=e2bf99636ce08bdbf5a7b4564ef05da561ab9bbf
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/01-Dashboard.jpg git_blob=35b32a6964d19550ddaa75b9d3ed2ef78140cb22
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/02-Sejarah-Sistem.jpg git_blob=bf53fb88743426ac0058527387c1399b8df917b6
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/03-Per-Prompt.jpg git_blob=32b4ec3c6b941a10e410f826baf018735358713b
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/04-Backup-Recovery.jpg git_blob=ee47b7cf821cb3170208d718634f43f9eeacf15b
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/05-Pengaturan.jpg git_blob=742a03965fd00a2282f95a9f82a0fd1046231bf4
+docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Materialized-V1.zip git_blob=943e57fe550d032dde381a0f08ee2ae8c7f0ee19 sha256=2797cf5993ba6e38532d028135f5f8ab12f99bc55ed0b643b441e57ca5eeebb0
+
+# Verified user rescue original
+V22_5_1_Update_1B_Dialog_Campuran,_Audit_Jangkar_Aksi_Terlewat,(1).zip bytes=69158 sha256_before=f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2 sha256_after=f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2
+readonly_preservation_copy sha256=f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2
+
+# V22.5.1 source corpus
+00-Riwayat-Instruksi-dan-Perubahan-V22.txt sha256=e450e59dc6a2ab56577e3931b2a3e9332b8cefba7ca0ffc43c2dfe6d7cc92178
+01-Audit-Sinkronisasi-V22.txt sha256=756e841e0df4c5519cb56031b4311aee513574062b7a9fa08364de54516c0c29
+02-Riwayat-Chat-Pembaruan-V22.txt sha256=cc0b6564b498757730864b1ca2c60f17c4465820aa7daf114a8065e689b0956f
+03-Sumber-Pedoman-Pembaruan-V22.5.1.txt sha256=d55a697d8851965cfe50fd0d8d0c36155cf5c44415ee67d6ae64533a321da1e8
+Indeks-Versi-V22.5.1.json sha256=eff868af0b7a4295545d3a39f39745bcab904b8561389f6fae2582dc58754818
+Manifest-SHA256-V22.5.1.txt sha256=9c762c43a255db25a4b2188f983d8273977ba39932058df15729899f27c069bf
+Panduan-Perintah-Singkat-V22.txt sha256=2e5ab7231a9f2f94a9caa197a54ab8f6d8a38285599a2d1832ec49df31d6c7d9
+Prompt-1A-Pelajari-Sinopsis-dan-SRT-Full-Film.txt sha256=65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5
+Prompt-1B-Satu-Dokumen-Teknis-dan-Naskah-Bersih-Edit-Manual.txt sha256=7064081b9a264ba66da2c4eb297cc00f0f2d4133a97c84bed6f0171318d870cf
+Prompt-1B1-Sinkronisasi-Naskah-Bersih-Dialog-Timestamp-dan-Penguncian.txt sha256=a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6
+Prompt-1B2-Identifikasi-Blok-Urutan-dan-Kepemilikan-Visual.txt sha256=12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576
+Prompt-2-Eksekusi-Langsung-Satu-Jangkar.txt sha256=d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98
+Prompt-3-Eksekusi-Langsung-Satu-Narasi.txt sha256=de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8
+Prompt-4-Gabung-dan-Audit-Satu-Blok.txt sha256=a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0
+Prompt-5-Finalisasi-Seluruh-Part.txt sha256=bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786
+Ringkasan-Tugas-Setiap-Prompt.txt sha256=40dc53e40eb1a52024e1fc8eb04303a403e9d78eeb9199c6388f6f8ddd196a94
+
+# Manifest verification
+manifest_entries=15
+actual_nonmanifest_files=15
+missing=0
+extra=0
+mismatch=0
+repeatability_equal=true
+
+# Preservation proof
+# Original rescue ZIP hash before/after is identical.
+# Read-only preservation copy hash is identical.
+# main source objects above were not modified by STEP 00.
