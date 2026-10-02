@@ -1,7 +1,6 @@
 # STEP 00 — Recovery Test
 
-Audit mode: remote GitHub evidence audit  
-Audited main HEAD: `350e5428afe8ec435f52f12189faf7ef0e9b4ea0`
+Audited repository baseline: `main` HEAD `350e5428afe8ec435f52f12189faf7ef0e9b4ea0`.
 
 ## 1. Canonical UI Reference Recovery Package
 
@@ -11,111 +10,125 @@ Package:
 
 Observed size: `125042` bytes.
 
-Companion checksum:
+Companion SHA256:
 
 `2797cf5993ba6e38532d028135f5f8ab12f99bc55ed0b643b441e57ca5eeebb0`
 
-Evidence from the successful `Materialize UI Reference Package` workflow proves that:
+Successful `Materialize UI Reference Package` workflow proves:
 
-- the five Base64 image inputs were decoded;
-- all five outputs were recognized as JPEG image data;
-- all five materialized images were reported as `320x180`;
-- two generated DOCX files were validated as ZIP/DOCX containers containing `word/document.xml`;
-- the materialized ZIP was generated from the materialized reference directory;
-- SHA256 was computed as the value above;
-- the generated package/checksum was committed successfully.
+- five Base64 image inputs decoded;
+- five outputs recognized as JPEG image data;
+- all five reported as `320x180`;
+- generated DOCX files validated as DOCX/ZIP containers;
+- materialized ZIP generated from the materialized reference directory;
+- SHA256 generated and committed successfully.
 
-### Result
+Result: `PASS_FOR_CLAIMED_UI_REFERENCE_SCOPE`.
 
-`PASS_FOR_CLAIMED_UI_REFERENCE_SCOPE`
+## 2. Verified V22.5.1 Rescue ZIP
 
-This package is accepted only as the canonical **UI reference recovery package**. It is not evidence of a complete Prompt Action application/source recovery.
+User-supplied package:
 
-## 2. Old UI Reference Package
+`V22_5_1_Update_1B_Dialog_Campuran,_Audit_Jangkar_Aksi_Terlewat,(1).zip`
 
-Package:
+Size: `69158` bytes  
+SHA256: `f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2`
 
-`docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Package-V1.zip`
+### Archive integrity
 
-The canonical README explicitly classifies this as an old experimental artifact and identifies the Materialized V1 package as canonical.
+`unzip -t` result: **PASS — No errors detected**.
 
-### Result
+Extracted to a clean staging directory only.
 
-`EXCLUDE_FROM_BASELINE`
+Top-level package:
 
-Preserve as history/evidence; do not use as the active recovery baseline.
+`V22.5.1 Prompt Per Jangkar dan Per Narasi (Update 1B Dialog-Campuran, Audit Jangkar Aksi Terlewat, Prompt 2 Per Kamera, Output JSON)`
 
-## 3. zz_BOOTSTRAP
+Files: `16`  
+Nested archive: `0`
 
-Observed files:
+### Version identity
 
-- `zz_BOOTSTRAP/chunks/part001.b64`
-- `zz_BOOTSTRAP/chunks/part002.b64`
-- `zz_BOOTSTRAP/chunks/part003.b64`
+`Indeks-Versi-V22.5.1.json` states:
 
-The chunks exist and are preserved. However this remote audit could not prove all of the following from the actual decoded archive:
+- version `V22.5.1`;
+- date `2026-09-01`;
+- based_on `V22.5`;
+- active workflow `1A, 1B, 1B1, 1B2, 2, 3, 4, 5`.
 
-- exact package filename/boundary;
-- canonical SHA256 of the reconstructed package;
-- complete extract into an empty staging directory;
-- complete internal file listing;
-- presence of Legacy V22.5.1 source;
-- presence of all eight required Prompt 1A–5 files;
-- exact parent/version provenance of those prompt files.
+`03-Sumber-Pedoman-Pembaruan-V22.5.1.txt` records the V22.5.1 update sources and states that Prompt 1A was unchanged.
 
-### Result
+`01-Audit-Sinkronisasi-V22.txt` states `LOLOS SINKRONISASI INTERNAL` and checks the V22.5.1 workflow.
 
-`VERSION_UNKNOWN / EVIDENCE_ONLY`
+### Internal SHA256 manifest
 
-Not sufficient to satisfy the Legacy or eight-prompt blocking gate.
+`Manifest-SHA256-V22.5.1.txt` declares coverage of every package file except itself.
 
-## 4. zz_REBUILD
+Independent verification:
 
-Observed files:
+- expected manifest entries: 15;
+- actual non-manifest files: 15;
+- missing: 0;
+- extra: 0;
+- mismatch: 0;
+- result: `MANIFEST_MATCH = TRUE`.
 
-- `zz_REBUILD/chunks/part001.b64`
-- `part002.b64`
-- `part003.b64`
-- `part004.b64`
-- `part005.b64`
-- `part006.b64`
-- `part007.b64`
-- `part008.b64`
-- `part009.b64`
+### Eight required prompt sources
 
-Git history contains commits named `Upload GitHub snapshot chunk 001` through `009`. This proves the chunks are intentional recovery evidence, but not the required source provenance.
+All required files are present and readable in full:
 
-One inspected chunk begins with Base64 data corresponding to a ZIP stream and exposes historical package paths such as changelog/version-control files. That alone is insufficient to promote the entire reconstructed archive to `VERIFIED_SOURCE` or `VERIFIED_RESCUE_ZIP`.
+| Prompt | Bytes | SHA256 | Result |
+|---|---:|---|---|
+| 1A | 5401 | `65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5` | PASS |
+| 1B | 43390 | `7064081b9a264ba66da2c4eb297cc00f0f2d4133a97c84bed6f0171318d870cf` | PASS |
+| 1B1 | 25510 | `a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6` | PASS |
+| 1B2 | 19437 | `12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576` | PASS |
+| 2 | 15810 | `d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98` | PASS |
+| 3 | 23652 | `de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8` | PASS |
+| 4 | 6514 | `a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0` | PASS |
+| 5 | 6107 | `bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786` | PASS |
 
-A full byte-accurate concatenate/decode/hash/extract test was not available in this remote-only execution channel. Therefore required Prompt 1A–5 and V22.5.1 cannot be declared present merely because these chunks exist.
+All eight decode as UTF-8 with no NUL bytes and no Unicode replacement-character errors.
 
-### Result
+### Preservation/repeatability
 
-`VERSION_UNKNOWN / EVIDENCE_ONLY`
+- original SHA256 before extraction: `f7ac13dd...cfdb2`;
+- preservation-copy SHA256: identical;
+- original SHA256 after audit: identical;
+- complete 16-file extracted hash map recomputed twice: identical.
 
-## 5. Full Prompt Action Recovery Gate
+Result: `PASS`.
 
-Required scope for STEP 00 includes:
+Classification: `VERIFIED_RESCUE_ZIP`; prompt files are `VERIFIED_SOURCE via verified rescue ZIP`.
 
-- verified Legacy V22.5.1 source/recovery;
-- Prompt 1A;
-- Prompt 1B;
-- Prompt 1B1;
-- Prompt 1B2;
-- Prompt 2;
-- Prompt 3;
-- Prompt 4;
-- Prompt 5;
-- a recovery package whose actual extracted contents prove the scope claimed.
+## 3. Old UI Reference Package
 
-That full scope is not verified in the audited HEAD.
+`Prompt-Action-UI-Reference-Package-V1.zip`
 
-### Final recovery result
+Canonical README classifies it as an old experimental artifact.
 
-`BLOCKED`
+Result: `EXCLUDE_FROM_BASELINE`.
 
-The UI-reference recovery package passes its own limited scope. Full Prompt Action recovery does **not** pass STEP 00.
+## 4. zz_BOOTSTRAP / zz_REBUILD
+
+These encoded chunks remain untouched as historical/recovery evidence.
+
+Their exact decoded provenance is still `VERSION_UNKNOWN`, but they are no longer required to satisfy the STEP 00 V22.5.1 source gate because a separate verified rescue ZIP now provides the complete required legacy/prompt corpus.
+
+Result: `EVIDENCE_ONLY / PRESERVE`.
+
+## 5. Full STEP 00 Recovery Scope
+
+Required scope is now proven by the combination of:
+
+- canonical UI recovery package + successful workflow/checksum evidence;
+- verified V22.5.1 rescue ZIP;
+- verified internal manifest;
+- all eight required prompt source files;
+- preservation and repeatability evidence.
+
+Final recovery result: **PASS**.
 
 ## 6. Safety conclusion
 
-No recovery chunk, package, workflow, UI image, legacy marker, or source document was edited or deleted during this audit. Missing prompt files were not regenerated from documentation or assumptions.
+No original rescue file, prompt source, UI reference, workflow, bootstrap chunk or rebuild chunk was edited/deleted. No missing prompt was synthesized or reconstructed.
