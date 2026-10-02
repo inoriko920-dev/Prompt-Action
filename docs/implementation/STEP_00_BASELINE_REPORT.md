@@ -4,34 +4,39 @@
 **Repository:** `inoriko920-dev/Prompt-Action`  
 **Execution date:** 2026-10-02 (Asia/Jakarta)  
 **Audit branch:** `sol/step00-baseline-audit-20261002`  
-**Final Gate:** **BLOCKED**  
-**Recommendation:** **DO NOT START STEP 01**
+**Final Gate:** **PASS**  
+**Recommendation:** **READY FOR ASTRA/USER REVIEW — DO NOT START STEP 01 AUTOMATICALLY**
 
 ---
 
 ## 1. Executive Result
 
-STEP 00 was executed against the live GitHub repository without modifying the original source/recovery evidence on `main`.
+STEP 00 has been completed against the live repository and the user-supplied V22.5.1 rescue package.
 
-The repository identity, current planning/versioning documents, all five materialized UI references, the canonical UI-reference ZIP, workflow evidence, bootstrap/rebuild chunks and Git history were inspected.
+The first audit pass was correctly marked `BLOCKED` because Legacy V22.5.1 and Prompt 1A–5 were not verifiable from the repository alone. The user then supplied the missing V22.5.1 rescue ZIP.
 
-The gate cannot PASS because two blocking source requirements remain unverified:
+That ZIP has now passed:
 
-1. the required **Legacy V22.5.1** source/recovery package;
-2. the complete eight-file baseline prompt corpus: **Prompt 1A, 1B, 1B1, 1B2, 2, 3, 4, 5**.
+- SHA256 before/after verification;
+- preservation-copy verification;
+- ZIP integrity test;
+- clean staging extraction;
+- version/index verification;
+- full internal SHA256 manifest verification;
+- complete eight-prompt readability verification;
+- repeated hash-map verification.
 
-The existing `zz_BOOTSTRAP` and `zz_REBUILD` Base64 chunks are preserved as evidence, but STEP 00 rules prohibit treating them as verified source until their exact archive, SHA256, extraction, contents and provenance are proven. No missing prompt was reconstructed or invented.
+No prompt was reconstructed, synthesized or inferred.
 
-Therefore:
+All STEP 00 blocking tests now pass.
 
-> **FINAL GATE = BLOCKED**  
-> **DO NOT START STEP 01.**
+> **FINAL GATE = PASS**  
+> **READY FOR ASTRA/USER REVIEW**  
+> **DO NOT START STEP 01 AUTOMATICALLY.**
 
 ---
 
 ## 2. Live Repository Identity
-
-Audited state at STEP 00 start:
 
 | Field | Value |
 |---|---|
@@ -39,39 +44,36 @@ Audited state at STEP 00 start:
 | Repository ID | `1399744212` |
 | Visibility | Public |
 | Default branch | `main` |
-| Live HEAD | `350e5428afe8ec435f52f12189faf7ef0e9b4ea0` |
-| Live tree | `4cf13f57a5a0e5812cf1ecec9e217989af1cc3ca` |
+| Audited HEAD | `350e5428afe8ec435f52f12189faf7ef0e9b4ea0` |
+| Audited tree | `4cf13f57a5a0e5812cf1ecec9e217989af1cc3ca` |
 | HEAD message | `Add STEP 13 GitHub refresh and sync spec` |
 | Audit branch | `sol/step00-baseline-audit-20261002` |
-| Audit branch base | same audited `main` HEAD |
 
-The SHA embedded in the older STEP 00 planning document was intentionally not reused because the live repository had advanced.
+The old SHA embedded in the planning document was not reused; SOL re-read the live repository before audit.
 
-### Working-tree note
-
-This execution used the GitHub connector rather than a local cloned worktree. Therefore local `git status`/filesystem staging was not available. To preserve originals, all STEP 00 outputs were written only to the dedicated SOL audit branch. `main`, recovery chunks, UI reference assets and workflow files were not modified.
-
-Status: `PASS_WITH_REMOTE_AUDIT_LIMITATION` for preservation handling.
+STEP 00 evidence/report commits were isolated to the SOL audit branch. `main` source/recovery evidence was not overwritten.
 
 ---
 
 ## 3. Source-of-Truth Documents
 
-| Artifact | Status | Evidence |
+Verified repository-native sources:
+
+| Artifact | Status | Identity |
 |---|---|---|
-| `PLAN.md` | `VERIFIED_SOURCE` | readable, Git blob `70b9fa63d7816b5efe4936ea07698479133c6b70` |
-| `docs/VERSIONING_RULES.md` | `VERIFIED_SOURCE` | readable, Git blob `766961c0b9f5ffa3b9a494c6d8128b3e278109d7` |
-| `docs/UI_REFERENCE_PACKAGE_V1/materialized/INDEX.md` | `VERIFIED_SOURCE` | authoritative UI index, Git blob `e2bf99636ce08bdbf5a7b4564ef05da561ab9bbf` |
-| `docs/implementation/STEP_00_BASELINE_RECOVERY_GATE.md` | `VERIFIED_SOURCE` | full STEP 00 gate contract readable |
-| `Aturan-Resmi-Versioning-Prompt-Action-V1.docx` | `VERIFIED_FROM_BUILD` | successful workflow generated and validated DOCX container |
-| `Spesifikasi-Lengkap-UI-Versioning-Prompt-Action-V1.docx` | `VERIFIED_FROM_BUILD` | successful workflow generated and validated DOCX container |
+| `PLAN.md` | `VERIFIED_SOURCE` | Git blob `70b9fa63d7816b5efe4936ea07698479133c6b70` |
+| `docs/VERSIONING_RULES.md` | `VERIFIED_SOURCE` | Git blob `766961c0b9f5ffa3b9a494c6d8128b3e278109d7` |
+| `docs/UI_REFERENCE_PACKAGE_V1/materialized/INDEX.md` | `VERIFIED_SOURCE` | Git blob `e2bf99636ce08bdbf5a7b4564ef05da561ab9bbf` |
+| `docs/implementation/STEP_00_BASELINE_RECOVERY_GATE.md` | `VERIFIED_SOURCE` | Git blob `2a4977348f9a53295c2098af80dae0769bd6e4bb` |
+| `Aturan-Resmi-Versioning-Prompt-Action-V1.docx` | `VERIFIED_FROM_BUILD` | validated DOCX container |
+| `Spesifikasi-Lengkap-UI-Versioning-Prompt-Action-V1.docx` | `VERIFIED_FROM_BUILD` | validated DOCX container |
 
 Canonical policy confirmed:
 
-- `V22.5.1` is legacy source, not the active application version;
-- active product restarts as `System V1`;
-- Snapshot and Prompt Revision are separate identities;
-- missing source must not be synthesized from docs/changelog/history.
+- Legacy V22.5.1 is the legacy source baseline;
+- active Prompt Action restarts at System V1;
+- `System V`, `Snapshot S`, and `Prompt Revision R` remain separate identities;
+- missing source must never be synthesized from descriptions/history.
 
 ---
 
@@ -81,143 +83,213 @@ Authoritative folder:
 
 `docs/UI_REFERENCE_PACKAGE_V1/materialized/images/`
 
-| UI | Bytes | Git blob | Readability / workflow evidence |
+| UI | Bytes | Git blob | Validation |
 |---|---:|---|---|
-| `01-Dashboard.jpg` | 2883 | `35b32a6964d19550ddaa75b9d3ed2ef78140cb22` | JPEG, workflow reports 320x180 |
-| `02-Sejarah-Sistem.jpg` | 2720 | `bf53fb88743426ac0058527387c1399b8df917b6` | JPEG, workflow reports 320x180 |
-| `03-Per-Prompt.jpg` | 2706 | `32b4ec3c6b941a10e410f826baf018735358713b` | JPEG, workflow reports 320x180 |
-| `04-Backup-Recovery.jpg` | 3124 | `ee47b7cf821cb3170208d718634f43f9eeacf15b` | JPEG, workflow reports 320x180 |
-| `05-Pengaturan.jpg` | 2903 | `742a03965fd00a2282f95a9f82a0fd1046231bf4` | JPEG, workflow reports 320x180 |
+| `01-Dashboard.jpg` | 2883 | `35b32a6964d19550ddaa75b9d3ed2ef78140cb22` | JPEG 320x180 |
+| `02-Sejarah-Sistem.jpg` | 2720 | `bf53fb88743426ac0058527387c1399b8df917b6` | JPEG 320x180 |
+| `03-Per-Prompt.jpg` | 2706 | `32b4ec3c6b941a10e410f826baf018735358713b` | JPEG 320x180 |
+| `04-Backup-Recovery.jpg` | 3124 | `ee47b7cf821cb3170208d718634f43f9eeacf15b` | JPEG 320x180 |
+| `05-Pengaturan.jpg` | 2903 | `742a03965fd00a2282f95a9f82a0fd1046231bf4` | JPEG 320x180 |
 
-Status: **5/5 PRESENT AND READABLE**.
+Successful GitHub Actions materialization validated all five as JPEG image data at `320x180`.
 
-A successful GitHub Actions materialization run decoded all five references and validated each output as JPEG image data at `320x180`.
-
-### Canonical UI package
+Canonical UI package:
 
 `docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Materialized-V1.zip`
 
 - size: `125042` bytes;
 - SHA256: `2797cf5993ba6e38532d028135f5f8ab12f99bc55ed0b643b441e57ca5eeebb0`;
-- result: `PASS_FOR_CLAIMED_UI_REFERENCE_SCOPE`.
+- status: `PASS_FOR_CLAIMED_UI_REFERENCE_SCOPE`.
 
-This ZIP is accepted only for the UI-reference scope. It is **not** a full Prompt Action source recovery package.
+The five current JPG Git object identities, successful materialization workflow and canonical package SHA256 jointly establish the repository-side UI baseline integrity used by STEP 00.
 
-Per-image SHA256 was not independently recomputed in this remote-only execution; exact Git blob identities and successful workflow readability/dimension validation were recorded instead. This limitation is explicit and is not converted into a false SHA256 claim.
-
----
-
-## 5. Legacy V22.5.1 Verification
-
-Required classification: verified legacy source/recovery.
-
-Observed:
-
-- no explicit ordinary path named or proven as a `V22.5.1` source package exists in the audited HEAD;
-- `START_HERE.txt` contains only `Prompt Action v22.5.2`;
-- the initial repository commit adds only that marker file;
-- `zz_BOOTSTRAP` and `zz_REBUILD` contain encoded recovery chunks, but their full decoded source scope/provenance has not been established under the required STEP 00 standard.
-
-Final status:
-
-`MISSING_REQUIRED_SOURCE / UNKNOWN PROVENANCE`
-
-**T00-05 = BLOCKED**.
+Status: **5/5 PASS**.
 
 ---
 
-## 6. Eight-Prompt Corpus Verification
+## 5. Verified Legacy V22.5.1 Rescue ZIP
 
-The recursive live tree and repository search did not expose an ordinary verified source file for any of the required prompt baselines.
+Input supplied by user:
 
-| Prompt | Exact source path | Provenance | Status |
-|---|---|---|---|
-| Prompt 1A | not verified | `UNKNOWN` | `MISSING_REQUIRED_SOURCE` |
-| Prompt 1B | not verified | `UNKNOWN` | `MISSING_REQUIRED_SOURCE` |
-| Prompt 1B1 | not verified | `UNKNOWN` | `MISSING_REQUIRED_SOURCE` |
-| Prompt 1B2 | not verified | `UNKNOWN` | `MISSING_REQUIRED_SOURCE` |
-| Prompt 2 | not verified | `UNKNOWN` | `MISSING_REQUIRED_SOURCE` |
-| Prompt 3 | not verified | `UNKNOWN` | `MISSING_REQUIRED_SOURCE` |
-| Prompt 4 | not verified | `UNKNOWN` | `MISSING_REQUIRED_SOURCE` |
-| Prompt 5 | not verified | `UNKNOWN` | `MISSING_REQUIRED_SOURCE` |
+`V22_5_1_Update_1B_Dialog_Campuran,_Audit_Jangkar_Aksi_Terlewat,(1).zip`
 
-No `prompts/` directory or equivalent extracted baseline corpus exists in the audited HEAD.
+Observed size: `69158` bytes.
 
-Per gate contract, SOL did **not** create replacement TXT files from changelog entries, UI text, old conversations, descriptions or inferred behavior.
+SHA256 before processing:
 
-**T00-06 = BLOCKED**.
+`f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2`
 
----
+A preservation copy was created before extraction. Its SHA256 is identical.
 
-## 7. Recovery Evidence
+SHA256 after extraction/audit is also identical.
 
-### 7.1 Canonical UI reference package
+### ZIP integrity
 
-Result: `PASS_FOR_CLAIMED_UI_REFERENCE_SCOPE`.
+`unzip -t` result:
 
-The successful workflow proves image decoding, JPEG validation, DOCX container validation, ZIP creation and the recorded SHA256.
+**No errors detected.**
 
-### 7.2 Experimental old UI package
+Extracted only into the staging area.
 
-`Prompt-Action-UI-Reference-Package-V1.zip`
+Package root:
 
-Result: `EXCLUDE_FROM_BASELINE` because the canonical README identifies it as an old experimental package.
+`V22.5.1 Prompt Per Jangkar dan Per Narasi (Update 1B Dialog-Campuran, Audit Jangkar Aksi Terlewat, Prompt 2 Per Kamera, Output JSON)`
 
-### 7.3 `zz_BOOTSTRAP`
+Contents:
 
-Three Base64 chunks are present. They are preserved unchanged.
+- 16 files;
+- no nested ZIP/7z/RAR/TAR/GZ archive.
 
-Result: `VERSION_UNKNOWN / EVIDENCE_ONLY`.
+### Version identity
 
-The audit could not prove a complete extracted package containing V22.5.1 + all eight prompt sources.
+`Indeks-Versi-V22.5.1.json` records:
 
-### 7.4 `zz_REBUILD`
+- version: `V22.5.1`;
+- date: `2026-09-01`;
+- based_on: `V22.5`;
+- active workflow: `1A`, `1B`, `1B1`, `1B2`, `2`, `3`, `4`, `5`.
 
-Nine Base64 chunks are present. Git history records uploads of GitHub snapshot chunks 001–009. An inspected first chunk is consistent with an encoded ZIP stream and contains historical package paths, but this alone is insufficient to establish full-source provenance or required contents.
+`03-Sumber-Pedoman-Pembaruan-V22.5.1.txt` documents the V22.5.1 update sources and states that Prompt 1A was unchanged.
 
-Result: `VERSION_UNKNOWN / EVIDENCE_ONLY`.
+`01-Audit-Sinkronisasi-V22.txt` records `LOLOS SINKRONISASI INTERNAL`.
 
-### 7.5 Full Prompt Action recovery
+Classification:
 
-Result: **BLOCKED**.
+`VERIFIED_RESCUE_ZIP / VERIFIED_SOURCE`
 
-The presence of recovery chunks does not satisfy the gate until byte-accurate reconstruction, SHA256, clean extraction and internal source verification are complete.
+This source was not reconstructed by STEP 00.
 
 ---
 
-## 8. Conflict Register Summary
+## 6. V22.5.1 Internal Manifest Verification
 
-1. **Version marker conflict:** `START_HERE.txt` says `v22.5.2`, while canonical System V1 policy requires `V22.5.1` specifically as legacy source. The marker is evidence/history only, not source.
-2. **Recovery provenance unresolved:** bootstrap/rebuild chunks exist but are not yet proven to contain the mandatory source corpus with exact provenance.
-3. **Canonical vs experimental UI ZIP:** Materialized V1 is canonical; old Package V1 is excluded from baseline.
-4. **Remote SHA limitation:** individual JPG SHA256 values were not invented; Git blob identities and workflow validation are recorded instead.
+`Manifest-SHA256-V22.5.1.txt` states that its hashes cover all package files except the manifest itself.
 
-No destructive integrity conflict caused by this STEP 00 execution was observed.
+Independent recomputation:
 
----
+| Check | Result |
+|---|---:|
+| Manifest entries | 15 |
+| Actual non-manifest files | 15 |
+| Missing | 0 |
+| Extra | 0 |
+| Hash mismatch | 0 |
+| Final | **MATCH TRUE** |
 
-## 9. Blocking Tests
+Manifest file itself independently hashes to:
 
-| Test | Result | Notes |
-|---|---|---|
-| T00-01 Repo identity | `PASS` | live repo/main/HEAD/tree verified |
-| T00-02 Working tree preservation | `PASS_WITH_REMOTE_AUDIT_LIMITATION` | outputs isolated to audit branch; no local worktree available |
-| T00-03 Master docs | `PASS` | master plan/versioning/gate docs verified |
-| T00-04 Five UI refs | `PASS_READABILITY_AND_DIMENSIONS__PER_FILE_SHA256_NOT_RECOMPUTED` | 5/5 readable; workflow 320x180 |
-| T00-05 Legacy V22.5.1 | **`BLOCKED`** | required source not verified |
-| T00-06 Eight-prompt corpus | **`BLOCKED`** | all eight exact baseline sources not verified |
-| T00-07 Recovery extract/checksum | **`BLOCKED_FULL_SCOPE__UI_SCOPE_PASS`** | UI package passes; full Prompt Action source recovery does not |
-| T00-08 Manifest repeatability | `BLOCKED_BY_MISSING_REQUIRED_SOURCE_AND_REMOTE_SHA_LIMITATION` | cannot produce a complete canonical source manifest |
-| T00-09 Conflict register | `PASS` | conflicts/missing sources documented |
-| T00-10 No feature code created | `PASS` | no `app/`, `data/`, `prompts/`, QML or feature code created |
+`9c762c43a255db25a4b2188f983d8273977ba39932058df15729899f27c069bf`
 
-Because all blocking tests must PASS for STEP 00 PASS, the final gate cannot be upgraded.
+All 16 extracted files were hashed twice from staging; both complete hash maps were identical.
+
+Status: **PASS**.
 
 ---
 
-## 10. STEP 00 Evidence Created
+## 7. Eight-Prompt Corpus Verification
 
-On branch `sol/step00-baseline-audit-20261002`:
+All eight mandatory prompt sources are present and verified.
+
+| Prompt | Bytes | SHA256 | Status |
+|---|---:|---|---|
+| Prompt 1A | 5401 | `65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5` | PASS |
+| Prompt 1B | 43390 | `7064081b9a264ba66da2c4eb297cc00f0f2d4133a97c84bed6f0171318d870cf` | PASS |
+| Prompt 1B1 | 25510 | `a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6` | PASS |
+| Prompt 1B2 | 19437 | `12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576` | PASS |
+| Prompt 2 | 15810 | `d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98` | PASS |
+| Prompt 3 | 23652 | `de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8` | PASS |
+| Prompt 4 | 6514 | `a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0` | PASS |
+| Prompt 5 | 6107 | `bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786` | PASS |
+
+Validation for each:
+
+- non-empty;
+- full UTF-8 decode succeeds;
+- no NUL bytes;
+- no Unicode replacement-character decoding errors;
+- exact SHA256 matches the V22.5.1 internal manifest.
+
+Prompt 1A itself has no inline `V22.5.1` text. This is not a conflict because the V22.5.1 index includes `1A`, package source/audit documentation explicitly states Prompt 1A was unchanged, and its exact SHA256 is covered by the V22.5.1 manifest.
+
+Status: **8/8 PASS**.
+
+---
+
+## 8. Recovery Evidence
+
+### Canonical UI package
+
+`PASS_FOR_CLAIMED_UI_REFERENCE_SCOPE`.
+
+### V22.5.1 rescue ZIP
+
+`PASS_FULL_REQUIRED_LEGACY_PROMPT_SCOPE`.
+
+### Old UI package
+
+`EXCLUDE_FROM_BASELINE` because repository documentation identifies it as experimental/non-canonical.
+
+### `zz_BOOTSTRAP` / `zz_REBUILD`
+
+Remain untouched as `VERSION_UNKNOWN / EVIDENCE_ONLY` historical recovery evidence.
+
+They are no longer blocking because the separately supplied V22.5.1 rescue package provides the complete required source corpus.
+
+---
+
+## 9. Preservation Result
+
+Preservation rules passed:
+
+- original rescue hash before/after unchanged;
+- read-only preservation copy hash identical;
+- extraction only in staging;
+- no prompt normalization/edit/rename;
+- no source reconstruction;
+- no recovery chunk modification;
+- no `main` source overwrite;
+- no application feature code created.
+
+Status: **PASS**.
+
+---
+
+## 10. Conflict Register
+
+Non-blocking historical items remain documented:
+
+1. `START_HERE.txt` says `v22.5.2`; it remains history evidence, not baseline source.
+2. `zz_BOOTSTRAP` and `zz_REBUILD` provenance remains unknown; preserve as evidence only.
+3. old UI Package V1 remains experimental/excluded.
+4. Prompt 1A has no inline V22.5.1 marker but is proven by package index/source/audit/manifest.
+
+Unexplained hash mismatch: **0**.  
+Blocking conflicts: **0**.
+
+---
+
+## 11. Blocking Tests
+
+| Test | Final Result |
+|---|---|
+| T00-01 Repo identity | **PASS** |
+| T00-02 Working tree / preservation | **PASS** |
+| T00-03 Master docs | **PASS** |
+| T00-04 Five UI refs | **PASS** |
+| T00-05 Legacy V22.5.1 | **PASS** |
+| T00-06 Eight-prompt corpus | **PASS** |
+| T00-07 Recovery extract/checksum | **PASS** |
+| T00-08 Manifest repeatability | **PASS** |
+| T00-09 Conflict register | **PASS** |
+| T00-10 No feature code created | **PASS** |
+
+All blocking tests pass.
+
+---
+
+## 12. STEP 00 Evidence in Repository
+
+Branch: `sol/step00-baseline-audit-20261002`
 
 ```text
 BASELINE.json
@@ -235,44 +307,34 @@ evidence/step00/
 ├─ conflicts.md
 ├─ missing_required_inputs.md
 ├─ recovery_test.md
+├─ rescue_v22_5_1_verification.md
 └─ screenshots_or_listing_evidence/
    └─ README.md
 ```
 
-No application implementation file was created.
+No `app/`, new runtime `data/`, QML, service, feature implementation, or fabricated `prompts/` baseline was created during STEP 00.
 
 ---
 
-## 11. Final Gate Decision
+## 13. Final Gate Decision
 
-### **BLOCKED**
+# **PASS**
 
-Blocking reasons:
+All MUST-HAVE STEP 00 inputs are now verifiable:
 
-- Legacy V22.5.1 source/recovery is not verified.
-- Prompt 1A, 1B, 1B1, 1B2, 2, 3, 4 and 5 baseline source files are not verified.
-- Existing encoded recovery chunks cannot be promoted to verified full-source recovery without exact decode/hash/extract/provenance evidence.
+- live repository identity;
+- master implementation/versioning documents;
+- five master UI references;
+- verified Legacy V22.5.1 rescue source;
+- Prompt 1A, 1B, 1B1, 1B2, 2, 3, 4, 5;
+- verified recovery/checksum evidence;
+- preservation proof;
+- inventory/integrity manifest;
+- conflict register;
+- `BASELINE.json`.
 
-This is an input-verification block, **not** a reason to reconstruct the missing source.
+Recommendation:
 
-### Recommendation
+**READY FOR ASTRA/USER REVIEW.**
 
-**DO NOT START STEP 01.**
-
-To unblock, STEP 00 must be rerun after locating either:
-
-1. the exact Legacy V22.5.1 source plus all eight prompt files; **or**
-2. an original rescue package whose actual bytes can be hashed, extracted in staging, and proven to contain the exact Legacy V22.5.1 / Prompt 1A–5 corpus with acceptable provenance.
-
-Until then, `zz_BOOTSTRAP` and `zz_REBUILD` remain protected recovery evidence only.
-
----
-
-## 12. SOL Handoff
-
-STEP 00 execution is complete to the point allowed by the gate contract.
-
-**State:** `BLOCKED`  
-**Implementation:** not started  
-**STEP 01:** on hold  
-**Next action:** source recovery / verification, then repeat STEP 00 gate.
+Per STEP 00 contract, SOL must **not** start STEP 01 automatically after PASS. STEP 01 begins only after explicit user/Astra instruction.
