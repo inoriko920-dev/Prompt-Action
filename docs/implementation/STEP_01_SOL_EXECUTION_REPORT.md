@@ -3,7 +3,7 @@
 **Repo:** `inoriko920-dev/Prompt-Action`  
 **Branch:** `sol/step01-app-skeleton-20261002`  
 **STEP 00 baseline merged to main:** `74cb295faecbdf4d6a59a681ed8135b16076f405`  
-**Latest foundation + Windows gate-helper commit verified by CI:** `9a361df400258df150f9db809fa0c402a09a8c2e`  
+**Latest hardened foundation/helper commit validated by Windows CI:** `9a361df400258df150f9db809fa0c402a09a8c2e`  
 **Final gate:** **BLOCKED — DO NOT START STEP 02**
 
 ## 1. Summary
