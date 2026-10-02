@@ -61,6 +61,7 @@ jobs:
             throw "Verifier rejected CI for an unexpected reason."
           }
           Write-Host "Expected rejection confirmed: Windows Server CI cannot close T09."
+          $global:LASTEXITCODE = 0
       - name: Install exact lock
         run: |
           python -m pip install --upgrade pip
