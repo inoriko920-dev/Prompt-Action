@@ -1,0 +1,74 @@
+# STEP 00 remote git tree evidence
+# Repository: inoriko920-dev/Prompt-Action
+# Branch audited: main
+# HEAD: 350e5428afe8ec435f52f12189faf7ef0e9b4ea0
+# Tree: 4cf13f57a5a0e5812cf1ecec9e217989af1cc3ca
+# Source: GitHub recursive tree API. This is remote tree evidence, not output of a local checkout.
+
+.github/workflows/extract-ui-reference.yml
+.github/workflows/materialize-ui-reference.yml
+PLAN.md
+START_HERE.txt
+docs/UI_REFERENCE_PACKAGE_V1/GPT_IMAGE_PROMPTS.md
+docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Materialized-V1.zip
+docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Materialized-V1.zip.sha256
+docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Package-V1.zip
+docs/UI_REFERENCE_PACKAGE_V1/README.md
+docs/UI_REFERENCE_PACKAGE_V1/images/01-Dashboard.jpg.b64
+docs/UI_REFERENCE_PACKAGE_V1/images/02-Sejarah-Sistem.jpg.b64
+docs/UI_REFERENCE_PACKAGE_V1/images/03-Per-Prompt.jpg.b64
+docs/UI_REFERENCE_PACKAGE_V1/images/03-Per-Prompt/part-001.b64
+docs/UI_REFERENCE_PACKAGE_V1/images/03-Per-Prompt/part-002.b64
+docs/UI_REFERENCE_PACKAGE_V1/images/03-Per-Prompt/part-003.b64
+docs/UI_REFERENCE_PACKAGE_V1/images/03-Per-Prompt/part-004.b64
+docs/UI_REFERENCE_PACKAGE_V1/images/04-Backup-Recovery.jpg.b64
+docs/UI_REFERENCE_PACKAGE_V1/images/05-Pengaturan.jpg.b64
+docs/UI_REFERENCE_PACKAGE_V1/materialized/ASTRA_MASTER_PLAN.md
+docs/UI_REFERENCE_PACKAGE_V1/materialized/Aturan-Resmi-Versioning-Prompt-Action-V1.docx
+docs/UI_REFERENCE_PACKAGE_V1/materialized/GPT_IMAGE_PROMPTS.md
+docs/UI_REFERENCE_PACKAGE_V1/materialized/INDEX.md
+docs/UI_REFERENCE_PACKAGE_V1/materialized/README.md
+docs/UI_REFERENCE_PACKAGE_V1/materialized/Spesifikasi-Lengkap-UI-Versioning-Prompt-Action-V1.docx
+docs/UI_REFERENCE_PACKAGE_V1/materialized/VERSIONING_RULES.md
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/01-Dashboard.jpg
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/02-Sejarah-Sistem.jpg
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/03-Per-Prompt.jpg
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/04-Backup-Recovery.jpg
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/05-Pengaturan.jpg
+docs/UI_REFERENCE_PACKAGE_V1/package/part-000.b64
+docs/UI_REFERENCE_PACKAGE_V1/package/part-001.b64
+docs/UI_REFERENCE_PACKAGE_V1/rebuild-ui-reference.ps1
+docs/UI_REFERENCE_PACKAGE_V1/sources/01-Dashboard.jpg.b64
+docs/UI_REFERENCE_PACKAGE_V1/sources/02-Sejarah-Sistem.jpg.b64
+docs/UI_REFERENCE_PACKAGE_V1/sources/04-Backup-Recovery.jpg.b64
+docs/VERSIONING_RULES.md
+docs/implementation/STEP_00_BASELINE_RECOVERY_GATE.md
+docs/implementation/STEP_01_APP_SKELETON_PROJECT_FOUNDATION.md
+docs/implementation/STEP_02_CANONICAL_DATA_VERSION_ENGINE.md
+docs/implementation/STEP_03_DESIGN_SYSTEM_UI_SHELL.md
+docs/implementation/STEP_04_DASHBOARD_IMPLEMENTATION.md
+docs/implementation/STEP_05_SEJARAH_SISTEM_IMPLEMENTATION.md
+docs/implementation/STEP_06_PER_PROMPT_IMPLEMENTATION.md
+docs/implementation/STEP_07_BACKUP_RECOVERY_UI_IMPLEMENTATION.md
+docs/implementation/STEP_08_PENGATURAN_IMPLEMENTATION.md
+docs/implementation/STEP_09_SEARCH_COMPARE_DOWNLOAD_INTEGRATION.md
+docs/implementation/STEP_10_REVISION_SNAPSHOT_RELEASE_WORKFLOW.md
+docs/implementation/STEP_11_BACKUP_ENGINE_RELEASE_COMPLETION.md
+docs/implementation/STEP_12_RECOVERY_RESTORE_ROLLBACK.md
+docs/implementation/STEP_13_GITHUB_REFRESH_SYNC.md
+zz_BOOTSTRAP/chunks/part001.b64
+zz_BOOTSTRAP/chunks/part002.b64
+zz_BOOTSTRAP/chunks/part003.b64
+zz_REBUILD/chunks/part001.b64
+zz_REBUILD/chunks/part002.b64
+zz_REBUILD/chunks/part003.b64
+zz_REBUILD/chunks/part004.b64
+zz_REBUILD/chunks/part005.b64
+zz_REBUILD/chunks/part006.b64
+zz_REBUILD/chunks/part007.b64
+zz_REBUILD/chunks/part008.b64
+zz_REBUILD/chunks/part009.b64
+
+# Blocking observation:
+# No ordinary file path for Prompt 1A, Prompt 1B, Prompt 1B1, Prompt 1B2, Prompt 2, Prompt 3, Prompt 4, Prompt 5 exists in the audited HEAD tree.
+# No explicit Legacy V22.5.1 source package/path exists in the audited HEAD tree.
