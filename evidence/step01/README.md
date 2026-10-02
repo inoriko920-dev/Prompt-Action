@@ -43,7 +43,7 @@ Verified artifact contents:
 - T06 PASS — different cwd
 - T07 PASS — path with spaces
 - T08 PASS — Unicode path
-- T09 **BLOCKED** — local Windows 11 non-admin execution not available in this environment
+- T09 **BLOCKED** — local Windows 11 non-admin execution not yet supplied
 - T10 PASS — runtime write
 - T11 PASS — read-only simulation
 - T12 PASS — clean exact-lock install on Windows CI
@@ -51,8 +51,38 @@ Verified artifact contents:
 - T14 PASS — relocation with spaces/Unicode from unrelated cwd
 - T15 PASS — Windows CI smoke
 
-## Gate closer
+## One-click gate closer on the target Windows 11 PC
 
-Run `scripts/dev/verify_step01_windows11.ps1` from a **standard-user (non-admin) PowerShell session on Windows 11**. The script rejects non-Windows-11 or elevated sessions and verifies exact Python/PySide6 versions, the full test suite, and local evidence capture.
+Use:
 
-Until that proof exists, STEP 01 must remain BLOCKED and STEP 02 must not start.
+`scripts/dev/STEP_01_VERIFY_WINDOWS11.bat`
+
+Run it by normal double-click. **Do not use “Run as administrator”.**
+
+The launcher calls `verify_step01_windows11.ps1`, which:
+
+1. rejects anything other than Windows 11;
+2. rejects an elevated/admin PowerShell token;
+3. prepares/reuses the locked `.venv` using CPython `3.13.16` and PySide6 `6.11.2`;
+4. runs the complete STEP 01 pytest suite;
+5. launches Prompt Action through the native Windows Qt platform and requires exit `0`;
+6. runs the intentional missing-QML case and requires exit `21`;
+7. captures a native Windows minimal-window PNG;
+8. writes OS/runtime/result metadata without recording the Windows account name;
+9. hashes every evidence file with SHA256;
+10. creates `evidence/step01/STEP01_WINDOWS11_LOCAL_EVIDENCE.zip` plus its `.sha256.txt` file.
+
+The verifier deliberately does **not** record the Windows username, email address, API key, token, or credential.
+
+If the exact Python runtime is missing, the script stops with a clear message instead of silently using another version.
+
+## Files to return to SOL
+
+After a PASS, provide these two generated files:
+
+- `evidence/step01/STEP01_WINDOWS11_LOCAL_EVIDENCE.zip`
+- `evidence/step01/STEP01_WINDOWS11_LOCAL_EVIDENCE.zip.sha256.txt`
+
+SOL must verify the ZIP/hash/result evidence before changing STEP 01 from BLOCKED to PASS.
+
+Until that proof exists, STEP 01 remains BLOCKED and STEP 02 must not start.
