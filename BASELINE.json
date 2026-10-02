@@ -1,14 +1,23 @@
 {
-  "schema_version": "step00-1.1",
+  "schema_version": "step00-1.2",
   "step": "STEP_00_BASELINE_RECOVERY_GATE",
   "result": "PASS",
   "recommendation": "READY_FOR_ASTRA_REVIEW",
   "repository": {
     "full_name": "inoriko920-dev/Prompt-Action",
     "default_branch": "main",
-    "audited_head": "350e5428afe8ec435f52f12189faf7ef0e9b4ea0",
-    "audited_tree": "4cf13f57a5a0e5812cf1ecec9e217989af1cc3ca",
-    "audited_head_message": "Add STEP 13 GitHub refresh and sync spec",
+    "initial_audited_head": "350e5428afe8ec435f52f12189faf7ef0e9b4ea0",
+    "initial_audited_tree": "4cf13f57a5a0e5812cf1ecec9e217989af1cc3ca",
+    "initial_audited_head_message": "Add STEP 13 GitHub refresh and sync spec",
+    "final_recheck_head": "82e11f8d78b76819ef55c838e5372bba26b1f958",
+    "final_recheck_tree": "657abc5894ff803f6e424f10ae0accd586752e9f",
+    "final_recheck_head_message": "Add STEP 16 final acceptance and release spec",
+    "main_drift_paths": [
+      "docs/implementation/STEP_14_HARDENING_FULL_SYSTEM_TESTING.md",
+      "docs/implementation/STEP_15_PORTABLE_WINDOWS_BUILD.md",
+      "docs/implementation/STEP_16_FINAL_ACCEPTANCE_RELEASE.md"
+    ],
+    "baseline_artifacts_changed_during_drift": false,
     "audit_branch": "sol/step00-baseline-audit-20261002",
     "audit_mode": "GITHUB_REMOTE_PLUS_LOCAL_RESCUE_STAGING"
   },
@@ -87,7 +96,8 @@
     "uploaded_original_hash_after": "f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2",
     "readonly_copy_hash_match": true,
     "recovery_chunks_modified": false,
-    "replacement_prompt_source_created": false
+    "replacement_prompt_source_created": false,
+    "main_drift_preserved_by_merge_sync": true
   },
   "blocking_tests": {
     "T00-01_repo_identity": "PASS",
