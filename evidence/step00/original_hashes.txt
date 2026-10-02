@@ -1,0 +1,22 @@
+# STEP 00 original identity / hash evidence
+# Remote-only execution: Git blob SHA-1 identities are recorded for originals.
+# SHA256 is only claimed where it was produced/verified from actual bytes by the canonical workflow.
+
+AUDITED_MAIN_HEAD=350e5428afe8ec435f52f12189faf7ef0e9b4ea0
+AUDITED_MAIN_TREE=4cf13f57a5a0e5812cf1ecec9e217989af1cc3ca
+
+PLAN.md git_blob=70b9fa63d7816b5efe4936ea07698479133c6b70
+START_HERE.txt git_blob=9291a98409c526f93d42698e6888f20180d2e2ed
+docs/VERSIONING_RULES.md git_blob=766961c0b9f5ffa3b9a494c6d8128b3e278109d7
+docs/implementation/STEP_00_BASELINE_RECOVERY_GATE.md git_blob=2a4977348f9a53295c2098af80dae0769bd6e4bb
+docs/UI_REFERENCE_PACKAGE_V1/materialized/INDEX.md git_blob=e2bf99636ce08bdbf5a7b4564ef05da561ab9bbf
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/01-Dashboard.jpg git_blob=35b32a6964d19550ddaa75b9d3ed2ef78140cb22
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/02-Sejarah-Sistem.jpg git_blob=bf53fb88743426ac0058527387c1399b8df917b6
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/03-Per-Prompt.jpg git_blob=32b4ec3c6b941a10e410f826baf018735358713b
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/04-Backup-Recovery.jpg git_blob=ee47b7cf821cb3170208d718634f43f9eeacf15b
+docs/UI_REFERENCE_PACKAGE_V1/materialized/images/05-Pengaturan.jpg git_blob=742a03965fd00a2282f95a9f82a0fd1046231bf4
+docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Materialized-V1.zip git_blob=943e57fe550d032dde381a0f08ee2ae8c7f0ee19 sha256=2797cf5993ba6e38532d028135f5f8ab12f99bc55ed0b643b441e57ca5eeebb0
+
+# Post-audit preservation proof:
+# STEP 00 evidence was written to sol/step00-baseline-audit-20261002 only.
+# main source object identities above were not updated by this audit.
