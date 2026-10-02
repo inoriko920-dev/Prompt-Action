@@ -48,3 +48,14 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: python -m prompt_action --smoke-test-ms 100
+      - name: Capture STEP 01 evidence
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python scripts/dev/capture_step01_evidence.py
+      - name: Upload STEP 01 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: step01-windows-evidence
+          path: evidence/step01/ci-generated
+          if-no-files-found: error
+          retention-days: 30
