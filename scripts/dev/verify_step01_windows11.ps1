@@ -22,6 +22,27 @@ function Get-LatestPromptActionLog([string]$RuntimeRoot) {
     return $Log.FullName
 }
 
+function Protect-EvidenceText([string]$Text) {
+    $Safe = $Text
+    if ($RepoRoot) {
+        $Safe = $Safe.Replace($RepoRoot, "<REPO_ROOT>")
+    }
+    if ($env:USERPROFILE) {
+        $Safe = $Safe.Replace($env:USERPROFILE, "<USERPROFILE>")
+    }
+    return $Safe
+}
+
+function Write-ProtectedEvidence([string]$Text, [string]$Destination) {
+    $Safe = Protect-EvidenceText $Text
+    $Safe | Set-Content -Encoding UTF8 $Destination
+}
+
+function Copy-ProtectedLog([string]$Source, [string]$Destination) {
+    $Text = Get-Content -Raw -Encoding UTF8 $Source
+    Write-ProtectedEvidence $Text $Destination
+}
+
 Write-Step "Checking target operating system"
 $Os = Get-CimInstance Win32_OperatingSystem
 $Build = [int]$Os.BuildNumber
@@ -106,7 +127,7 @@ Write-Step "Running STEP 01 test suite"
 $env:QT_QPA_PLATFORM = "offscreen"
 $TestOutput = & $Python -m pytest tests/step01 -q 2>&1
 $TestExit = $LASTEXITCODE
-$TestOutput | Set-Content -Encoding UTF8 (Join-Path $EvidenceRoot "pytest.txt")
+Write-ProtectedEvidence (($TestOutput | Out-String)) (Join-Path $EvidenceRoot "pytest.txt")
 if ($TestExit -ne 0) {
     throw "STEP 01 pytest failed on local Windows 11. See evidence/step01/local-windows11/pytest.txt"
 }
@@ -119,11 +140,11 @@ $env:QT_QUICK_BACKEND = "software"
 $env:QSG_RENDER_LOOP = "basic"
 $SuccessConsole = & $Python -m prompt_action --smoke-test-ms 700 2>&1
 $SuccessExit = $LASTEXITCODE
-$SuccessConsole | Set-Content -Encoding UTF8 (Join-Path $EvidenceRoot "startup-success-console.txt")
+Write-ProtectedEvidence (($SuccessConsole | Out-String)) (Join-Path $EvidenceRoot "startup-success-console.txt")
 if ($SuccessExit -ne 0) {
     throw "Native Windows startup smoke failed with exit code $SuccessExit."
 }
-Copy-Item (Get-LatestPromptActionLog $SuccessRuntime) (Join-Path $EvidenceRoot "startup-success.log") -Force
+Copy-ProtectedLog (Get-LatestPromptActionLog $SuccessRuntime) (Join-Path $EvidenceRoot "startup-success.log")
 
 Write-Step "Running intentional native Windows failure smoke"
 $FailureRuntime = Join-Path $EvidenceRoot "failure-runtime"
@@ -131,11 +152,16 @@ $MissingQml = Join-Path $EvidenceRoot "intentionally-missing.qml"
 $env:PROMPT_ACTION_RUNTIME_ROOT = $FailureRuntime
 $FailureConsole = & $Python -m prompt_action --qml $MissingQml --smoke-test-ms 1 2>&1
 $FailureExit = $LASTEXITCODE
-$FailureConsole | Set-Content -Encoding UTF8 (Join-Path $EvidenceRoot "startup-failure-console.txt")
+Write-ProtectedEvidence (($FailureConsole | Out-String)) (Join-Path $EvidenceRoot "startup-failure-console.txt")
 if ($FailureExit -ne 21) {
     throw "Intentional missing-QML smoke returned $FailureExit; expected exit code 21."
 }
-Copy-Item (Get-LatestPromptActionLog $FailureRuntime) (Join-Path $EvidenceRoot "startup-failure.log") -Force
+Copy-ProtectedLog (Get-LatestPromptActionLog $FailureRuntime) (Join-Path $EvidenceRoot "startup-failure.log")
+
+# Raw runtime logs can contain absolute local paths. The protected copies above are
+# sufficient evidence, so remove raw runtime directories before packaging.
+if (Test-Path $SuccessRuntime) { Remove-Item -Recurse -Force $SuccessRuntime }
+if (Test-Path $FailureRuntime) { Remove-Item -Recurse -Force $FailureRuntime }
 
 Write-Step "Capturing native Windows minimal-window screenshot"
 $env:PROMPT_ACTION_RUNTIME_ROOT = (Join-Path $EvidenceRoot "screenshot-runtime")
@@ -144,6 +170,9 @@ $Screenshot = Join-Path $EvidenceRoot "minimal-window.png"
 & $Python scripts/dev/capture_step01_evidence.py --screenshot-only $Screenshot
 if ($LASTEXITCODE -ne 0 -or -not (Test-Path $Screenshot) -or (Get-Item $Screenshot).Length -le 0) {
     throw "Native Windows screenshot capture failed."
+}
+if (Test-Path (Join-Path $EvidenceRoot "screenshot-runtime")) {
+    Remove-Item -Recurse -Force (Join-Path $EvidenceRoot "screenshot-runtime")
 }
 
 Write-Step "Writing final local PASS record"
@@ -164,7 +193,7 @@ $Result = [ordered]@{
     expected_failure_exit_code = 21
     screenshot_file = "minimal-window.png"
     git_head = $GitHead
-    privacy_note = "No Windows account name, email, token, API key, or credential is recorded by this verifier."
+    privacy_note = "Packaged text evidence redacts the repository root and user-profile path. No Windows account name, email, token, API key, or credential is intentionally recorded."
 }
 $Result | ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $EvidenceRoot "result.json")
 
@@ -175,7 +204,7 @@ Get-ChildItem -Path $EvidenceRoot -File -Recurse |
     Where-Object { $_.FullName -ne $ManifestPath } |
     Sort-Object FullName |
     ForEach-Object {
-        $Relative = $_.FullName.Substring($EvidenceRoot.Length).TrimStart('\','/')
+        $Relative = $_.FullName.Substring($EvidenceRoot.Length).TrimStart([char[]]@('\','/'))
         $Hash = (Get-FileHash -Algorithm SHA256 $_.FullName).Hash.ToLowerInvariant()
         $ManifestLines += "$Hash  $Relative"
     }
