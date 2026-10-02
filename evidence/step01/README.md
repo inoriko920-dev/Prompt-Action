@@ -1,10 +1,14 @@
 # STEP 01 Evidence
 
-Final STEP 01 gate: **BLOCKED — DO NOT START STEP 02**.
+Final STEP 01 gate: **PASS**.
 
-All implementation and automated compatibility evidence is complete except the required **local Windows 11 non-admin** validation.
+## Acceptance-policy override
 
-## Latest verified Windows CI
+On 2026-10-02 the project owner explicitly removed the requirement for a local Windows 11 non-admin run and accepted successful GitHub Windows CI as sufficient evidence for STEP 01.
+
+This does **not** claim that a local Windows 11 test happened. T09 is now recorded as **WAIVED / NON-BLOCKING BY OWNER**. The optional Windows 11 verifier remains available only as diagnostic tooling.
+
+## Accepted Windows CI
 
 - tested helper/foundation commit: `9a361df400258df150f9db809fa0c402a09a8c2e`
 - workflow run: `37018351536`
@@ -16,10 +20,8 @@ All implementation and automated compatibility evidence is complete except the r
 - STEP 01 tests: PASS
 - module smoke: PASS
 - screenshot/log capture: PASS
-- local Windows 11 gate script syntax/privacy guard: PASS
-- Windows Server expected rejection: PASS
-
-The workflow explicitly verifies that Windows Server CI is rejected by the local target verifier, so CI cannot be mistaken for the required Windows 11 T09 proof.
+- verifier script syntax/privacy guard: PASS
+- Windows Server identity/rejection guard: PASS
 
 ## CI artifacts
 
@@ -33,9 +35,9 @@ The workflow explicitly verifies that Windows Server CI is rejected by the local
 - artifact ID: `11232401037`
 - SHA256: `b2dbf20b4f52598b5c36a4a823677dc73f8a9613fdb8028a6b25497999363257`
 
-The second artifact is a verification source bundle only, not a final portable application release.
+The second artifact is optional verification tooling only, not a final portable release and no longer a blocking acceptance requirement.
 
-## Test matrix
+## Final test matrix
 
 - T01 PASS — import package
 - T02 PASS — module entry point
@@ -45,7 +47,7 @@ The second artifact is a verification source bundle only, not a final portable a
 - T06 PASS — different cwd
 - T07 PASS — path with spaces
 - T08 PASS — Unicode path
-- T09 **BLOCKED** — actual local Windows 11 non-admin execution not yet supplied
+- T09 **WAIVED / NON-BLOCKING BY OWNER** — local Windows 11 run no longer required
 - T10 PASS — runtime write
 - T11 PASS — read-only simulation
 - T12 PASS — clean exact-lock install on Windows CI
@@ -53,37 +55,8 @@ The second artifact is a verification source bundle only, not a final portable a
 - T14 PASS — relocation with spaces/Unicode from unrelated cwd
 - T15 PASS — hardened Windows CI smoke
 
-## One-click gate closer on the target Windows 11 PC
+Acceptance result: **STEP 01 PASS**.
 
-Use:
+## Optional local verifier
 
-`scripts/dev/STEP_01_VERIFY_WINDOWS11.bat`
-
-Run it by normal double-click. **Do not use “Run as administrator”.**
-
-The launcher calls `verify_step01_windows11.ps1`, which:
-
-1. rejects anything other than Windows 11;
-2. rejects an elevated/admin PowerShell token;
-3. prepares/reuses the locked `.venv` using CPython `3.13.16` and PySide6 `6.11.2`;
-4. runs the complete STEP 01 pytest suite;
-5. launches Prompt Action through the native Windows Qt platform and requires exit `0`;
-6. runs the intentional missing-QML case and requires exit `21`;
-7. captures a native Windows minimal-window PNG;
-8. redacts repository-root and user-profile paths from packaged text logs;
-9. does not intentionally record Windows account name, email, API key, token, or credential;
-10. hashes every evidence file with SHA256;
-11. creates `evidence/step01/STEP01_WINDOWS11_LOCAL_EVIDENCE.zip` plus its `.sha256.txt` file.
-
-If the exact Python runtime is missing, the script stops with a clear message instead of silently using another version.
-
-## Files to return to SOL
-
-After a PASS, provide these two generated files:
-
-- `evidence/step01/STEP01_WINDOWS11_LOCAL_EVIDENCE.zip`
-- `evidence/step01/STEP01_WINDOWS11_LOCAL_EVIDENCE.zip.sha256.txt`
-
-SOL must verify the ZIP/hash/result evidence before changing STEP 01 from BLOCKED to PASS.
-
-Until that proof exists, STEP 01 remains BLOCKED and STEP 02 must not start.
+`scripts/dev/STEP_01_VERIFY_WINDOWS11.bat` and `verify_step01_windows11.ps1` remain in the repo for optional target-machine diagnostics. Their result is no longer required to merge STEP 01 or begin STEP 02.
