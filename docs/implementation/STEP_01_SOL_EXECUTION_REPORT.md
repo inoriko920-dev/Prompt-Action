@@ -4,17 +4,23 @@
 **Branch:** `sol/step01-app-skeleton-20261002`  
 **STEP 00 baseline merged to main:** `74cb295faecbdf4d6a59a681ed8135b16076f405`  
 **Latest hardened foundation/helper commit validated by Windows CI:** `9a361df400258df150f9db809fa0c402a09a8c2e`  
-**Final gate:** **BLOCKED — DO NOT START STEP 02**
+**Final gate:** **PASS**
 
 ## 1. Summary
 
-STEP 01 implementation is complete within its allowed scope. The repository now contains a modular Python/PySide6 foundation, deterministic module entry point, portable path resolution, runtime writability checks, startup/error logging, fixed exit-code contract, minimal QML shell, exact dependency lock, PowerShell developer scripts, tests, Windows CI, CI evidence capture, and a strict one-click Windows 11 non-admin gate verifier.
+STEP 01 implementation is complete within its allowed scope. The repository contains a modular Python/PySide6 foundation, deterministic module entry point, portable path resolution, runtime writability checks, startup/error logging, fixed exit-code contract, minimal QML shell, exact dependency lock, PowerShell developer scripts, tests, Windows CI, and CI evidence capture.
 
-No STEP 02+ feature was implemented. No Dashboard, Sejarah Sistem, Per Prompt product UI, version engine, backup engine, GitHub runtime sync, or final portable packaging was added.
+No STEP 02+ feature was implemented during STEP 01. No Dashboard, Sejarah Sistem, Per Prompt product UI, version engine, backup engine, GitHub runtime sync, or final portable packaging was added.
 
-The gate remains intentionally **BLOCKED**, not PASS, because the target compatibility requirement still needs actual execution on **Windows 11 from a non-admin session**. GitHub-hosted Windows Server CI is strong compatibility evidence but is not treated as that target-machine proof.
+## 2. Gate-policy override
 
-## 2. Runtime/dependency lock
+On 2026-10-02 the project owner explicitly changed the STEP 01 acceptance policy: **local Windows 11 non-admin execution is no longer required; successful GitHub Windows CI is accepted as sufficient compatibility evidence for this project.**
+
+This is a deliberate acceptance-policy override, not a claim that the application was physically executed on a local Windows 11 machine. The local Windows 11 verifier remains in the repository as an optional diagnostic tool, but it is no longer blocking.
+
+Therefore T09 is recorded as **WAIVED BY OWNER / NON-BLOCKING**, and the overall STEP 01 gate is PASS based on the accepted GitHub CI evidence.
+
+## 3. Runtime/dependency lock
 
 Target runtime:
 
@@ -33,7 +39,7 @@ Target runtime:
 
 The exact lock is stored in `requirements-lock.txt`.
 
-## 3. Implemented foundation
+## 4. Implemented foundation
 
 Implemented STEP 01 scope:
 
@@ -59,9 +65,9 @@ Important contracts implemented:
 - minimal QML shell only: title `Prompt Action`, 1280×720, placeholder `Prompt Action — Foundation Build`;
 - no final app UI or product feature implementation.
 
-## 4. Latest Windows CI proof
+## 5. Accepted Windows CI proof
 
-Latest successful hardened workflow:
+Successful hardened workflow:
 
 - workflow: `STEP 01 Foundation CI`
 - run ID: `37018351536`
@@ -78,13 +84,13 @@ The successful run proved:
 - full STEP 01 test suite passes;
 - module smoke passes;
 - CI screenshot/log evidence capture passes;
-- the local Windows 11 verifier parses without PowerShell syntax errors;
-- the one-click BAT launcher exists;
-- static privacy check confirms the verifier does not intentionally record the Windows account name;
-- the verifier deliberately rejects Windows Server CI with the expected Windows 11 requirement, so CI cannot accidentally close T09;
-- both CI evidence and the local Windows 11 verifier bundle upload successfully.
+- verifier PowerShell syntax check passes;
+- one-click BAT launcher exists;
+- privacy guard passes;
+- Windows Server is not falsely labeled as Windows 11;
+- CI evidence artifacts upload successfully.
 
-## 5. CI artifacts
+## 6. CI artifacts
 
 ### A. STEP 01 Windows CI evidence
 
@@ -92,19 +98,15 @@ The successful run proved:
 - artifact ID: `11232441027`
 - SHA256: `a5cf7c37a058a1319ac54489bae77077915bb422aace9572c9b91e1b5384fc51`
 
-It contains the CI minimal-window screenshot, success/failure startup logs and environment evidence.
-
-### B. Windows 11 local verifier bundle
+### B. Optional Windows 11 verifier bundle
 
 - name: `step01-windows11-verifier-bundle`
 - artifact ID: `11232401037`
 - SHA256: `b2dbf20b4f52598b5c36a4a823677dc73f8a9613fdb8028a6b25497999363257`
 
-It contains the STEP 01 foundation source, tests, dependency lock and developer/verifier scripts needed to run the target-machine gate without needing a final packaged release.
+The second artifact is optional diagnostic tooling, not a final portable release and not a release gate anymore.
 
-This artifact is a **verification source bundle**, not the final portable application release. Final portable packaging remains out of STEP 01 scope.
-
-## 6. T01–T15 final matrix
+## 7. T01–T15 final matrix
 
 | Test | Result | Evidence |
 |---|---|---|
@@ -116,7 +118,7 @@ This artifact is a **verification source bundle**, not the final portable applic
 | T06 different cwd | PASS | root resolver + unrelated cwd subprocess |
 | T07 path with spaces | PASS | path tests |
 | T08 Unicode path | PASS | Unicode path + relocation test |
-| T09 no admin / Windows 11 target compatibility | **BLOCKED** | requires real Windows 11 non-admin run |
+| T09 local Windows 11 non-admin | **WAIVED / NON-BLOCKING** | owner explicitly accepts GitHub CI instead |
 | T10 runtime write | PASS | log/temp write tests |
 | T11 read-only runtime simulation | PASS | controlled failure test |
 | T12 clean install from dependency lock | PASS | Windows CI exact lock install |
@@ -124,37 +126,7 @@ This artifact is a **verification source bundle**, not the final portable applic
 | T14 relocation | PASS | copied tree + unrelated cwd |
 | T15 CI smoke | PASS | successful hardened workflow |
 
-Result: **14 PASS / 1 BLOCKED**.
-
-## 7. One-click Windows 11 gate closer
-
-Run on the target Windows 11 PC by normal double-click:
-
-`scripts/dev/STEP_01_VERIFY_WINDOWS11.bat`
-
-Do **not** use “Run as administrator”.
-
-The BAT launches:
-
-`scripts/dev/verify_step01_windows11.ps1`
-
-The verifier:
-
-1. rejects non-Windows-11 systems;
-2. rejects elevated/admin sessions;
-3. prepares/reuses the exact locked `.venv`;
-4. requires CPython `3.13.16` and PySide6 `6.11.2`;
-5. runs the full STEP 01 tests;
-6. runs native Windows startup and requires exit `0`;
-7. runs intentional missing-QML startup and requires exit `21`;
-8. captures a native Windows minimal-window screenshot;
-9. redacts repository-root and user-profile paths from packaged text logs;
-10. does not intentionally record Windows account name, email, API keys, tokens, or credentials;
-11. creates `sha256_manifest.txt`;
-12. creates `evidence/step01/STEP01_WINDOWS11_LOCAL_EVIDENCE.zip`;
-13. creates the companion `.sha256.txt` checksum file.
-
-To close the gate, SOL must receive and verify both generated files.
+Acceptance result: **14 PASS + 1 owner-waived non-blocking test = STEP 01 PASS**.
 
 ## 8. Protected-source integrity
 
@@ -168,15 +140,8 @@ Comparison against `main` shows STEP 01 adds only foundation/test/evidence/helpe
 
 ## 9. Final decision
 
-**STEP 01 = BLOCKED**
+**STEP 01 = PASS**
 
-Remaining blocker: actual Windows 11 non-admin target proof.
+Reason: implementation and accepted GitHub CI gate are complete, protected sources remain intact, and the project owner explicitly waived the local Windows 11-only requirement.
 
-**STEP 02 MUST NOT START.**
-
-When `STEP_01_VERIFY_WINDOWS11.bat` completes successfully on the target Windows 11 PC, return:
-
-- `STEP01_WINDOWS11_LOCAL_EVIDENCE.zip`
-- `STEP01_WINDOWS11_LOCAL_EVIDENCE.zip.sha256.txt`
-
-SOL will verify those bytes/evidence, change STEP 01 to PASS only if valid, then merge STEP 01 before any STEP 02 work begins.
+STEP 01 may now be merged. STEP 02 may begin only after the merge is confirmed and live `main` is re-verified.
