@@ -29,6 +29,38 @@ jobs:
         run: |
           python --version
           python -c "import platform; assert platform.python_version() == '3.13.16', platform.python_version()"
+      - name: Validate local Windows 11 gate scripts
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path "scripts/dev/verify_step01_windows11.ps1"),
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            throw "verify_step01_windows11.ps1 has PowerShell syntax errors."
+          }
+          if (-not (Test-Path "scripts/dev/STEP_01_VERIFY_WINDOWS11.bat")) {
+            throw "One-click Windows 11 launcher is missing."
+          }
+          $VerifierText = Get-Content -Raw "scripts/dev/verify_step01_windows11.ps1"
+          if ($VerifierText -match 'Identity\.Name' -or $VerifierText -match '(?m)^\s*user\s*=') {
+            throw "Local evidence verifier must not record the Windows account name."
+          }
+          $Output = & powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "scripts/dev/verify_step01_windows11.ps1" 2>&1
+          $Rc = $LASTEXITCODE
+          $OutputText = ($Output | Out-String)
+          if ($Rc -eq 0) {
+            throw "Windows Server CI must not be accepted as the Windows 11 local gate."
+          }
+          if ($OutputText -notmatch 'requires Windows 11') {
+            Write-Host $OutputText
+            throw "Verifier rejected CI for an unexpected reason."
+          }
+          Write-Host "Expected rejection confirmed: Windows Server CI cannot close T09."
       - name: Install exact lock
         run: |
           python -m pip install --upgrade pip
