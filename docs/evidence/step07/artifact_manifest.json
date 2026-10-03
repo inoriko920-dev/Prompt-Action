@@ -1,0 +1,30 @@
+{
+  "step": "STEP_07",
+  "status": "PASS",
+  "implementation_head": "377f19f1fac83ad71754f4672ed81835db7aa176",
+  "workflow_run_id": 37118924471,
+  "job_id": 111191060025,
+  "artifact": {
+    "name": "step07-backup-recovery-evidence",
+    "id": 11273155251,
+    "size_bytes": 67748,
+    "sha256": "075604a17a9e6fff8fe1bbfe37b244ec876610071428fcbc9ee4bbfe83879707",
+    "independent_digest_match": true,
+    "entries": 5,
+    "unsafe_paths": false,
+    "nested_archives": false
+  },
+  "tests": {
+    "step07_passed": 46,
+    "regression_step01_06_passed": 188,
+    "module_smoke": "PASS",
+    "qml_warnings": []
+  },
+  "canonical": {
+    "active_system": "V1",
+    "active_snapshot": "S001",
+    "snapshot_status": "BACKUP_REQUIRED",
+    "backup_records": 0,
+    "recovery_label": "BELUM AMAN"
+  }
+}

@@ -1,0 +1,68 @@
+name: STEP 07 Backup Recovery CI
+
+on:
+  push:
+    branches:
+      - 'sol/step07-*'
+  pull_request:
+    paths:
+      - 'src/prompt_action/presentation/backup_**'
+      - 'src/prompt_action/main.py'
+      - 'src/prompt_action/ui/qml/pages/BackupRecoveryPage.qml'
+      - 'src/prompt_action/ui/qml/shell/**'
+      - 'tests/step07/**'
+      - 'scripts/dev/*step07*'
+      - '.github/workflows/ci-step07.yml'
+      - 'docs/implementation/STEP_07_SOL_EXECUTION_REPORT.md'
+      - 'docs/evidence/step07/**'
+
+jobs:
+  validate-step07:
+    runs-on: windows-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+      QT_QUICK_BACKEND: software
+      QSG_RHI_BACKEND: software
+      QSG_RENDER_LOOP: basic
+      QT_QUICK_CONTROLS_STYLE: Basic
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+          architecture: x64
+      - name: Verify exact Python
+        run: python -c "import platform,sys; print(sys.version); assert sys.version_info[:3] == (3,13,16); assert platform.architecture()[0] == '64bit'"
+      - name: Install exact lock
+        run: python -m pip install -r requirements-lock.txt
+      - name: Install Prompt Action editable
+        run: python -m pip install -e . --no-deps --no-build-isolation
+      - name: Verify STEP 07 prerequisites
+        run: python scripts/dev/verify_step07_preflight.py
+      - name: Capture STEP 07 visual evidence
+        run: python scripts/dev/capture_step07_evidence.py --output ci-step07-evidence
+      - name: STEP 07 T01-T46
+        run: python -m pytest tests/step07 -q
+      - name: Regenerate STEP 03 evidence for regression
+        run: python scripts/dev/capture_step03_evidence.py --output ci-step03-regression-evidence
+      - name: Regenerate STEP 04 evidence for regression
+        run: python scripts/dev/capture_step04_evidence.py --output ci-step04-regression-evidence
+      - name: Regenerate STEP 05 evidence for regression
+        run: python scripts/dev/capture_step05_evidence.py --output ci-step05-regression-evidence
+      - name: Regenerate STEP 06 evidence for regression
+        run: python scripts/dev/capture_step06_evidence.py --output ci-step06-regression-evidence
+      - name: STEP 01-06 regression
+        env:
+          STEP03_EVIDENCE_DIR: ${{ github.workspace }}\ci-step03-regression-evidence
+          STEP04_EVIDENCE_DIR: ${{ github.workspace }}\ci-step04-regression-evidence
+        run: python -m pytest tests/step01 tests/step02 tests/step03 tests/step04 tests/step05 tests/step06 -q
+      - name: Module backup-recovery smoke
+        run: python -m prompt_action --smoke-test-ms 180
+      - name: Upload STEP 07 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: step07-backup-recovery-evidence
+          path: |
+            ci-step07-preflight
+            ci-step07-evidence
+          retention-days: 30

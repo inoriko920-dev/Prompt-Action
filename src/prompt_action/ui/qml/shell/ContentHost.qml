@@ -26,7 +26,16 @@ Item {
             }) : null
         }
     }
-    Component { id: backupComponent; Pages.PlaceholderBackup {} }
+    Component {
+        id: backupComponent
+        Pages.BackupRecoveryPage {
+            stateOverride: (typeof backupViewModel === "undefined") ? ({
+                "load_state":"loading","active_system":"","active_snapshot":"","snapshot_status":"",
+                "recovery_health":"REQUIRED","recovery_label":"MEMUAT","recovery_message":"Membaca status recovery…",
+                "checklist":[],"latest_backup":null,"history":[],"actions":{},"diagnostics":[]
+            }) : null
+        }
+    }
     Component { id: settingsComponent; Pages.PlaceholderSettings {} }
 
     Loader {

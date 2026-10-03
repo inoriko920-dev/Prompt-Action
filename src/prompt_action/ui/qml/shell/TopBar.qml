@@ -8,6 +8,7 @@ Rectangle {
     objectName: "topbar"
     property string pageTitle: "Dashboard"
     property string pageSubtitle: "Foundation shell"
+    readonly property string displayedSubtitle: pageSubtitle.indexOf("[STEP 07] ") === 0 ? pageSubtitle.substring(10) : pageSubtitle
     property string systemLabel: "System V1 • S001"
     property bool narrow: false
 
@@ -42,7 +43,7 @@ Rectangle {
                 width: parent.width
             }
             Text {
-                text: topbar.pageSubtitle
+                text: topbar.displayedSubtitle
                 color: PATheme.Theme.textSecondary
                 font.family: PATheme.Typography.fontFamily
                 font.pixelSize: PATheme.Typography.caption
