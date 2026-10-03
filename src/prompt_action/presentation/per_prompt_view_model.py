@@ -5,6 +5,7 @@ from typing import Any
 
 from PySide6.QtCore import QObject, Property, Signal, Slot
 
+from prompt_action.services.step09 import CapabilityService, CompareError, RevisionCompareService
 from .per_prompt_query_service import PerPromptQueryService
 
 
@@ -13,10 +14,14 @@ class PerPromptViewModel(QObject):
     navigationRequested = Signal(str, str)
     actionRejected = Signal(str)
     downloadRequested = Signal(str)
+    compareRequested = Signal('QVariant')
 
-    def __init__(self, project_root: Path, *, query_service: PerPromptQueryService | None = None, auto_refresh: bool = True):
+    def __init__(self, project_root: Path, *, query_service: PerPromptQueryService | None = None, compare_service: RevisionCompareService | None = None, auto_refresh: bool = True):
         super().__init__()
-        self._query = query_service or PerPromptQueryService(Path(project_root).resolve())
+        root = Path(project_root).resolve()
+        self._query = query_service or PerPromptQueryService(root)
+        self._compare = compare_service or RevisionCompareService(root)
+        self._capabilities = CapabilityService()
         self._state: dict[str, Any] = self._loading_state()
         if auto_refresh:
             self.refresh()
@@ -32,13 +37,32 @@ class PerPromptViewModel(QObject):
         self._state = self._loading_state()
         self.stateChanged.emit()
         self._state = self._query.read(prompt_id, revision_id)
+        self._apply_step09_capabilities()
         self.stateChanged.emit()
+
+    def _apply_step09_capabilities(self) -> None:
+        caps = self._state.get("capabilities", {})
+        detail = self._state.get("selected_revision", {})
+        if not isinstance(caps, dict) or not isinstance(detail, dict):
+            return
+        parent = detail.get("parent")
+        selected_valid = str(detail.get("file_state") or "") == "VALID"
+        parent_valid = False
+        if parent:
+            parent_node = next((x for x in self._state.get("official_revisions", []) if isinstance(x, dict) and x.get("id") == parent), None)
+            parent_valid = bool(parent_node and str(parent_node.get("file_state") or "") == "VALID")
+        compare_cap = self._capabilities.get("COMPARE_REVISION", {"same_prompt": True, "verified_files": int(selected_valid) + int(parent_valid)})
+        caps["can_compare"] = bool(parent) and compare_cap.enabled
+        caps["disabled_reason_compare"] = "Revision baseline tidak memiliki parent untuk dibandingkan." if not parent else compare_cap.reason
+        caps["can_add_revision"] = False
+        caps["disabled_reason_add_revision"] = self._capabilities.get("ADD_REVISION").reason
 
     @Slot(str)
     def selectPrompt(self, prompt_id: str) -> None:
         if not prompt_id:
             return
         self._state = self._query.read(prompt_id, None)
+        self._apply_step09_capabilities()
         self.stateChanged.emit()
 
     @Slot(str)
@@ -47,6 +71,7 @@ class PerPromptViewModel(QObject):
             return
         prompt_id = str(self._state.get("selected_prompt_id") or "") or None
         self._state = self._query.read(prompt_id, revision_id)
+        self._apply_step09_capabilities()
         self.stateChanged.emit()
 
     @Slot()
@@ -70,7 +95,19 @@ class PerPromptViewModel(QObject):
     @Slot()
     def compareSelectedWithParent(self) -> None:
         caps = self._state.get("capabilities", {})
-        self.actionRejected.emit(str(caps.get("disabled_reason_compare") or "Perbandingan belum tersedia."))
+        detail = self._state.get("selected_revision", {})
+        if not isinstance(caps, dict) or not caps.get("can_compare"):
+            self.actionRejected.emit(str(caps.get("disabled_reason_compare") or "Perbandingan tidak tersedia."))
+            return
+        prompt_id = str(self._state.get("selected_prompt_id") or "")
+        selected = str(self._state.get("selected_revision_id") or "")
+        parent = str(detail.get("parent") or "") if isinstance(detail, dict) else ""
+        try:
+            result = self._compare.compare(prompt_id, parent, selected)
+        except CompareError as exc:
+            self.actionRejected.emit(exc.user_message)
+            return
+        self.compareRequested.emit(result.to_dict())
 
     @Slot()
     def viewSnapshot(self) -> None:
@@ -90,7 +127,7 @@ class PerPromptViewModel(QObject):
     @Slot()
     def addRevision(self) -> None:
         caps = self._state.get("capabilities", {})
-        self.actionRejected.emit(str(caps.get("disabled_reason_add_revision") or "Tambah Revisi belum tersedia."))
+        self.actionRejected.emit(str(caps.get("disabled_reason_add_revision") or self._capabilities.get("ADD_REVISION").reason))
 
     @staticmethod
     def _loading_state() -> dict[str, Any]:

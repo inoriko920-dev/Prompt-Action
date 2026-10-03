@@ -1,0 +1,83 @@
+name: STEP 09 Search Compare Download CI
+
+on:
+  push:
+    branches:
+      - 'sol/step09-*'
+  pull_request:
+    paths:
+      - 'src/prompt_action/services/step09/**'
+      - 'src/prompt_action/ui/viewmodels/search_view_model.py'
+      - 'src/prompt_action/presentation/**_view_model.py'
+      - 'src/prompt_action/main.py'
+      - 'src/prompt_action/ui/qml/search/**'
+      - 'src/prompt_action/ui/qml/dialogs/Compare*.qml'
+      - 'src/prompt_action/ui/qml/shell/**'
+      - 'tests/step09/**'
+      - 'scripts/dev/*step09*'
+      - '.github/workflows/ci-step09.yml'
+      - 'docs/implementation/STEP_09_SOL_EXECUTION_REPORT.md'
+      - 'docs/evidence/step09/**'
+
+jobs:
+  validate-step09:
+    runs-on: windows-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+      QT_QUICK_BACKEND: software
+      QSG_RHI_BACKEND: software
+      QSG_RENDER_LOOP: basic
+      QT_QUICK_CONTROLS_STYLE: Basic
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+          architecture: x64
+      - name: Verify exact Python
+        run: python -c "import platform,sys; print(sys.version); assert sys.version_info[:3] == (3,13,16); assert platform.architecture()[0] == '64bit'"
+      - name: Install exact lock
+        run: python -m pip install -r requirements-lock.txt
+      - name: Install Prompt Action editable
+        run: python -m pip install -e . --no-deps --no-build-isolation
+      - name: Verify STEP 09 prerequisites
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force ci-step09-evidence | Out-Null
+          python scripts/dev/verify_step09_preflight.py | Tee-Object -FilePath ci-step09-evidence/preflight.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Capture STEP 09 visual/state evidence
+        run: python scripts/dev/capture_step09_evidence.py --output ci-step09-evidence
+      - name: STEP 09 T01-T60
+        run: python -m pytest tests/step09 -q
+      - name: DPI 150 smoke
+        env:
+          QT_SCALE_FACTOR: '1.5'
+        run: python -m prompt_action --smoke-test-ms 120
+      - name: Regenerate STEP 03 evidence for regression
+        run: python scripts/dev/capture_step03_evidence.py --output ci-step03-regression-evidence
+      - name: Regenerate STEP 04 evidence for regression
+        run: python scripts/dev/capture_step04_evidence.py --output ci-step04-regression-evidence
+      - name: Regenerate STEP 05 evidence for regression
+        run: python scripts/dev/capture_step05_evidence.py --output ci-step05-regression-evidence
+      - name: Regenerate STEP 06 evidence for regression
+        run: python scripts/dev/capture_step06_evidence.py --output ci-step06-regression-evidence
+      - name: Regenerate STEP 07 evidence for regression
+        run: python scripts/dev/capture_step07_evidence.py --output ci-step07-regression-evidence
+      - name: Regenerate STEP 08 evidence for regression
+        run: python scripts/dev/capture_step08_evidence.py --output ci-step08-regression-evidence
+      - name: STEP 01-08 regression
+        env:
+          STEP03_EVIDENCE_DIR: ${{ github.workspace }}\ci-step03-regression-evidence
+          STEP04_EVIDENCE_DIR: ${{ github.workspace }}\ci-step04-regression-evidence
+        run: python -m pytest tests/step01 tests/step02 tests/step03 tests/step04 tests/step05 tests/step06 tests/step07 tests/step08 -q
+      - name: Module integration smoke
+        run: python -m prompt_action --smoke-test-ms 180
+      - name: Verify protected hashes again
+        run: python scripts/dev/verify_step09_preflight.py
+      - name: Upload STEP 09 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: step09-search-compare-download-evidence
+          path: ci-step09-evidence
+          retention-days: 30
