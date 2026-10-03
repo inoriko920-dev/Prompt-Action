@@ -78,7 +78,8 @@ def test_t11_atomic_failure_preserves_old_file(tmp_path):
 def test_t12_parse_error_safe_handling(tmp_path):
     root=make_project(tmp_path); repo=SettingsRepository(root); repo.settings_dir.mkdir(parents=True); repo.settings_path.write_text("{broken"); loaded=repo.load(); assert loaded.degraded and loaded.source=="safe_defaults" and repo.settings_path.read_text()=="{broken"
 
-def test_t13_schema_version_supported(tmp_path): assert validate_settings(settings_for(make_project(tmp_path)),make_project(tmp_path)).valid is True
+def test_t13_schema_version_supported(tmp_path):
+    root=make_project(tmp_path); assert validate_settings(settings_for(root),root).valid is True
 
 def test_t14_unknown_field_forward_tolerant(tmp_path):
     root=make_project(tmp_path); raw=settings_for(root).to_dict(); raw["future_section"]={"x":1}; raw["github"]["future_value"]="x"; s=AppSettings.from_dict(raw); assert s.github.repository=="inoriko920-dev/Prompt-Action" and "future_section" not in s.to_dict()
