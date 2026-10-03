@@ -5,6 +5,7 @@ from typing import Any
 
 from PySide6.QtCore import QObject, Property, Signal, Slot
 
+from prompt_action.services.step09 import CompareError, SnapshotCompareService
 from .history_query_service import SystemHistoryQueryService
 
 
@@ -13,10 +14,13 @@ class SystemHistoryViewModel(QObject):
     navigationRequested = Signal(str, str)
     actionRejected = Signal(str)
     downloadRequested = Signal(str)
+    compareRequested = Signal('QVariant')
 
-    def __init__(self, project_root: Path, *, query_service: SystemHistoryQueryService | None = None, auto_refresh: bool = True):
+    def __init__(self, project_root: Path, *, query_service: SystemHistoryQueryService | None = None, compare_service: SnapshotCompareService | None = None, auto_refresh: bool = True):
         super().__init__()
-        self._query = query_service or SystemHistoryQueryService(Path(project_root).resolve())
+        root = Path(project_root).resolve()
+        self._query = query_service or SystemHistoryQueryService(root)
+        self._compare = compare_service or SnapshotCompareService(root)
         self._state: dict[str, Any] = {"load_state": "loading", "systems": [], "selected_snapshot": {}, "diagnostics": []}
         if auto_refresh:
             self.refresh()
@@ -66,11 +70,17 @@ class SystemHistoryViewModel(QObject):
     @Slot()
     def comparePrevious(self) -> None:
         detail = self._state.get("selected_snapshot", {})
-        parent = detail.get("parent_snapshot") if isinstance(detail, dict) else None
+        current = str(detail.get("id") or "") if isinstance(detail, dict) else ""
+        parent = str(detail.get("parent_snapshot") or "") if isinstance(detail, dict) else ""
         if not parent:
             self.actionRejected.emit("Snapshot baseline tidak memiliki snapshot sebelumnya.")
             return
-        self.actionRejected.emit("Perbandingan snapshot metadata belum memiliki dialog final pada STEP 05.")
+        try:
+            result = self._compare.compare(parent, current)
+        except CompareError as exc:
+            self.actionRejected.emit(exc.user_message)
+            return
+        self.compareRequested.emit(result.to_dict())
 
     @Slot()
     def viewChangelog(self) -> None:
