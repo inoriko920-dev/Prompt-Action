@@ -27,12 +27,12 @@ jobs:
       - name: Commit atomic materialization
         shell: bash
         run: |
-          if git diff --quiet -- data/version_history.json prompts; then
+          if git diff --quiet -- data/version_history.json prompts backups docs/evidence/step095; then
             echo 'Nothing to materialize.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/version_history.json prompts
+          git add data/version_history.json prompts backups docs/evidence/step095
           git commit -m 'STEP 09.5: materialize exact baseline + complete S001 [step095-materialized]'
           git push origin HEAD:${GITHUB_REF_NAME}
