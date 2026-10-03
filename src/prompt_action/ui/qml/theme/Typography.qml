@@ -2,9 +2,9 @@ pragma Singleton
 import QtQuick
 
 QtObject {
-    // Empty family delegates to Qt's application/system default font.
-    // On Windows 11 this follows the native Windows UI font without bundling font files.
-    readonly property string fontFamily: ""
+    // Use a Windows-standard UI-compatible family that is present on Windows 11
+    // and on the CI Windows image. No font files are bundled with Prompt Action.
+    readonly property string fontFamily: "Arial"
     readonly property string monoFamily: "Consolas"
     readonly property int pageTitle: 24
     readonly property int sectionTitle: 17
