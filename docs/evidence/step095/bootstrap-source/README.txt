@@ -1,0 +1,1 @@
+STEP 09.5 bootstrap source staging. Exact rescue source is transferred only through verified chunks on this staging branch; final merge will contain materialized Prompt R1 files and verified bootstrap backup artifacts.
