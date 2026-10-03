@@ -1,0 +1,44 @@
+name: TEMP STEP 09.5 Source Probe
+
+on:
+  push:
+    branches:
+      - 'sol/step09-5-tree-build-temp'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode preserved recovery chunks
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force probe | Out-Null
+          foreach ($name in @('zz_BOOTSTRAP','zz_REBUILD')) {
+            $parts = Get-ChildItem "$name/chunks/*.b64" | Sort-Object Name
+            $joined = ($parts | ForEach-Object { (Get-Content $_.FullName -Raw).Trim() }) -join ''
+            $bytes = [Convert]::FromBase64String($joined)
+            $out = "probe/$name.zip"
+            [IO.File]::WriteAllBytes($out, $bytes)
+            $sha = (Get-FileHash $out -Algorithm SHA256).Hash.ToLowerInvariant()
+            Write-Host "SOURCE=$name SIZE=$($bytes.Length) SHA256=$sha"
+            try {
+              Add-Type -AssemblyName System.IO.Compression.FileSystem
+              $zip = [IO.Compression.ZipFile]::OpenRead((Resolve-Path $out))
+              Write-Host "ENTRIES=$($zip.Entries.Count)"
+              $zip.Entries | Select-Object -First 40 | ForEach-Object { Write-Host "ENTRY=$($_.FullName) SIZE=$($_.Length)" }
+              $zip.Dispose()
+            } catch {
+              Write-Host "ZIP_OPEN_FAILED=$($_.Exception.Message)"
+            }
+          }
+      - name: Upload decoded probes
+        uses: actions/upload-artifact@v4
+        with:
+          name: step095-source-probe
+          path: probe
+          retention-days: 1
