@@ -1,0 +1,38 @@
+{
+  "step": "STEP_04",
+  "status": "PASS",
+  "workflow_run_id": 37106329477,
+  "job_id": 111155472297,
+  "validated_head": "063d42eec213f9438fe7cf2faf00dbb4db4234b8",
+  "artifact": {
+    "name": "step04-dashboard-evidence",
+    "id": 11267679510,
+    "size_bytes": 123798,
+    "sha256": "54eed1998d87453457d63dec644143525b8ce43aab4c1d63963b1013ece345fb",
+    "independent_download_sha256_match": true
+  },
+  "canonical": {
+    "valid": true,
+    "active_system": "V1",
+    "active_snapshot": "S001",
+    "active_prompt_count": 8,
+    "backup_health": "PERLU BACKUP",
+    "primary_change": null,
+    "sync_changes": []
+  },
+  "tests": {
+    "step04_passed": 35,
+    "step01_step03_regression_passed": 73,
+    "dpi_175": "PASS",
+    "module_smoke": "PASS",
+    "qml_warnings": []
+  },
+  "screenshots": [
+    {"file": "dashboard-1600x900.png", "width": 1600, "height": 900, "bytes": 29174},
+    {"file": "dashboard-1920x1080.png", "width": 1920, "height": 1080, "bytes": 31742},
+    {"file": "dashboard-1366x768.png", "width": 1366, "height": 768, "bytes": 25659},
+    {"file": "dashboard-backup-required.png", "width": 1600, "height": 900, "bytes": 29174},
+    {"file": "dashboard-loading.png", "width": 1600, "height": 900, "bytes": 15661},
+    {"file": "dashboard-invalid.png", "width": 1600, "height": 900, "bytes": 15838}
+  ]
+}

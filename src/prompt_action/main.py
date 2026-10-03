@@ -41,7 +41,7 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
 
 def _validate_runtime() -> tuple[bool, str]:
     if sys.version_info[:2] != (3, 13):
-        return False, f"Prompt Action STEP 01 requires Python 3.13.x; found {platform.python_version()}"
+        return False, f"Prompt Action requires Python 3.13.x; found {platform.python_version()}"
     try:
         import PySide6
     except Exception as exc:  # pragma: no cover
@@ -78,6 +78,7 @@ def run(argv: Sequence[str] | None = None) -> int:
         import PySide6
         from PySide6.QtCore import QLibraryInfo, QTimer
         from .bootstrap.qml_boot import create_application, load_qml
+        from .presentation.dashboard_view_model import DashboardViewModel
 
         logger.info("startup.begin app_version=%s", APP_VERSION)
         logger.info("runtime.python=%s", platform.python_version())
@@ -97,7 +98,9 @@ def run(argv: Sequence[str] | None = None) -> int:
 
         try:
             app = create_application(sys.argv[:1])
-            engine = load_qml(qml_path)
+            dashboard_vm = DashboardViewModel(paths.project_root)
+            logger.info("dashboard.state=%s", dashboard_vm.state.get("load_state"))
+            engine = load_qml(qml_path, {"dashboardViewModel": dashboard_vm})
         except Exception:
             logger.exception("qt.initialization_failure")
             print(f"Qt/QML initialization failed. Log: {log_file}", file=sys.stderr)

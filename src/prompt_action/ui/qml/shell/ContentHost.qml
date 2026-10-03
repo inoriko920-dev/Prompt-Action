@@ -6,7 +6,7 @@ Item {
     objectName: "contentHost"
     property string currentRoute: "dashboard"
 
-    Component { id: dashboardComponent; Pages.PlaceholderDashboard {} }
+    Component { id: dashboardComponent; Pages.DashboardPage {} }
     Component { id: historyComponent; Pages.PlaceholderSystemHistory {} }
     Component { id: promptComponent; Pages.PlaceholderPrompt {} }
     Component { id: backupComponent; Pages.PlaceholderBackup {} }
