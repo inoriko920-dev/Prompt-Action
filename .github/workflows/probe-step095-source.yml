@@ -18,21 +18,30 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           New-Item -ItemType Directory -Force probe | Out-Null
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
           foreach ($name in @('zz_BOOTSTRAP','zz_REBUILD')) {
             $parts = Get-ChildItem "$name/chunks/*.b64" | Sort-Object Name
-            $joined = ($parts | ForEach-Object { (Get-Content $_.FullName -Raw) }) -join ''
-            # Strip BOM/CRLF/other wrapper characters, but preserve the Base64 alphabet exactly.
-            $joined = $joined -replace '[^A-Za-z0-9+/=]', ''
-            $bytes = [Convert]::FromBase64String($joined)
+            $stream = [IO.MemoryStream]::new()
+            try {
+              foreach ($part in $parts) {
+                $text = Get-Content $part.FullName -Raw
+                $text = $text -replace '[^A-Za-z0-9+/=]', ''
+                $chunk = [Convert]::FromBase64String($text)
+                $stream.Write($chunk, 0, $chunk.Length)
+                Write-Host "PART=$($part.Name) DECODED=$($chunk.Length)"
+              }
+              $bytes = $stream.ToArray()
+            } finally {
+              $stream.Dispose()
+            }
             $out = "probe/$name.zip"
             [IO.File]::WriteAllBytes($out, $bytes)
             $sha = (Get-FileHash $out -Algorithm SHA256).Hash.ToLowerInvariant()
             Write-Host "SOURCE=$name SIZE=$($bytes.Length) SHA256=$sha"
             try {
-              Add-Type -AssemblyName System.IO.Compression.FileSystem
               $zip = [IO.Compression.ZipFile]::OpenRead((Resolve-Path $out))
               Write-Host "ENTRIES=$($zip.Entries.Count)"
-              $zip.Entries | Select-Object -First 80 | ForEach-Object { Write-Host "ENTRY=$($_.FullName) SIZE=$($_.Length)" }
+              $zip.Entries | Select-Object -First 100 | ForEach-Object { Write-Host "ENTRY=$($_.FullName) SIZE=$($_.Length)" }
               $zip.Dispose()
             } catch {
               Write-Host "ZIP_OPEN_FAILED=$($_.Exception.Message)"
