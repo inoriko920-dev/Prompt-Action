@@ -74,10 +74,14 @@ def main() -> int:
     for filename, width, height in [("history-1600x900.png", 1600, 900), ("history-1920x1080.png", 1920, 1080), ("history-1366x768.png", 1366, 768)]:
         result["screenshots"].append(capture(window, app, screenshots / filename, width, height))
 
-    page.setProperty("stateOverride", {"load_state":"loading","systems":[],"selected_snapshot":{},"diagnostics":[]})
+    fallback_legacy = {"available": False, "label": "", "verified": False}
+    page.setProperty("stateOverride", {"load_state":"loading","legacy":fallback_legacy,"systems":[],"selected_snapshot_id":"","selected_snapshot":{},"diagnostics":[]})
     result["screenshots"].append(capture(window, app, screenshots / "history-loading.png", 1600, 900))
-    page.setProperty("stateOverride", {"load_state":"invalid","systems":[],"selected_snapshot":{},"diagnostics":["TEST-EVIDENCE: canonical invalid"]})
+    page.setProperty("stateOverride", {"load_state":"invalid","legacy":fallback_legacy,"systems":[],"selected_snapshot_id":"","selected_snapshot":{},"diagnostics":["TEST-EVIDENCE: canonical invalid"]})
     result["screenshots"].append(capture(window, app, screenshots / "history-invalid.png", 1600, 900))
+
+    if warnings:
+        raise RuntimeError("QML warnings after state captures: " + " | ".join(warnings))
 
     refs.mkdir(parents=True, exist_ok=True)
     shutil.copy2(root / "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/02-Sejarah-Sistem.jpg", refs / "02-Sejarah-Sistem.jpg")
