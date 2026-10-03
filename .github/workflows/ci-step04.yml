@@ -1,0 +1,39 @@
+name: STEP 04 Dashboard CI
+
+on:
+  push:
+    branches:
+      - 'sol/step04-*'
+  pull_request:
+    paths:
+      - 'src/prompt_action/presentation/**'
+      - 'src/prompt_action/ui/qml/pages/DashboardPage.qml'
+      - 'src/prompt_action/ui/qml/dashboard/**'
+      - 'src/prompt_action/ui/qml/shell/**'
+      - 'tests/step04/**'
+      - 'scripts/dev/*step04*'
+      - '.github/workflows/ci-step04.yml'
+      - 'docs/implementation/STEP_04_SOL_EXECUTION_REPORT.md'
+      - 'docs/evidence/step04/**'
+
+jobs:
+  preflight:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+          architecture: x64
+      - name: Install exact lock
+        run: python -m pip install -r requirements-lock.txt
+      - name: Install Prompt Action editable
+        run: python -m pip install -e . --no-deps --no-build-isolation
+      - name: Verify STEP 04 prerequisites and canonical data
+        run: python scripts/dev/verify_step04_preflight.py
+      - name: Upload STEP 04 preflight
+        uses: actions/upload-artifact@v4
+        with:
+          name: step04-preflight
+          path: ci-step04-preflight
+          retention-days: 30
