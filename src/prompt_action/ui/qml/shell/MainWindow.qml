@@ -34,7 +34,7 @@ Window {
         if (route === "system_history") return "System, snapshot, dan kesinambungan perubahan"
         if (route === "prompt") return "Revision explorer • ACTIVE dan SELECTED dipisahkan"
         if (route === "backup") return "[STEP 07] Pastikan Prompt Action dapat dibangun ulang kapan pun"
-        if (route === "settings") return "Shell navigasi • konten final pada STEP 08"
+        if (route === "settings") return "Lokasi data, backup, GitHub, dan tampilan"
         return "Ringkasan canonical System, Snapshot, Prompt aktif, dan status backup"
     }
     function navigateTo(route, entityId) {
@@ -58,7 +58,6 @@ Window {
         currentRoute: root.currentRoute
         onRouteRequested: function(route) { root.navigateTo(route, "") }
     }
-
     Item {
         id: workArea
         anchors.left: sidebar.right
