@@ -59,8 +59,6 @@ class SearchViewModel(QObject):
         if generation != self._generation:
             return
         try:
-            page = self._service.search(self._pending_query, self._cancel_token, generation=generation)
-        except TypeError:
             page = self._service.search(self._pending_query, cancel_token=self._cancel_token, generation=generation)
         except SearchError as exc:
             self._publish({"state": "ERROR", "query": self._pending_query, "results": [], "message": exc.user_message, "generation": generation})
