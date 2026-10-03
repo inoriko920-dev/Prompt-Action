@@ -27,7 +27,7 @@ jobs:
               for ($i=0; $i -lt $text.Length; $i++) {
                 $ch = $text[$i]
                 if ($alphabet.IndexOf($ch) -lt 0) {
-                  if ($invalid.Count -lt 12) { $invalid.Add("$i:$([int][char]$ch)") }
+                  if ($invalid.Count -lt 12) { $invalid.Add("${i}:$([int][char]$ch)") }
                 }
               }
               $eq = @()
@@ -35,6 +35,8 @@ jobs:
               $prefix = $text.Substring(0, [Math]::Min(32,$text.Length))
               $suffixStart = [Math]::Max(0,$text.Length-64)
               $suffix = $text.Substring($suffixStart)
-              Write-Host "PART=$($part.Name) RAW=$($raw.Length) LEN=$($text.Length) MOD4=$($text.Length%4) INVALID_SAMPLE=$($invalid -join ',') EQCOUNT=$($eq.Count) FIRSTEQ=$($eq | Select-Object -First 5) LASTEQ=$($eq | Select-Object -Last 5) PREFIX=$prefix SUFFIX=$suffix"
+              $firstEq = ($eq | Select-Object -First 5) -join ','
+              $lastEq = ($eq | Select-Object -Last 5) -join ','
+              Write-Host "PART=$($part.Name) RAW=$($raw.Length) LEN=$($text.Length) MOD4=$($text.Length%4) INVALID_SAMPLE=$($invalid -join ',') EQCOUNT=$($eq.Count) FIRSTEQ=$firstEq LASTEQ=$lastEq PREFIX=$prefix SUFFIX=$suffix"
             }
           }
