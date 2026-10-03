@@ -19,6 +19,7 @@ Window {
     readonly property color primaryToken: PATheme.Theme.primary
     readonly property int sidebarWidthToken: PATheme.Metrics.sidebarWidth
     property var dashboardVm: (typeof dashboardViewModel !== "undefined") ? dashboardViewModel : null
+    property var historyVm: (typeof historyViewModel !== "undefined") ? historyViewModel : null
 
     function routeTitle(route) {
         if (route === "system_history") return "Sejarah Sistem"
@@ -28,7 +29,7 @@ Window {
         return "Dashboard"
     }
     function routeSubtitle(route) {
-        if (route === "system_history") return "Shell navigasi • konten final pada STEP 05"
+        if (route === "system_history") return "System, snapshot, dan kesinambungan perubahan"
         if (route === "prompt") return "Shell navigasi • konten final pada STEP 06"
         if (route === "backup") return "Shell navigasi • konten final pada STEP 07"
         if (route === "settings") return "Shell navigasi • konten final pada STEP 08"
@@ -37,14 +38,18 @@ Window {
     function navigateTo(route, entityId) {
         currentRoute = route
         navigationEntityId = entityId || ""
+        if (route === "system_history" && historyVm && navigationEntityId) historyVm.selectSnapshot(navigationEntityId)
     }
 
     Connections {
         target: root.dashboardVm
         enabled: root.dashboardVm !== null
-        function onNavigationRequested(route, entityId) {
-            root.navigateTo(route, entityId)
-        }
+        function onNavigationRequested(route, entityId) { root.navigateTo(route, entityId) }
+    }
+    Connections {
+        target: root.historyVm
+        enabled: root.historyVm !== null
+        function onNavigationRequested(route, entityId) { root.navigateTo(route, entityId) }
     }
 
     Sidebar {
