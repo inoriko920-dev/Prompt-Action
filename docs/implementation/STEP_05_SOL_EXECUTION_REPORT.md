@@ -4,7 +4,8 @@
 **Branch:** `sol/step05-system-history-20261003`  
 **Base main:** `16538b40f18a1ba24346bebc673fa09373a0a969`  
 **Implementation/evidence head validated:** `6399fd2da3d2ff6035c9e3deed2f4ee9fd6128e0`  
-**Final gate:** **PASS — READY FOR MERGE after final-head CI**
+**Final documentation head:** `f646a73a93e85eb1bafaeb4f12ff886eb47ffd99`  
+**Final gate:** **PASS — READY FOR MERGE**
 
 ## Scope completed
 
@@ -60,6 +61,8 @@ Evidence artifact:
 
 The artifact contains eight files: preflight JSON, capture JSON, the master reference, and five history screenshots. ZIP traversal audit found no unsafe paths.
 
+Final documentation head `f646a73a93e85eb1bafaeb4f12ff886eb47ffd99` was revalidated after reports/evidence were committed. STEP 01, STEP 03, STEP 04, and STEP 05 workflows all concluded **SUCCESS** on that head.
+
 ## Regression correction
 
 The first PR run exposed two STEP 03 regressions caused only by a missing fallback `legacy` object when the old shell test intentionally loaded App.qml without context ViewModels. STEP 05 business tests were already 35/35 PASS. The fallback state and evidence overrides were hardened; the final implementation run then passed all 108 prior tests and produced zero QML warnings.
@@ -84,4 +87,4 @@ No prompt bytes, legacy rescue bytes, canonical version history, or master UI re
 
 **STEP 05 = PASS.**
 
-Run CI once more on this report/evidence final head, verify the branch remains 0-behind and in STEP 05 scope, then merge. STEP 06 may start only after live `main` is verified after merge.
+All final-head CI gates are green and the branch is 0-behind. STEP 06 may start only after this PR is merged and live `main` is verified.
