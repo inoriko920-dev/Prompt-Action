@@ -1,0 +1,35 @@
+{
+  "step": "STEP 08",
+  "status": "PASS",
+  "validated_head": "39259e7dc98cd28d225fad05003c53e60338dae9",
+  "workflow": "STEP 08 Settings CI",
+  "run_id": 37121864116,
+  "job_id": 111199388763,
+  "artifact": {
+    "name": "step08-settings-evidence",
+    "artifact_id": 11274110502,
+    "size_in_bytes": 257152,
+    "sha256": "b0b8273c983e553fb3231cac22e0d38ec7624107fb9283c93374983d7ee8b911",
+    "independent_download_sha256_match": true,
+    "entries": 15,
+    "path_traversal": false,
+    "nested_archives": false,
+    "expires_at": "2026-11-02T12:09:58Z"
+  },
+  "screenshots": [
+    "settings-1600x900.png",
+    "settings-1920x1080.png",
+    "settings-1366x768.png",
+    "settings-dirty.png",
+    "settings-invalid-path.png",
+    "settings-save-success.png",
+    "settings-save-error.png",
+    "settings-github-unavailable.png",
+    "settings-diagnostics-export.png"
+  ],
+  "protected_sha256": {
+    "BASELINE.json": "8ffd22fe3636309ce0484f8b724f9fe306f3156383c5f4efbcc7e59f79e90b6d",
+    "data/version_history.json": "1a0fddf98b000bb908e12e5aa617b42793a399a8dd9cb36e1acf7204ca8465bb",
+    "05-Pengaturan.jpg": "64c916b15b2e0d36129748348d22c0e66949cbdf8756b3a5de583bf62bc2c84a"
+  }
+}
