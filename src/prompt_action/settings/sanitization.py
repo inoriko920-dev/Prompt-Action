@@ -4,7 +4,8 @@ from pathlib import Path
 import re
 from typing import Any
 
-_SECRET_KEYS = ("token", "password", "passwd", "secret", "authorization", "auth_header", "cookie", "oauth", "credential", "private_key", "pat")
+_SECRET_EXACT = {"token", "password", "passwd", "secret", "authorization", "auth_header", "cookie", "oauth", "credential", "private_key", "pat"}
+_SECRET_PARTS = ("token", "password", "passwd", "secret", "authorization", "auth_header", "cookie", "oauth", "credential", "private_key")
 _PATTERNS = (
     re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._~+/=-]{8,}"),
     re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}\b"),
@@ -14,7 +15,9 @@ _PATTERNS = (
 
 def _secret_key(key: object) -> bool:
     lowered = str(key).lower()
-    return any(part in lowered for part in _SECRET_KEYS)
+    # PAT is intentionally exact: substring matching would incorrectly classify
+    # ordinary fields such as "path" as credentials.
+    return lowered in _SECRET_EXACT or any(part in lowered for part in _SECRET_PARTS)
 
 
 def sanitize_text(text: str, *, project_root: Path | None = None, user_home: Path | None = None) -> str:
