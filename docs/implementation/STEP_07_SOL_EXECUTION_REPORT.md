@@ -5,7 +5,6 @@
 **Base main:** `30bfd4af42c271c84216b14d63da88aaeadbd5ac`  
 **Implementation/evidence head validated:** `377f19f1fac83ad71754f4672ed81835db7aa176`  
 **Implementation gate:** **PASS**  
-**Final documentation head:** `9909ffa1781b9c942ecad9df56327d204c9b6da0`  
 **Merge rule:** final documentation head must pass current CI before merge.
 
 ## Scope completed
