@@ -1,0 +1,30 @@
+{
+  "step": "STEP_05",
+  "status": "PASS",
+  "implementation_head": "6399fd2da3d2ff6035c9e3deed2f4ee9fd6128e0",
+  "workflow_run": 37110566145,
+  "job": 111167494136,
+  "artifact": {
+    "name": "step05-system-history-evidence",
+    "id": 11269861630,
+    "size_bytes": 89163,
+    "sha256": "fefdd3308b080e6bd397b5c4fcdd4100fb9729216518cb8885a153a7bcacd987",
+    "download_digest_verified": true,
+    "safe_paths": true
+  },
+  "tests": {
+    "step05_passed": 35,
+    "regression_step01_to_step04_passed": 108,
+    "qml_warnings": 0,
+    "module_smoke": "PASS"
+  },
+  "canonical": {
+    "legacy": "V22.5.1",
+    "active_system": "V1",
+    "active_snapshot": "S001",
+    "snapshot_title": "Baseline",
+    "status": "BACKUP_REQUIRED",
+    "primary_change": null,
+    "sync_changes": []
+  }
+}

@@ -9,33 +9,17 @@ import traceback
 from typing import Sequence
 
 from .app_version import APP_VERSION
-from .bootstrap.app_paths import (
-    ProjectRootNotFoundError,
-    RuntimeDirectoryError,
-    ensure_runtime_directories,
-    resolve_app_paths,
-)
+from .bootstrap.app_paths import ProjectRootNotFoundError, RuntimeDirectoryError, ensure_runtime_directories, resolve_app_paths
 from .bootstrap.exit_codes import ExitCode
 from .bootstrap.logging_setup import configure_logging, flush_and_close
-
 
 EXPECTED_PYSIDE_VERSION = "6.11.2"
 
 
 def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="prompt-action")
-    parser.add_argument(
-        "--smoke-test-ms",
-        type=int,
-        default=None,
-        help="Auto-close after N ms; intended for automated smoke tests.",
-    )
-    parser.add_argument(
-        "--qml",
-        type=Path,
-        default=None,
-        help="Override QML file for diagnostics/tests.",
-    )
+    parser.add_argument("--smoke-test-ms", type=int, default=None, help="Auto-close after N ms; intended for automated smoke tests.")
+    parser.add_argument("--qml", type=Path, default=None, help="Override QML file for diagnostics/tests.")
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
@@ -55,18 +39,15 @@ def run(argv: Sequence[str] | None = None) -> int:
     args = _parse_args(argv)
     logger: logging.Logger | None = None
     log_file: Path | None = None
-
     valid, message = _validate_runtime()
     if not valid:
         print(message, file=sys.stderr)
         return int(ExitCode.DEPENDENCY_RUNTIME_MISMATCH)
-
     try:
         paths = resolve_app_paths()
     except ProjectRootNotFoundError as exc:
         print(f"Bootstrap/path failure: {exc}", file=sys.stderr)
         return int(ExitCode.BOOTSTRAP_PATH_FAILURE)
-
     try:
         ensure_runtime_directories(paths)
     except RuntimeDirectoryError as exc:
@@ -79,6 +60,7 @@ def run(argv: Sequence[str] | None = None) -> int:
         from PySide6.QtCore import QLibraryInfo, QTimer
         from .bootstrap.qml_boot import create_application, load_qml
         from .presentation.dashboard_view_model import DashboardViewModel
+        from .presentation.history_view_model import SystemHistoryViewModel
 
         logger.info("startup.begin app_version=%s", APP_VERSION)
         logger.info("runtime.python=%s", platform.python_version())
@@ -95,22 +77,21 @@ def run(argv: Sequence[str] | None = None) -> int:
             logger.fatal("qml.file_missing path=%s", qml_path)
             print(f"QML file not found: {qml_path}. Log: {log_file}", file=sys.stderr)
             return int(ExitCode.QML_ROOT_LOAD_FAILURE)
-
         try:
             app = create_application(sys.argv[:1])
             dashboard_vm = DashboardViewModel(paths.project_root)
+            history_vm = SystemHistoryViewModel(paths.project_root)
             logger.info("dashboard.state=%s", dashboard_vm.state.get("load_state"))
-            engine = load_qml(qml_path, {"dashboardViewModel": dashboard_vm})
+            logger.info("history.state=%s", history_vm.state.get("load_state"))
+            engine = load_qml(qml_path, {"dashboardViewModel": dashboard_vm, "historyViewModel": history_vm})
         except Exception:
             logger.exception("qt.initialization_failure")
             print(f"Qt/QML initialization failed. Log: {log_file}", file=sys.stderr)
             return int(ExitCode.QT_INITIALIZATION_FAILURE)
-
         if not engine.rootObjects():
             logger.fatal("qml.root_object_failed path=%s", qml_path)
             print(f"QML root object failed to load. Log: {log_file}", file=sys.stderr)
             return int(ExitCode.QML_ROOT_LOAD_FAILURE)
-
         logger.info("startup.ready qml=%s", qml_path)
         if args.smoke_test_ms is not None:
             QTimer.singleShot(max(args.smoke_test_ms, 0), app.quit)
