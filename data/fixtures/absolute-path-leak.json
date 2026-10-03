@@ -1,0 +1,4 @@
+{
+  "fixture_schema": "step02-corruption-v1",
+  "mutation": "absolute-path-leak"
+}

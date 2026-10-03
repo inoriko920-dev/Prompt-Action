@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "app_data_revision": 1,
+  "app_version": "0.1.0-dev",
+  "active_system": "V1",
+  "active_snapshot": "S001",
+  "legacy_sources": [
+    {
+      "id": "V22.5.1",
+      "type": "LEGACY_SOURCE",
+      "file_available": false,
+      "source_path": null,
+      "sha256_manifest": "f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2",
+      "manifest_verified": true,
+      "evidence": "BASELINE.json",
+      "used_to_seed": "V1/S001",
+      "note": "Verified rescue source in STEP 00; bytes are not copied or reconstructed by STEP 02."
+    }
+  ],
+  "systems": [
+    {
+      "id": "V1",
+      "parent_system": null,
+      "status": "ACTIVE",
+      "created_from_legacy": "V22.5.1",
+      "first_snapshot": "S001",
+      "latest_snapshot": "S001",
+      "generation_reason": "LEGACY_BASELINE_SEED"
+    }
+  ],
+  "snapshots": [
+    {
+      "id": "S001",
+      "system": "V1",
+      "parent_snapshot": null,
+      "status": "BACKUP_REQUIRED",
+      "primary_change": null,
+      "sync_changes": [],
+      "prompt_state": {
+        "P1A": "R1",
+        "P1B": "R1",
+        "P1B1": "R1",
+        "P1B2": "R1",
+        "P2": "R1",
+        "P3": "R1",
+        "P4": "R1",
+        "P5": "R1"
+      },
+      "backup_id": null
+    }
+  ],
+  "prompts": {
+    "P1A": {
+      "display_name": "Prompt 1A",
+      "active_revision": "R1",
+      "revisions": {
+        "R1": {
+          "parent": null,
+          "snapshot": "S001",
+          "status": "ACTIVE",
+          "file": null,
+          "sha256": "65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5",
+          "file_available": false,
+          "change_role": "BASELINE",
+          "summary": [
+            "Verified STEP 00 baseline hash; physical prompt bytes are not materialized in this repository."
+          ],
+          "reason": "Seeded from verified V22.5.1 rescue evidence without reconstructing prompt content."
+        }
+      }
+    },
+    "P1B": {
+      "display_name": "Prompt 1B",
+      "active_revision": "R1",
+      "revisions": {
+        "R1": {
+          "parent": null,
+          "snapshot": "S001",
+          "status": "ACTIVE",
+          "file": null,
+          "sha256": "7064081b9a264ba66da2c4eb297cc00f0f2d4133a97c84bed6f0171318d870cf",
+          "file_available": false,
+          "change_role": "BASELINE",
+          "summary": [
+            "Verified STEP 00 baseline hash; physical prompt bytes are not materialized in this repository."
+          ],
+          "reason": "Seeded from verified V22.5.1 rescue evidence without reconstructing prompt content."
+        }
+      }
+    },
+    "P1B1": {
+      "display_name": "Prompt 1B1",
+      "active_revision": "R1",
+      "revisions": {
+        "R1": {
+          "parent": null,
+          "snapshot": "S001",
+          "status": "ACTIVE",
+          "file": null,
+          "sha256": "a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6",
+          "file_available": false,
+          "change_role": "BASELINE",
+          "summary": [
+            "Verified STEP 00 baseline hash; physical prompt bytes are not materialized in this repository."
+          ],
+          "reason": "Seeded from verified V22.5.1 rescue evidence without reconstructing prompt content."
+        }
+      }
+    },
+    "P1B2": {
+      "display_name": "Prompt 1B2",
+      "active_revision": "R1",
+      "revisions": {
+        "R1": {
+          "parent": null,
+          "snapshot": "S001",
+          "status": "ACTIVE",
+          "file": null,
+          "sha256": "12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576",
+          "file_available": false,
+          "change_role": "BASELINE",
+          "summary": [
+            "Verified STEP 00 baseline hash; physical prompt bytes are not materialized in this repository."
+          ],
+          "reason": "Seeded from verified V22.5.1 rescue evidence without reconstructing prompt content."
+        }
+      }
+    },
+    "P2": {
+      "display_name": "Prompt 2",
+      "active_revision": "R1",
+      "revisions": {
+        "R1": {
+          "parent": null,
+          "snapshot": "S001",
+          "status": "ACTIVE",
+          "file": null,
+          "sha256": "d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98",
+          "file_available": false,
+          "change_role": "BASELINE",
+          "summary": [
+            "Verified STEP 00 baseline hash; physical prompt bytes are not materialized in this repository."
+          ],
+          "reason": "Seeded from verified V22.5.1 rescue evidence without reconstructing prompt content."
+        }
+      }
+    },
+    "P3": {
+      "display_name": "Prompt 3",
+      "active_revision": "R1",
+      "revisions": {
+        "R1": {
+          "parent": null,
+          "snapshot": "S001",
+          "status": "ACTIVE",
+          "file": null,
+          "sha256": "de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8",
+          "file_available": false,
+          "change_role": "BASELINE",
+          "summary": [
+            "Verified STEP 00 baseline hash; physical prompt bytes are not materialized in this repository."
+          ],
+          "reason": "Seeded from verified V22.5.1 rescue evidence without reconstructing prompt content."
+        }
+      }
+    },
+    "P4": {
+      "display_name": "Prompt 4",
+      "active_revision": "R1",
+      "revisions": {
+        "R1": {
+          "parent": null,
+          "snapshot": "S001",
+          "status": "ACTIVE",
+          "file": null,
+          "sha256": "a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0",
+          "file_available": false,
+          "change_role": "BASELINE",
+          "summary": [
+            "Verified STEP 00 baseline hash; physical prompt bytes are not materialized in this repository."
+          ],
+          "reason": "Seeded from verified V22.5.1 rescue evidence without reconstructing prompt content."
+        }
+      }
+    },
+    "P5": {
+      "display_name": "Prompt 5",
+      "active_revision": "R1",
+      "revisions": {
+        "R1": {
+          "parent": null,
+          "snapshot": "S001",
+          "status": "ACTIVE",
+          "file": null,
+          "sha256": "bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786",
+          "file_available": false,
+          "change_role": "BASELINE",
+          "summary": [
+            "Verified STEP 00 baseline hash; physical prompt bytes are not materialized in this repository."
+          ],
+          "reason": "Seeded from verified V22.5.1 rescue evidence without reconstructing prompt content."
+        }
+      }
+    }
+  },
+  "backups": [],
+  "release_policy": {
+    "require_backup_for_complete": true,
+    "require_second_copy": true,
+    "allow_active_unmaterialized_baseline": true
+  },
+  "integrity": {
+    "baseline_source": "BASELINE.json",
+    "baseline_verification": "STEP_00_PASS",
+    "legacy_rescue_sha256": "f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2",
+    "protected_prompt_hashes": {
+      "P1A": "65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5",
+      "P1B": "7064081b9a264ba66da2c4eb297cc00f0f2d4133a97c84bed6f0171318d870cf",
+      "P1B1": "a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6",
+      "P1B2": "12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576",
+      "P2": "d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98",
+      "P3": "de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8",
+      "P4": "a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0",
+      "P5": "bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786"
+    },
+    "path_policy": "PROJECT_RELATIVE_ONLY",
+    "hash_algorithm": "sha256",
+    "prompt_bytes_reconstructed": false
+  }
+}
