@@ -1,0 +1,40 @@
+name: STEP 03 Design System UI Shell CI
+
+on:
+  push:
+    branches:
+      - 'sol/step03-*'
+  pull_request:
+    paths:
+      - '.github/workflows/ci-step03.yml'
+      - 'scripts/dev/verify_step03_inputs.py'
+      - 'src/prompt_action/ui/**'
+      - 'tests/step03/**'
+      - 'evidence/step03/**'
+      - 'docs/implementation/STEP_03_SOL_EXECUTION_REPORT.md'
+
+permissions:
+  contents: read
+
+jobs:
+  input-gate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+          architecture: 'x64'
+          check-latest: false
+      - name: Install exact lock
+        run: python -m pip install -r requirements-lock.txt
+      - name: Install Prompt Action editable
+        run: python -m pip install -e . --no-deps --no-build-isolation
+      - name: Verify STEP 03 prerequisite inputs
+        run: python scripts/dev/verify_step03_inputs.py --output ci-step03-input-gate
+      - name: Upload verified master references
+        uses: actions/upload-artifact@v4
+        with:
+          name: step03-input-gate
+          path: ci-step03-input-gate
+          retention-days: 30
