@@ -34,6 +34,7 @@ Item {
                         model: root.officialRevisions || []
                         delegate: Column {
                             required property var modelData
+                            required property int index
                             width: treeColumn.width
                             spacing: 4
                             Rectangle {
