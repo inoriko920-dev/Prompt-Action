@@ -13,30 +13,28 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13.16'
       - name: Diagnose preserved chunk format
         shell: pwsh
         run: |
-          @'
-          from pathlib import Path
-          import re
-
-          alphabet = set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
-          for source in ("zz_BOOTSTRAP", "zz_REBUILD"):
-              print(f"SOURCE={source}")
-              for path in sorted(Path(source, "chunks").glob("*.b64")):
-                  raw = path.read_text(encoding="utf-8-sig")
-                  stripped = raw.strip()
-                  invalid = [(i, repr(ch), ord(ch)) for i, ch in enumerate(stripped) if ch not in alphabet]
-                  eq = [i for i, ch in enumerate(stripped) if ch == "="]
-                  print(
-                      f"PART={path.name} RAW={len(raw)} STRIPPED={len(stripped)} MOD4={len(stripped)%4} "
-                      f"INVALID={len(invalid)} EQCOUNT={len(eq)} FIRSTEQ={eq[:5]} LASTEQ={eq[-5:]} "
-                      f"PREFIX={stripped[:32]!r} SUFFIX={stripped[-64:]!r}"
-                  )
-                  if invalid:
-                      print(f"INVALID_SAMPLE={invalid[:12]}")
-          '@ | Set-Content -Encoding utf8 probe_chunks.py
-          python probe_chunks.py
+          $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
+          foreach ($source in @('zz_BOOTSTRAP','zz_REBUILD')) {
+            Write-Host "SOURCE=$source"
+            foreach ($part in (Get-ChildItem "$source/chunks/*.b64" | Sort-Object Name)) {
+              $raw = Get-Content $part.FullName -Raw
+              $text = $raw.Trim()
+              if ($text.Length -gt 0 -and [int][char]$text[0] -eq 65279) { $text = $text.Substring(1) }
+              $invalid = New-Object System.Collections.Generic.List[string]
+              for ($i=0; $i -lt $text.Length; $i++) {
+                $ch = $text[$i]
+                if ($alphabet.IndexOf($ch) -lt 0) {
+                  if ($invalid.Count -lt 12) { $invalid.Add("$i:$([int][char]$ch)") }
+                }
+              }
+              $eq = @()
+              for ($i=0; $i -lt $text.Length; $i++) { if ($text[$i] -eq '=') { $eq += $i } }
+              $prefix = $text.Substring(0, [Math]::Min(32,$text.Length))
+              $suffixStart = [Math]::Max(0,$text.Length-64)
+              $suffix = $text.Substring($suffixStart)
+              Write-Host "PART=$($part.Name) RAW=$($raw.Length) LEN=$($text.Length) MOD4=$($text.Length%4) INVALID_SAMPLE=$($invalid -join ',') EQCOUNT=$($eq.Count) FIRSTEQ=$($eq | Select-Object -First 5) LASTEQ=$($eq | Select-Object -Last 5) PREFIX=$prefix SUFFIX=$suffix"
+            }
+          }
