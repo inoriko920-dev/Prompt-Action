@@ -79,6 +79,9 @@ PA.PACard {
                 text: "Buka Backup"
                 variant: "secondary"
                 interactive: Boolean(root.capabilities.can_open_backup_page && root.viewModel)
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                Layout.preferredWidth: 1
                 onClicked: root.viewModel.openBackupPage()
             }
             PA.PAButton {
@@ -86,6 +89,9 @@ PA.PACard {
                 variant: "primary"
                 interactive: Boolean(root.capabilities.can_request_backup && root.viewModel)
                 Accessible.description: root.capabilities.reason_if_disabled || ""
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                Layout.preferredWidth: 1
                 onClicked: root.viewModel.requestBackupNow()
             }
         }
