@@ -1,0 +1,163 @@
+{
+  "step": "STEP_02_CANONICAL_DATA_VERSION_ENGINE",
+  "result": "PASS",
+  "go_step03": true,
+  "base_main": "32f55aaaeb44a36456aee81c2c958d74ef25cb34",
+  "branch": "sol/step02-canonical-data-engine-20261002",
+  "implementation_commit": "11ceed9f0a9d49daeef7ab942e1f0f28bbce3558",
+  "local_tests": "34/34 PASS",
+  "canonical_validation": {
+    "valid": true,
+    "issues": 0
+  },
+  "ci": {
+    "workflow": "STEP 02 Canonical Data CI",
+    "run_id": 37099894985,
+    "job_id": 111137217762,
+    "implementation_commit": "11ceed9f0a9d49daeef7ab942e1f0f28bbce3558",
+    "runner": "Microsoft Windows Server 2025 10.0.26100 / windows-2025-vs2026",
+    "python": "3.13.16 x64",
+    "pytest": "34 passed in 0.32s",
+    "artifact": {
+      "name": "step02-ci-evidence",
+      "id": 11265288953,
+      "bytes": 5835,
+      "sha256": "a1d629a71c737bce068534ab58daf42a51837f5531a3784cbfa8d446cd9174c7"
+    }
+  },
+  "corruption_reports": {
+    "absolute-path-leak.report.json": {
+      "valid": false,
+      "codes": [
+        "POLICY-ABSOLUTE-PATH"
+      ]
+    },
+    "complete-without-backup.report.json": {
+      "valid": false,
+      "codes": [
+        "INV-11"
+      ]
+    },
+    "missing-active-file.report.json": {
+      "valid": false,
+      "codes": [
+        "INV-10"
+      ]
+    },
+    "missing-parent-snapshot.report.json": {
+      "valid": false,
+      "codes": [
+        "INV-03"
+      ]
+    },
+    "revision-cycle.report.json": {
+      "valid": false,
+      "codes": [
+        "INV-05",
+        "GRAPH-REVISION-CYCLE",
+        "GRAPH-REVISION-CYCLE"
+      ]
+    },
+    "schema-version-unsupported.report.json": {
+      "valid": false,
+      "codes": [
+        "SCHEMA-UNSUPPORTED"
+      ]
+    },
+    "sha-mismatch.report.json": {
+      "valid": false,
+      "codes": [
+        "INV-10-SHA-MISMATCH"
+      ]
+    },
+    "snapshot-cycle.report.json": {
+      "valid": false,
+      "codes": [
+        "INV-04",
+        "GRAPH-SNAPSHOT-CYCLE",
+        "GRAPH-SNAPSHOT-CYCLE",
+        "INV-09"
+      ]
+    },
+    "undeclared-sync-change.report.json": {
+      "valid": false,
+      "codes": [
+        "INV-09"
+      ]
+    }
+  },
+  "atomic_write_failure": {
+    "simulated_failure_observed": true,
+    "before_sha256": "4185ff45aec0eeb056dee8a90617359487b4d215639cad5976761c3618ef6289",
+    "after_sha256": "4185ff45aec0eeb056dee8a90617359487b4d215639cad5976761c3618ef6289",
+    "canonical_preserved": true
+  },
+  "migration": {
+    "from": 0,
+    "to": 1,
+    "backup_path": "data/migrations/backups/version_history.before_schema0_to_1.rev0.json",
+    "backup_sha256": "a6359e5f53d38161b8a16bc23e4e6064d92eedcb26bd45ba2397653d2d879f87",
+    "saved_revision": 1,
+    "prompt_before_sha256": "a4cd7e44a2a1d0d4a5712d82f642b26bd6e63281b7a586ab7ec41b474f67020a",
+    "prompt_after_sha256": "a4cd7e44a2a1d0d4a5712d82f642b26bd6e63281b7a586ab7ec41b474f67020a",
+    "prompt_bytes_unchanged": true
+  },
+  "relocation": {
+    "relocated_directory_name": "Relocated Prompt Action Ω d8reru65",
+    "valid": true,
+    "issues": []
+  },
+  "release_commit": {
+    "plan": {
+      "expected_app_data_revision": 1,
+      "app_version": "0.1.0-dev",
+      "system": "V1",
+      "parent_snapshot": "S001",
+      "snapshot_id": "S002",
+      "primary": {
+        "prompt_id": "P3",
+        "role": "PRIMARY",
+        "from": "R1",
+        "to": "R2",
+        "file": "prompts/V1/Prompt-3/Prompt-3_V1_R2.txt",
+        "sha256": "9f264b7c620416b2f1ecb1c6c62e17bc6479479f023a317f8cffca1b5893ae70",
+        "file_available": true
+      },
+      "sync": [],
+      "prompt_state": {
+        "P1A": "R1",
+        "P1B": "R1",
+        "P1B1": "R1",
+        "P1B2": "R1",
+        "P2": "R1",
+        "P3": "R2",
+        "P4": "R1",
+        "P5": "R1"
+      },
+      "committable": true,
+      "resulting_status": "BACKUP_REQUIRED"
+    },
+    "saved_revision": 2,
+    "active_snapshot": "S002",
+    "snapshot_status": "BACKUP_REQUIRED",
+    "backup_id": null,
+    "app_version": "0.1.0-dev",
+    "system": "V1"
+  },
+  "protected_source": {
+    "compare": "main...implementation_commit",
+    "changed_files": 36,
+    "protected_paths_changed": false,
+    "baseline_json_changed": false,
+    "ui_reference_changed": false,
+    "step00_evidence_changed": false,
+    "prompt_or_legacy_content_changed": false
+  },
+  "source_policy": {
+    "prompts_directory_materialized": false,
+    "r1_hashes_from_step00": true,
+    "r1_file_available": false,
+    "prompt_bytes_reconstructed": false,
+    "nonbaseline_unavailable_source_rejected": true
+  }
+}
