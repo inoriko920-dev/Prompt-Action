@@ -20,7 +20,9 @@ jobs:
           New-Item -ItemType Directory -Force probe | Out-Null
           foreach ($name in @('zz_BOOTSTRAP','zz_REBUILD')) {
             $parts = Get-ChildItem "$name/chunks/*.b64" | Sort-Object Name
-            $joined = ($parts | ForEach-Object { (Get-Content $_.FullName -Raw).Trim() }) -join ''
+            $joined = ($parts | ForEach-Object { (Get-Content $_.FullName -Raw) }) -join ''
+            # Strip BOM/CRLF/other wrapper characters, but preserve the Base64 alphabet exactly.
+            $joined = $joined -replace '[^A-Za-z0-9+/=]', ''
             $bytes = [Convert]::FromBase64String($joined)
             $out = "probe/$name.zip"
             [IO.File]::WriteAllBytes($out, $bytes)
@@ -30,7 +32,7 @@ jobs:
               Add-Type -AssemblyName System.IO.Compression.FileSystem
               $zip = [IO.Compression.ZipFile]::OpenRead((Resolve-Path $out))
               Write-Host "ENTRIES=$($zip.Entries.Count)"
-              $zip.Entries | Select-Object -First 40 | ForEach-Object { Write-Host "ENTRY=$($_.FullName) SIZE=$($_.Length)" }
+              $zip.Entries | Select-Object -First 80 | ForEach-Object { Write-Host "ENTRY=$($_.FullName) SIZE=$($_.Length)" }
               $zip.Dispose()
             } catch {
               Write-Host "ZIP_OPEN_FAILED=$($_.Exception.Message)"
