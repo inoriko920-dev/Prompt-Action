@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from pathlib import Path, PurePath
 import re
 import tempfile
@@ -54,24 +53,28 @@ class PathSafetyPolicy:
         if any(part == ".." for part in pure.parts) or raw.startswith("../") or "/../" in raw:
             raise PathSafetyError("PATH_ESCAPE", "Path source mencoba keluar dari root yang diizinkan.")
 
-    def resolve_source(self, root: Path, relative_value: str, *, must_exist: bool = True) -> Path:
-        self._reject_raw_escape(relative_value)
-        real_root = Path(root).resolve()
-        candidate = (real_root / relative_value).resolve(strict=False)
+    @staticmethod
+    def assert_resolved_within(root: Path, resolved: Path, *, escape_code: str = "PATH_SYMLINK_ESCAPE") -> Path:
+        real_root = Path(root).resolve(strict=False)
+        candidate = Path(resolved).resolve(strict=False)
         try:
             candidate.relative_to(real_root)
         except ValueError as exc:
-            raise PathSafetyError("PATH_ESCAPE", "Resolved source berada di luar root yang diizinkan.") from exc
+            raise PathSafetyError(escape_code, "Resolved source berada di luar root yang diizinkan.") from exc
+        return candidate
+
+    def resolve_source(self, root: Path, relative_value: str, *, must_exist: bool = True) -> Path:
+        self._reject_raw_escape(relative_value)
+        real_root = Path(root).resolve()
+        candidate = self.assert_resolved_within(real_root, real_root / relative_value, escape_code="PATH_ESCAPE")
         if must_exist:
             if not candidate.exists():
                 raise PathSafetyError("PATH_SOURCE_MISSING", "File sumber tidak tersedia.", {"source": relative_value})
             if not candidate.is_file():
                 raise PathSafetyError("PATH_NOT_REGULAR_FILE", "Source bukan regular file.")
             resolved_existing = candidate.resolve(strict=True)
-            try:
-                resolved_existing.relative_to(real_root)
-            except ValueError as exc:
-                raise PathSafetyError("PATH_SYMLINK_ESCAPE", "Symlink/junction source keluar dari root yang diizinkan.") from exc
+            self.assert_resolved_within(real_root, resolved_existing, escape_code="PATH_SYMLINK_ESCAPE")
+            candidate = resolved_existing
         return candidate
 
     @staticmethod
