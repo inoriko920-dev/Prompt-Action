@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   materialize:
-    if: ${{ !contains(github.event.head_commit.message, '[step095-materialized]') }}
+    if: ${{ contains(github.event.head_commit.message, '[run-step095-materializer]') && !contains(github.event.head_commit.message, '[step095-materialized]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,19 +22,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Rebuild bootstrap ZIP from verified preserved STEP 00 chunks
+      - name: Expand exact Prompt capsule and build bootstrap ZIP
         run: python scripts/dev/rebuild_step095_bootstrap_from_preserved_chunks.py
       - name: Materialize exact Prompt bytes and canonical state
         run: python scripts/dev/materialize_step095_prompts.py
       - name: Commit atomic materialization
         shell: bash
         run: |
-          if git diff --quiet -- data/version_history.json prompts backups docs/evidence/step095; then
-            echo 'Nothing to materialize.'
-            exit 0
-          fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add data/version_history.json prompts backups docs/evidence/step095
+          git rm -r --ignore-unmatch docs/evidence/step095/exact_prompt_capsule
+          if git diff --cached --quiet; then
+            echo 'Nothing to materialize.'
+            exit 0
+          fi
           git commit -m 'STEP 09.5: materialize exact baseline + complete S001 [step095-materialized]'
           git push origin HEAD:${GITHUB_REF_NAME}
