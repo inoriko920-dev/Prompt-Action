@@ -1,0 +1,67 @@
+name: STEP 06 Per Prompt CI
+
+on:
+  push:
+    branches:
+      - 'sol/step06-*'
+  pull_request:
+    paths:
+      - 'src/prompt_action/presentation/per_prompt_**'
+      - 'src/prompt_action/main.py'
+      - 'src/prompt_action/ui/qml/pages/PerPromptPage.qml'
+      - 'src/prompt_action/ui/qml/per_prompt/**'
+      - 'src/prompt_action/ui/qml/shell/**'
+      - 'tests/step06/**'
+      - 'scripts/dev/*step06*'
+      - '.github/workflows/ci-step06.yml'
+      - 'docs/implementation/STEP_06_SOL_EXECUTION_REPORT.md'
+      - 'docs/evidence/step06/**'
+
+jobs:
+  validate-step06:
+    runs-on: windows-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+      QT_QUICK_BACKEND: software
+      QSG_RHI_BACKEND: software
+      QSG_RENDER_LOOP: basic
+      QT_QUICK_CONTROLS_STYLE: Basic
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+          architecture: x64
+      - name: Verify exact Python
+        run: python -c "import platform,sys; print(sys.version); assert sys.version_info[:3] == (3,13,16); assert platform.architecture()[0] == '64bit'"
+      - name: Install exact lock
+        run: python -m pip install -r requirements-lock.txt
+      - name: Install Prompt Action editable
+        run: python -m pip install -e . --no-deps --no-build-isolation
+      - name: Verify STEP 06 prerequisites
+        run: python scripts/dev/verify_step06_preflight.py
+      - name: Capture STEP 06 visual evidence
+        run: python scripts/dev/capture_step06_evidence.py --output ci-step06-evidence
+      - name: STEP 06 T01-T45
+        run: python -m pytest tests/step06 -q
+      - name: Regenerate STEP 03 evidence for regression
+        run: python scripts/dev/capture_step03_evidence.py --output ci-step03-regression-evidence
+      - name: Regenerate STEP 04 evidence for regression
+        run: python scripts/dev/capture_step04_evidence.py --output ci-step04-regression-evidence
+      - name: Regenerate STEP 05 evidence for regression
+        run: python scripts/dev/capture_step05_evidence.py --output ci-step05-regression-evidence
+      - name: STEP 01-05 regression
+        env:
+          STEP03_EVIDENCE_DIR: ${{ github.workspace }}\ci-step03-regression-evidence
+          STEP04_EVIDENCE_DIR: ${{ github.workspace }}\ci-step04-regression-evidence
+        run: python -m pytest tests/step01 tests/step02 tests/step03 tests/step04 tests/step05 -q
+      - name: Module per-prompt smoke
+        run: python -m prompt_action --smoke-test-ms 180
+      - name: Upload STEP 06 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: step06-per-prompt-evidence
+          path: |
+            ci-step06-preflight
+            ci-step06-evidence
+          retention-days: 30

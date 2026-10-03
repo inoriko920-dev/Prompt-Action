@@ -61,6 +61,7 @@ def run(argv: Sequence[str] | None = None) -> int:
         from .bootstrap.qml_boot import create_application, load_qml
         from .presentation.dashboard_view_model import DashboardViewModel
         from .presentation.history_view_model import SystemHistoryViewModel
+        from .presentation.per_prompt_view_model import PerPromptViewModel
 
         logger.info("startup.begin app_version=%s", APP_VERSION)
         logger.info("runtime.python=%s", platform.python_version())
@@ -81,9 +82,15 @@ def run(argv: Sequence[str] | None = None) -> int:
             app = create_application(sys.argv[:1])
             dashboard_vm = DashboardViewModel(paths.project_root)
             history_vm = SystemHistoryViewModel(paths.project_root)
+            per_prompt_vm = PerPromptViewModel(paths.project_root)
             logger.info("dashboard.state=%s", dashboard_vm.state.get("load_state"))
             logger.info("history.state=%s", history_vm.state.get("load_state"))
-            engine = load_qml(qml_path, {"dashboardViewModel": dashboard_vm, "historyViewModel": history_vm})
+            logger.info("per_prompt.state=%s", per_prompt_vm.state.get("load_state"))
+            engine = load_qml(qml_path, {
+                "dashboardViewModel": dashboard_vm,
+                "historyViewModel": history_vm,
+                "perPromptViewModel": per_prompt_vm,
+            })
         except Exception:
             logger.exception("qt.initialization_failure")
             print(f"Qt/QML initialization failed. Log: {log_file}", file=sys.stderr)

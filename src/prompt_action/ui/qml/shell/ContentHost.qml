@@ -11,16 +11,21 @@ Item {
         id: historyComponent
         Pages.SystemHistoryPage {
             stateOverride: (typeof historyViewModel === "undefined") ? ({
-                "load_state": "loading",
-                "legacy": {"available": false, "label": "", "verified": false},
-                "systems": [],
-                "selected_snapshot_id": "",
-                "selected_snapshot": {},
-                "diagnostics": []
+                "load_state": "loading", "legacy": {"available": false, "label": "", "verified": false},
+                "systems": [], "selected_snapshot_id": "", "selected_snapshot": {}, "diagnostics": []
             }) : null
         }
     }
-    Component { id: promptComponent; Pages.PlaceholderPrompt {} }
+    Component {
+        id: promptComponent
+        Pages.PerPromptPage {
+            stateOverride: (typeof perPromptViewModel === "undefined") ? ({
+                "load_state":"loading","prompts":[],"selected_prompt_id":"","selected_prompt_name":"",
+                "active_revision_id":"","selected_revision_id":"","official_revisions":[],"drafts":[],
+                "selected_revision":{},"available_files":[],"capabilities":{},"issues":[],"diagnostics":[]
+            }) : null
+        }
+    }
     Component { id: backupComponent; Pages.PlaceholderBackup {} }
     Component { id: settingsComponent; Pages.PlaceholderSettings {} }
 

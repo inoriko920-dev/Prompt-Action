@@ -20,6 +20,7 @@ Window {
     readonly property int sidebarWidthToken: PATheme.Metrics.sidebarWidth
     property var dashboardVm: (typeof dashboardViewModel !== "undefined") ? dashboardViewModel : null
     property var historyVm: (typeof historyViewModel !== "undefined") ? historyViewModel : null
+    property var perPromptVm: (typeof perPromptViewModel !== "undefined") ? perPromptViewModel : null
 
     function routeTitle(route) {
         if (route === "system_history") return "Sejarah Sistem"
@@ -30,7 +31,7 @@ Window {
     }
     function routeSubtitle(route) {
         if (route === "system_history") return "System, snapshot, dan kesinambungan perubahan"
-        if (route === "prompt") return "Shell navigasi • konten final pada STEP 06"
+        if (route === "prompt") return "Revision explorer • ACTIVE dan SELECTED dipisahkan"
         if (route === "backup") return "Shell navigasi • konten final pada STEP 07"
         if (route === "settings") return "Shell navigasi • konten final pada STEP 08"
         return "Ringkasan canonical System, Snapshot, Prompt aktif, dan status backup"
@@ -39,18 +40,12 @@ Window {
         currentRoute = route
         navigationEntityId = entityId || ""
         if (route === "system_history" && historyVm && navigationEntityId) historyVm.selectSnapshot(navigationEntityId)
+        if (route === "prompt" && perPromptVm && navigationEntityId) perPromptVm.selectPrompt(navigationEntityId)
     }
 
-    Connections {
-        target: root.dashboardVm
-        enabled: root.dashboardVm !== null
-        function onNavigationRequested(route, entityId) { root.navigateTo(route, entityId) }
-    }
-    Connections {
-        target: root.historyVm
-        enabled: root.historyVm !== null
-        function onNavigationRequested(route, entityId) { root.navigateTo(route, entityId) }
-    }
+    Connections { target: root.dashboardVm; enabled: root.dashboardVm !== null; function onNavigationRequested(route, entityId) { root.navigateTo(route, entityId) } }
+    Connections { target: root.historyVm; enabled: root.historyVm !== null; function onNavigationRequested(route, entityId) { root.navigateTo(route, entityId) } }
+    Connections { target: root.perPromptVm; enabled: root.perPromptVm !== null; function onNavigationRequested(route, entityId) { root.navigateTo(route, entityId) } }
 
     Sidebar {
         id: sidebar
@@ -68,7 +63,6 @@ Window {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-
         TopBar {
             id: topbar
             anchors.left: parent.left
@@ -78,7 +72,6 @@ Window {
             pageSubtitle: root.routeSubtitle(root.currentRoute)
             narrow: root.narrowLayout
         }
-
         ContentHost {
             id: contentHost
             anchors.left: parent.left
