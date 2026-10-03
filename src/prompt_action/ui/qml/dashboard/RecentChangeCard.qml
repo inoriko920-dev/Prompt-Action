@@ -55,7 +55,7 @@ PA.PACard {
         Row {
             width: parent.width
             spacing: 8
-            visible: root.latestChange.sync_changes && root.latestChange.sync_changes.length > 0
+            visible: Boolean(root.latestChange.sync_changes && root.latestChange.sync_changes.length > 0)
             Repeater {
                 model: root.latestChange.sync_changes || []
                 delegate: PA.PABadge {
@@ -65,7 +65,7 @@ PA.PACard {
             }
         }
 
-        Item { width: 1; height: 1; Layout.fillHeight: true }
+        Item { width: 1; height: 1 }
 
         RowLayout {
             width: parent.width
