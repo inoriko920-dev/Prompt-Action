@@ -1,0 +1,51 @@
+{
+  "step": "STEP 03",
+  "status": "PASS",
+  "repository": "inoriko920-dev/Prompt-Action",
+  "base_main": "b065adb8f74da34b225eff557a94b06b2d9f37b6",
+  "implementation_head": "b4f959bbf35788e153d90ce580910c40b164f1e7",
+  "input_gate": {
+    "run_id": 37100638449,
+    "job_id": 111139316987,
+    "conclusion": "success",
+    "artifact_id": 11266225729,
+    "artifact_sha256": "bedc3f08d880dc778682efec3f146a33426ac2839133ed8a7714c0aab87cd0b9"
+  },
+  "windows_ci": {
+    "run_id": 37101539795,
+    "job_id": 111141887100,
+    "conclusion": "success",
+    "runner_os": "Microsoft Windows Server 2025",
+    "python": "3.13.16 x64",
+    "step03_tests": "30 passed in 5.01s",
+    "step01_step02_regression": "43 passed in 2.21s",
+    "module_smoke": "PASS",
+    "qml_warnings": [],
+    "artifact": {
+      "name": "step03-visual-evidence",
+      "id": 11265832588,
+      "size_bytes": 115150,
+      "sha256": "df96c49d186ce2b546a92d872c3d793b57e191bfc04bf3bc621942a60ded2429",
+      "local_download_hash_matched": true,
+      "file_count": 22
+    }
+  },
+  "master_references": {
+    "01-Dashboard.jpg": "7553c2808f5051a4b51c82d163cbd6142bf3aab658e407802f3e39eccb03a514",
+    "02-Sejarah-Sistem.jpg": "72c1ead9cb91e93989070718f4ceb8f1df8483239ca07f10f86a0a8d337343d8",
+    "03-Per-Prompt.jpg": "7ae0a93a27ca7fc3b2576aa1298d75a527d9c061b38c4690fcb3189ffe818e52",
+    "04-Backup-Recovery.jpg": "6149e181c1577f3c080b8e908b5d9ffaa339cf1fefae88fc4f82f879d920efcb",
+    "05-Pengaturan.jpg": "64c916b15b2e0d36129748348d22c0e66949cbdf8756b3a5de583bf62bc2c84a"
+  },
+  "protected_sources": {
+    "BASELINE.json": "8ffd22fe3636309ce0484f8b724f9fe306f3156383c5f4efbcc7e59f79e90b6d",
+    "data/version_history.json": "1a0fddf98b000bb908e12e5aa617b42793a399a8dd9cb36e1acf7204ca8465bb",
+    "docs/UI_REFERENCE_PACKAGE_V1/materialized/VERSIONING_RULES.md": "9b33b4af31ddf27b5b6cfffd95011550a4e4de3f48c8e8d697b95f9e06da8969"
+  },
+  "visual_review": {
+    "result": "PASS",
+    "expected_technical_adaptation": "Hosted CI offscreen/software screenshots render text glyphs as box outlines; same headless limitation exists in STEP 01 evidence. QML warnings are empty and functional/text-property tests pass.",
+    "deferred": ["Dashboard final content STEP 04", "System History final content STEP 05", "Per Prompt final content STEP 06", "Backup/Recovery final content STEP 07", "Settings final content STEP 08"],
+    "unresolved_defects": []
+  }
+}
