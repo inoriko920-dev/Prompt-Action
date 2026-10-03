@@ -13,43 +13,30 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Decode preserved recovery chunks
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+      - name: Diagnose preserved chunk format
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
-          New-Item -ItemType Directory -Force probe | Out-Null
-          Add-Type -AssemblyName System.IO.Compression.FileSystem
-          foreach ($name in @('zz_BOOTSTRAP','zz_REBUILD')) {
-            $parts = Get-ChildItem "$name/chunks/*.b64" | Sort-Object Name
-            $stream = [IO.MemoryStream]::new()
-            try {
-              foreach ($part in $parts) {
-                $text = Get-Content $part.FullName -Raw
-                $text = $text -replace '[^A-Za-z0-9+/=]', ''
-                $chunk = [Convert]::FromBase64String($text)
-                $stream.Write($chunk, 0, $chunk.Length)
-                Write-Host "PART=$($part.Name) DECODED=$($chunk.Length)"
-              }
-              $bytes = $stream.ToArray()
-            } finally {
-              $stream.Dispose()
-            }
-            $out = "probe/$name.zip"
-            [IO.File]::WriteAllBytes($out, $bytes)
-            $sha = (Get-FileHash $out -Algorithm SHA256).Hash.ToLowerInvariant()
-            Write-Host "SOURCE=$name SIZE=$($bytes.Length) SHA256=$sha"
-            try {
-              $zip = [IO.Compression.ZipFile]::OpenRead((Resolve-Path $out))
-              Write-Host "ENTRIES=$($zip.Entries.Count)"
-              $zip.Entries | Select-Object -First 100 | ForEach-Object { Write-Host "ENTRY=$($_.FullName) SIZE=$($_.Length)" }
-              $zip.Dispose()
-            } catch {
-              Write-Host "ZIP_OPEN_FAILED=$($_.Exception.Message)"
-            }
-          }
-      - name: Upload decoded probes
-        uses: actions/upload-artifact@v4
-        with:
-          name: step095-source-probe
-          path: probe
-          retention-days: 1
+          @'
+          from pathlib import Path
+          import re
+
+          alphabet = set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
+          for source in ("zz_BOOTSTRAP", "zz_REBUILD"):
+              print(f"SOURCE={source}")
+              for path in sorted(Path(source, "chunks").glob("*.b64")):
+                  raw = path.read_text(encoding="utf-8-sig")
+                  stripped = raw.strip()
+                  invalid = [(i, repr(ch), ord(ch)) for i, ch in enumerate(stripped) if ch not in alphabet]
+                  eq = [i for i, ch in enumerate(stripped) if ch == "="]
+                  print(
+                      f"PART={path.name} RAW={len(raw)} STRIPPED={len(stripped)} MOD4={len(stripped)%4} "
+                      f"INVALID={len(invalid)} EQCOUNT={len(eq)} FIRSTEQ={eq[:5]} LASTEQ={eq[-5:]} "
+                      f"PREFIX={stripped[:32]!r} SUFFIX={stripped[-64:]!r}"
+                  )
+                  if invalid:
+                      print(f"INVALID_SAMPLE={invalid[:12]}")
+          '@ | Set-Content -Encoding utf8 probe_chunks.py
+          python probe_chunks.py
