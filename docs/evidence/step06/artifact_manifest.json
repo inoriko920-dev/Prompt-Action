@@ -1,0 +1,25 @@
+{
+  "step": "STEP_06",
+  "artifact_name": "step06-per-prompt-evidence",
+  "artifact_id": 11270706564,
+  "workflow_run_id": 37113821773,
+  "workflow_job_id": 111176652580,
+  "validated_head": "7755e1ae5b5c39e30b6267f3bfe98c20806fa013",
+  "size_bytes": 130740,
+  "sha256": "5d74f5b94f7da3b295c1ee85aa7da1f9158919de00aa711de90febc9e87933ce",
+  "independent_download_sha256_match": true,
+  "archive_entry_count": 9,
+  "unsafe_paths": [],
+  "nested_archives": [],
+  "screenshots": [
+    "per-prompt-1600x900.png",
+    "per-prompt-1920x1080.png",
+    "per-prompt-1366x768.png",
+    "per-prompt-loading.png",
+    "per-prompt-invalid.png",
+    "per-prompt-degraded.png"
+  ],
+  "qml_warnings": [],
+  "step06_tests": 45,
+  "regression_step01_to_step05": 143
+}
