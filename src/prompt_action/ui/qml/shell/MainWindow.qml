@@ -21,6 +21,7 @@ Window {
     property var dashboardVm: (typeof dashboardViewModel !== "undefined") ? dashboardViewModel : null
     property var historyVm: (typeof historyViewModel !== "undefined") ? historyViewModel : null
     property var perPromptVm: (typeof perPromptViewModel !== "undefined") ? perPromptViewModel : null
+    property var backupVm: (typeof backupViewModel !== "undefined") ? backupViewModel : null
 
     function routeTitle(route) {
         if (route === "system_history") return "Sejarah Sistem"
@@ -32,7 +33,7 @@ Window {
     function routeSubtitle(route) {
         if (route === "system_history") return "System, snapshot, dan kesinambungan perubahan"
         if (route === "prompt") return "Revision explorer • ACTIVE dan SELECTED dipisahkan"
-        if (route === "backup") return "Shell navigasi • konten final pada STEP 07"
+        if (route === "backup") return "Pastikan Prompt Action dapat dibangun ulang kapan pun"
         if (route === "settings") return "Shell navigasi • konten final pada STEP 08"
         return "Ringkasan canonical System, Snapshot, Prompt aktif, dan status backup"
     }
@@ -46,6 +47,7 @@ Window {
     Connections { target: root.dashboardVm; enabled: root.dashboardVm !== null; function onNavigationRequested(route, entityId) { root.navigateTo(route, entityId) } }
     Connections { target: root.historyVm; enabled: root.historyVm !== null; function onNavigationRequested(route, entityId) { root.navigateTo(route, entityId) } }
     Connections { target: root.perPromptVm; enabled: root.perPromptVm !== null; function onNavigationRequested(route, entityId) { root.navigateTo(route, entityId) } }
+    Connections { target: root.backupVm; enabled: root.backupVm !== null; function onNavigationRequested(route, entityId) { root.navigateTo(route, entityId) } }
 
     Sidebar {
         id: sidebar

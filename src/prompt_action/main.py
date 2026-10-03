@@ -20,7 +20,8 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="prompt-action")
     parser.add_argument("--smoke-test-ms", type=int, default=None, help="Auto-close after N ms; intended for automated smoke tests.")
     parser.add_argument("--qml", type=Path, default=None, help="Override QML file for diagnostics/tests.")
-    return parser.parse_args(list(argv) if argv is not None else None)
+    return parser.parse_args(list(argv) if argv is not None else None
+    )
 
 
 def _validate_runtime() -> tuple[bool, str]:
@@ -62,6 +63,7 @@ def run(argv: Sequence[str] | None = None) -> int:
         from .presentation.dashboard_view_model import DashboardViewModel
         from .presentation.history_view_model import SystemHistoryViewModel
         from .presentation.per_prompt_view_model import PerPromptViewModel
+        from .presentation.backup_view_model import BackupRecoveryViewModel
 
         logger.info("startup.begin app_version=%s", APP_VERSION)
         logger.info("runtime.python=%s", platform.python_version())
@@ -83,13 +85,16 @@ def run(argv: Sequence[str] | None = None) -> int:
             dashboard_vm = DashboardViewModel(paths.project_root)
             history_vm = SystemHistoryViewModel(paths.project_root)
             per_prompt_vm = PerPromptViewModel(paths.project_root)
+            backup_vm = BackupRecoveryViewModel(paths.project_root)
             logger.info("dashboard.state=%s", dashboard_vm.state.get("load_state"))
             logger.info("history.state=%s", history_vm.state.get("load_state"))
             logger.info("per_prompt.state=%s", per_prompt_vm.state.get("load_state"))
+            logger.info("backup.state=%s", backup_vm.state.get("load_state"))
             engine = load_qml(qml_path, {
                 "dashboardViewModel": dashboard_vm,
                 "historyViewModel": history_vm,
                 "perPromptViewModel": per_prompt_vm,
+                "backupViewModel": backup_vm,
             })
         except Exception:
             logger.exception("qt.initialization_failure")
