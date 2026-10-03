@@ -7,6 +7,8 @@ on:
   pull_request:
     paths:
       - 'src/prompt_action/presentation/**'
+      - 'src/prompt_action/bootstrap/qml_boot.py'
+      - 'src/prompt_action/main.py'
       - 'src/prompt_action/ui/qml/pages/DashboardPage.qml'
       - 'src/prompt_action/ui/qml/dashboard/**'
       - 'src/prompt_action/ui/qml/shell/**'
@@ -17,23 +19,51 @@ on:
       - 'docs/evidence/step04/**'
 
 jobs:
-  preflight:
+  validate-step04:
     runs-on: windows-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+      QT_QUICK_BACKEND: software
+      QSG_RHI_BACKEND: software
+      QSG_RENDER_LOOP: basic
+      QT_QUICK_CONTROLS_STYLE: Basic
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13.16'
           architecture: x64
+      - name: Verify exact Python
+        run: python -c "import platform,sys; print(sys.version); assert sys.version_info[:3] == (3,13,16); assert platform.architecture()[0] == '64bit'"
       - name: Install exact lock
         run: python -m pip install -r requirements-lock.txt
       - name: Install Prompt Action editable
         run: python -m pip install -e . --no-deps --no-build-isolation
       - name: Verify STEP 04 prerequisites and canonical data
         run: python scripts/dev/verify_step04_preflight.py
-      - name: Upload STEP 04 preflight
+      - name: Capture STEP 04 visual evidence
+        run: python scripts/dev/capture_step04_evidence.py --output ci-step04-evidence
+      - name: STEP 04 T01-T35
+        env:
+          STEP04_EVIDENCE_DIR: ${{ github.workspace }}\ci-step04-evidence
+        run: python -m pytest tests/step04 -q
+      - name: STEP 03 evidence for regression
+        run: python scripts/dev/capture_step03_evidence.py --output ci-step03-regression-evidence
+      - name: STEP 01-03 regression
+        env:
+          STEP03_EVIDENCE_DIR: ${{ github.workspace }}\ci-step03-regression-evidence
+        run: python -m pytest tests/step01 tests/step02 tests/step03 -q
+      - name: Explicit DPI 175 probe
+        env:
+          QT_SCALE_FACTOR: '1.75'
+        run: python tests/step04/dashboard_probe.py --width 1600 --height 900
+      - name: Module dashboard smoke
+        run: python -m prompt_action --smoke-test-ms 180
+      - name: Upload STEP 04 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: step04-preflight
-          path: ci-step04-preflight
+          name: step04-dashboard-evidence
+          path: |
+            ci-step04-preflight
+            ci-step04-evidence
           retention-days: 30

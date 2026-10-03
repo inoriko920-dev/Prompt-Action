@@ -14,9 +14,11 @@ Window {
     color: PATheme.Theme.pageBackground
 
     property string currentRoute: "dashboard"
+    property string navigationEntityId: ""
     readonly property bool narrowLayout: width < 1320
     readonly property color primaryToken: PATheme.Theme.primary
     readonly property int sidebarWidthToken: PATheme.Metrics.sidebarWidth
+    property var dashboardVm: (typeof dashboardViewModel !== "undefined") ? dashboardViewModel : null
 
     function routeTitle(route) {
         if (route === "system_history") return "Sejarah Sistem"
@@ -30,10 +32,19 @@ Window {
         if (route === "prompt") return "Shell navigasi • konten final pada STEP 06"
         if (route === "backup") return "Shell navigasi • konten final pada STEP 07"
         if (route === "settings") return "Shell navigasi • konten final pada STEP 08"
-        return "Shell navigasi • konten final pada STEP 04"
+        return "Ringkasan canonical System, Snapshot, Prompt aktif, dan status backup"
     }
-    function navigateTo(route) {
+    function navigateTo(route, entityId) {
         currentRoute = route
+        navigationEntityId = entityId || ""
+    }
+
+    Connections {
+        target: root.dashboardVm
+        enabled: root.dashboardVm !== null
+        function onNavigationRequested(route, entityId) {
+            root.navigateTo(route, entityId)
+        }
     }
 
     Sidebar {
@@ -43,7 +54,7 @@ Window {
         anchors.bottom: parent.bottom
         narrow: root.narrowLayout
         currentRoute: root.currentRoute
-        onRouteRequested: function(route) { root.navigateTo(route) }
+        onRouteRequested: function(route) { root.navigateTo(route, "") }
     }
 
     Item {
