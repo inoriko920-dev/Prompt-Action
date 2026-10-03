@@ -1,0 +1,41 @@
+{
+  "step": "STEP_09",
+  "status": "PASS",
+  "implementation_head": "a09d34f8136bedfb090a6dff3e03de543154296b",
+  "workflow": {
+    "name": "STEP 09 Search Compare Download CI",
+    "run_id": 37124386229,
+    "job_id": 111206637743,
+    "conclusion": "success"
+  },
+  "tests": {
+    "step09_passed": 60,
+    "step09_seconds": 1.47,
+    "step01_08_regression_passed": 284,
+    "step01_08_regression_seconds": 12.54,
+    "dpi_150_smoke": "PASS",
+    "module_smoke": "PASS",
+    "protected_hash_recheck": "PASS"
+  },
+  "artifact": {
+    "name": "step09-search-compare-download-evidence",
+    "artifact_id": 11274129404,
+    "size_bytes": 91848,
+    "sha256": "946d7b8f5ff4dd23585eed014b7d007f894f7980ae9db43d80193e2ff22f7d2f",
+    "independent_download_sha256_match": true,
+    "entries": 9,
+    "path_traversal_entries": 0,
+    "nested_archives": 0
+  },
+  "capture": {
+    "screenshots": 7,
+    "qml_warnings": 0,
+    "production_search_entities": 18,
+    "production_compare_download_expected_blocked": true
+  },
+  "protected": {
+    "BASELINE.json": "8ffd22fe3636309ce0484f8b724f9fe306f3156383c5f4efbcc7e59f79e90b6d",
+    "data/version_history.json": "1a0fddf98b000bb908e12e5aa617b42793a399a8dd9cb36e1acf7204ca8465bb",
+    "prompt_bytes_reconstructed": false
+  }
+}
