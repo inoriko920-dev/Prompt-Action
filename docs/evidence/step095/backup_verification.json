@@ -1,0 +1,13 @@
+{
+  "backup_id": "B001",
+  "snapshot": "S001",
+  "primary_path": "backups/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip",
+  "primary_sha256": "0893ffbfcd28616673cfddc7ac8e4f655337b176794c2119f485cafc0559db02",
+  "second_copy_path": "backups/second-copy/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip",
+  "second_copy_sha256": "0893ffbfcd28616673cfddc7ac8e4f655337b176794c2119f485cafc0559db02",
+  "zip_reopen": "PASS",
+  "path_audit": "PASS",
+  "manifest_hash_verification": "PASS",
+  "safe_extraction_verification": "PASS",
+  "second_copy_verification": "PASS"
+}

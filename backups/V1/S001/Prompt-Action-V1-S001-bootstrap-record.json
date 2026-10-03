@@ -1,0 +1,19 @@
+{
+  "id": "B001",
+  "snapshot": "S001",
+  "system": "V1",
+  "status": "VALID",
+  "verified": true,
+  "file": "backups/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip",
+  "sha256": "0893ffbfcd28616673cfddc7ac8e4f655337b176794c2119f485cafc0559db02",
+  "sha256_file": "backups/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip.sha256",
+  "sha256_file_sha256": "8489cd7b61e0b2ca6d54d97b9d764c37d2c54291ce306b307674d05c0a2311b9",
+  "second_copy": "backups/second-copy/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip",
+  "second_copy_sha256": "0893ffbfcd28616673cfddc7ac8e4f655337b176794c2119f485cafc0559db02",
+  "second_copy_verified": true,
+  "manifest_path": "bootstrap/manifest.json",
+  "manifest_sha256": "8b97448f959375e957a8425a2b83eeb516775f5086681467cd9c6a2049f571d9",
+  "rescue_source_sha256": "f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2",
+  "backup_kind": "BOOTSTRAP_BASELINE",
+  "created_at": "2026-10-03T00:00:00+07:00"
+}
