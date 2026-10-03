@@ -1,0 +1,9 @@
+{
+  "migration_id": "schema0_to_schema1",
+  "from_schema_version": 0,
+  "to_schema_version": 1,
+  "kind": "METADATA_ONLY",
+  "deterministic": true,
+  "prompt_content_mutation": false,
+  "description": "Adds STEP 02 canonical metadata fields without modifying prompt bytes."
+}

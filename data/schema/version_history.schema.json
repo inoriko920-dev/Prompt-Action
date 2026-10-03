@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "prompt-action/version-history.schema.json",
+  "title": "Prompt Action canonical version history",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "app_data_revision",
+    "app_version",
+    "active_system",
+    "active_snapshot",
+    "legacy_sources",
+    "systems",
+    "snapshots",
+    "prompts",
+    "backups",
+    "release_policy",
+    "integrity"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "app_data_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "app_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "active_system": {
+      "type": "string",
+      "pattern": "^V[1-9][0-9]*$"
+    },
+    "active_snapshot": {
+      "type": "string",
+      "pattern": "^S[0-9]{3}$"
+    },
+    "legacy_sources": {
+      "type": "array"
+    },
+    "systems": {
+      "type": "array"
+    },
+    "snapshots": {
+      "type": "array"
+    },
+    "prompts": {
+      "type": "object",
+      "required": [
+        "P1A",
+        "P1B",
+        "P1B1",
+        "P1B2",
+        "P2",
+        "P3",
+        "P4",
+        "P5"
+      ]
+    },
+    "backups": {
+      "type": "array"
+    },
+    "release_policy": {
+      "type": "object"
+    },
+    "integrity": {
+      "type": "object"
+    }
+  }
+}

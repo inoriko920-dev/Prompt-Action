@@ -1,0 +1,94 @@
+name: STEP 02 Canonical Data CI
+
+on:
+  push:
+    branches:
+      - 'sol/step02-*'
+    paths:
+      - 'src/prompt_action/domain/**'
+      - 'src/prompt_action/data/**'
+      - 'src/prompt_action/services/version_engine.py'
+      - 'src/prompt_action/services/__init__.py'
+      - 'data/**'
+      - 'tests/step02/**'
+      - 'scripts/dev/validate_data.ps1'
+      - '.github/workflows/ci-step02.yml'
+      - 'docs/implementation/STEP_02_SOL_EXECUTION_REPORT.md'
+      - 'evidence/step02/**'
+  pull_request:
+    paths:
+      - 'src/prompt_action/domain/**'
+      - 'src/prompt_action/data/**'
+      - 'src/prompt_action/services/version_engine.py'
+      - 'src/prompt_action/services/__init__.py'
+      - 'data/**'
+      - 'tests/step02/**'
+      - 'scripts/dev/validate_data.ps1'
+      - '.github/workflows/ci-step02.yml'
+
+jobs:
+  validate-step02:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+          architecture: 'x64'
+      - name: Verify exact Python
+        shell: pwsh
+        run: |
+          python -c "import platform,sys; print(sys.version); assert sys.version_info[:3] == (3,13,16); assert platform.architecture()[0] == '64bit'"
+      - name: Install exact lock
+        run: python -m pip install -r requirements-lock.txt
+      - name: Install Prompt Action editable
+        run: python -m pip install -e . --no-deps --no-build-isolation
+      - name: Validate canonical baseline
+        run: python -m prompt_action.data validate
+      - name: STEP 02 T01-T30 plus contracts
+        run: python -m pytest tests/step02 -q
+      - name: Read-only inspection and plan preview
+        shell: pwsh
+        run: |
+          python -m prompt_action.data inspect-active | Out-File -Encoding utf8 ci-inspect-active.json
+          python -m prompt_action.data inspect-prompt P3 | Out-File -Encoding utf8 ci-inspect-p3.json
+          python -m prompt_action.data plan-release --primary P3 --sync P1B2 P4 | Out-File -Encoding utf8 ci-plan-release.json
+      - name: Corruption fixtures must fail validation
+        shell: pwsh
+        run: |
+          $fixtures = @(
+            'missing-parent-snapshot.json',
+            'snapshot-cycle.json',
+            'revision-cycle.json',
+            'undeclared-sync-change.json',
+            'missing-active-file.json',
+            'sha-mismatch.json',
+            'complete-without-backup.json',
+            'absolute-path-leak.json',
+            'schema-version-unsupported.json'
+          )
+          New-Item -ItemType Directory -Force ci-corruption-reports | Out-Null
+          foreach ($fixture in $fixtures) {
+            python -m prompt_action.data validate --file "data/fixtures/$fixture" | Out-File -Encoding utf8 "ci-corruption-reports/$fixture.report.json"
+            if ($LASTEXITCODE -eq 0) { throw "Corruption fixture unexpectedly passed: $fixture" }
+          }
+          exit 0
+      - name: Developer validator PowerShell
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File scripts/dev/validate_data.ps1
+      - name: Package CI evidence
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force ci-step02-evidence | Out-Null
+          Copy-Item ci-inspect-active.json ci-step02-evidence/
+          Copy-Item ci-inspect-p3.json ci-step02-evidence/
+          Copy-Item ci-plan-release.json ci-step02-evidence/
+          Copy-Item ci-corruption-reports ci-step02-evidence/ -Recurse
+          python -m prompt_action.data validate | Out-File -Encoding utf8 ci-step02-evidence/canonical-validation.json
+          python -m pytest tests/step02 -q | Out-File -Encoding utf8 ci-step02-evidence/pytest.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: step02-ci-evidence
+          path: ci-step02-evidence
+          retention-days: 30
