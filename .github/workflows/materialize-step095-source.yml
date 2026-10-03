@@ -1,0 +1,47 @@
+name: STEP 09.5 Materialize Verified Bootstrap Source
+
+on:
+  push:
+    branches:
+      - 'sol/step09-5-bootstrap-source-20261003'
+    paths:
+      - 'docs/evidence/step095/bootstrap-source/**'
+      - 'scripts/dev/materialize_step095_from_source.py'
+      - '.github/workflows/materialize-step095-source.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+          architecture: x64
+      - name: Verify exact Python
+        run: python -c "import platform,sys; print(sys.version); assert sys.version_info[:3] == (3,13,16); assert platform.architecture()[0] == '64bit'"
+      - name: Reconstruct, verify, materialize, and bootstrap
+        run: python scripts/dev/materialize_step095_from_source.py
+      - name: Verify generated bootstrap state
+        shell: pwsh
+        run: |
+          python -c "import hashlib,json,pathlib; p=pathlib.Path('data/version_history.json'); d=json.loads(p.read_text(encoding='utf-8')); s=next(x for x in d['snapshots'] if x['id']=='S001'); assert d['active_system']=='V1' and d['active_snapshot']=='S001'; assert s['status']=='COMPLETE' and s['backup_id']=='B001'; assert len(d['backups'])==1 and d['backups'][0]['verified'] is True and d['backups'][0]['second_copy_verified'] is True; assert all(v['revisions']['R1']['file_available'] is True for v in d['prompts'].values()); assert all(set(v['revisions'])=={'R1'} for v in d['prompts'].values()); print('canonical bootstrap PASS', hashlib.sha256(p.read_bytes()).hexdigest())"
+          python -m zipfile -t backups/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip
+          python -m zipfile -t backups/second-copy/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip
+      - name: Commit generated exact artifacts
+        shell: pwsh
+        run: |
+          git config user.name "prompt-action-step095-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add prompts backups data/version_history.json docs/CHANGELOG.md docs/evidence/step095/rescue_verification.json docs/evidence/step095/backup_verification.json docs/evidence/step095/bootstrap_transaction.json docs/evidence/step095/allowed_canonical_diff.json
+          if (git diff --cached --quiet) {
+            Write-Host "No generated changes to commit."
+            exit 0
+          }
+          git commit -m "STEP 09.5: materialize verified V1 S001 bootstrap artifacts"
+          git push origin HEAD:sol/step09-5-bootstrap-source-20261003
