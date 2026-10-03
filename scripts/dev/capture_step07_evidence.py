@@ -38,12 +38,15 @@ def main() -> int:
     window = engine.rootObjects()[0]
     window.setProperty("currentRoute", "backup")
     QCoreApplication.processEvents()
+    screen = app.primaryScreen()
+    if screen is None:
+        raise RuntimeError("No primary screen available for capture")
 
     captured = []
     for width, height in [(1600, 900), (1920, 1080), (1366, 768)]:
         window.setWidth(width); window.setHeight(height)
         QCoreApplication.processEvents()
-        image = window.grabWindow()
+        image = screen.grabWindow(int(window.winId()), 0, 0, width, height).toImage()
         path = screens / f"backup-recovery-{width}x{height}.png"
         if image.isNull() or not image.save(str(path)):
             raise RuntimeError(f"Screenshot failed: {width}x{height}")
