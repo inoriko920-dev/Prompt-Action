@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+      - name: Diagnose exact capsule Base64 segmentation
+        run: python scripts/dev/diagnose_exact_capsule.py
       - name: Expand exact Prompt capsule and build bootstrap ZIP
         run: python scripts/dev/run_step095_exact_capsule_rebuild.py
       - name: Materialize exact Prompt bytes and canonical state
