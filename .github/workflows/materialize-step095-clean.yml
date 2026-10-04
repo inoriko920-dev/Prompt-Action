@@ -19,7 +19,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13.16'
-      - name: Guarded repair of bootstrap ZIP container
+      - name: Fetch historical recovery snapshot commit
+        shell: bash
+        run: git fetch origin d23512acd3ae9d6f4877e4d4873eb89b061289ef --depth=1
+      - name: Recover bootstrap from protected historical bytes
         run: python scripts/dev/repair_step095_bootstrap_zip.py
       - name: Materialize exact Prompt bytes and canonical state
         run: python scripts/dev/materialize_step095_prompts.py
