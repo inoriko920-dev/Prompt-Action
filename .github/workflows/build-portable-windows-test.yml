@@ -65,6 +65,20 @@ jobs:
             if (-not (Test-Path $path)) { throw "Missing portable path: $path" }
           }
 
+      - name: Verify portable user-facing text
+        shell: pwsh
+        run: |
+          $readmePath = "portable-output\Prompt-Action-Portable-Test\BACA_DULU.txt"
+          $readme = Get-Content $readmePath -Raw
+          if ($readme -match '[\x00-\x08\x0B\x0C\x0E-\x1F]') {
+            throw "BACA_DULU.txt contains unexpected control characters"
+          }
+          foreach ($requiredText in @("Jalankan Prompt Action.bat", "PromptAction.exe", "_internal", "backups")) {
+            if (-not $readme.Contains($requiredText)) {
+              throw "BACA_DULU.txt missing required text: $requiredText"
+            }
+          }
+
       - name: Smoke test frozen EXE
         shell: pwsh
         run: |
