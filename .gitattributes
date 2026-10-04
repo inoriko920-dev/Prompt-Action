@@ -1,0 +1,3 @@
+# STEP 09.5 integrity rule: baseline Prompt files are byte-exact artifacts.
+# Never normalize line endings on checkout/commit; protected SHA-256 values are over exact bytes.
+prompts/**/*.txt -text
