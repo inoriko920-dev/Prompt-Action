@@ -52,11 +52,39 @@ class TransactionJournalStore:
             raise ReleaseWorkflowError("RECOVERY_REQUIRED", f"Invalid transaction journal root: {txn_id}")
         return value
 
+    def _live_placed_targets(self, document: dict[str, Any]) -> list[str]:
+        live: list[str] = []
+        values = document.get("placed_targets", [])
+        if not isinstance(values, list):
+            raise ReleaseWorkflowError("RECOVERY_REQUIRED", "Transaction placed_targets is invalid")
+        for value in values:
+            if not isinstance(value, str) or not value:
+                raise ReleaseWorkflowError("RECOVERY_REQUIRED", "Transaction contains an invalid placed target")
+            candidate = (self.project_root / value).resolve()
+            try:
+                candidate.relative_to(self.project_root)
+            except ValueError as exc:
+                raise ReleaseWorkflowError("RECOVERY_REQUIRED", f"Placed target escapes project root: {value}") from exc
+            if candidate.exists():
+                live.append(value)
+        return live
+
     def update(self, txn_id: str, phase: str, **fields: Any) -> dict[str, Any]:
         if phase not in ALLOWED_PHASES:
             raise ReleaseWorkflowError("RECOVERY_REQUIRED", f"Unknown transaction phase: {phase}")
         doc = self.load(txn_id)
         doc.update(fields)
+        # ABORTED is a terminal promise that no official files from this
+        # transaction remain. If a partial placement survived a failure, keep
+        # the transaction recoverable instead of hiding the orphan behind a
+        # false terminal state.
+        if phase == "ABORTED":
+            live = self._live_placed_targets(doc)
+            if live:
+                raise ReleaseWorkflowError(
+                    "RECOVERY_REQUIRED",
+                    "Cannot mark release ABORTED while placed revision files remain: " + ", ".join(live),
+                )
         doc["phase"] = phase
         doc["updated_at"] = _now()
         atomic_write_json(self.journal_path(txn_id), doc)
