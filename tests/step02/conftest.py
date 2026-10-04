@@ -4,6 +4,7 @@ from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
+import shutil
 
 import pytest
 
@@ -21,13 +22,31 @@ def baseline(project_root: Path) -> dict:
 
 
 @pytest.fixture
-def project_factory(tmp_path: Path, baseline: dict):
+def project_factory(tmp_path: Path, baseline: dict, project_root: Path):
     def make(document: dict | None = None, name: str = "project") -> Path:
         root = tmp_path / name
+        doc = document or baseline
         (root / "data").mkdir(parents=True)
         (root / "data/version_history.json").write_text(
-            json.dumps(document or baseline, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
+        # STEP 09.5 materialized the official Prompt Revision bytes. Any isolated
+        # fixture that claims file_available=true must therefore contain those
+        # exact referenced files or the fixture itself would be canonically invalid.
+        for prompt in doc.get("prompts", {}).values():
+            if not isinstance(prompt, dict):
+                continue
+            for revision in prompt.get("revisions", {}).values():
+                if not isinstance(revision, dict) or revision.get("file_available") is not True:
+                    continue
+                rel = revision.get("file")
+                if not isinstance(rel, str) or not rel:
+                    continue
+                source = project_root / rel
+                target = root / rel
+                if source.is_file():
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(source, target)
         (root / "data/fixtures").mkdir(parents=True, exist_ok=True)
         (root / "data/fixtures/hash-target.txt").write_text("fixture-bytes\n", encoding="utf-8")
         return root
