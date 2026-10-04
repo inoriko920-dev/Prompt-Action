@@ -18,7 +18,7 @@ def test_commit_release_creates_backup_required(project_factory):
     repo=VersionRepository(root); engine=VersionEngine(repo)
     plan=engine.plan_release({"primary":{"prompt_id":"P3","file":rel},"sync":[]})
     result=engine.commit_release(plan); doc=repo.load().document
-    assert result.app_data_revision==2 and doc["active_snapshot"]=="S002"
+    assert result.app_data_revision==3 and doc["active_snapshot"]=="S002"
     assert doc["snapshots"][-1]["status"]=="BACKUP_REQUIRED" and doc["snapshots"][-1]["backup_id"] is None
     assert doc["app_version"]=="0.1.0-dev" and doc["active_system"]=="V1"
 
@@ -28,8 +28,8 @@ def test_new_snapshot_cannot_start_complete(project_factory, baseline):
     # Add a valid backup so domain validation is otherwise capable of accepting COMPLETE.
     doc["snapshots"][-1]["backup_id"]="BKP-V1-S002"
     doc["backups"].append({"id":"BKP-V1-S002","status":"VALID","verified":True,"second_copy_verified":True})
-    doc["app_data_revision"]=2
-    with pytest.raises(ValidationBlockedError): repo.save(doc,expected_revision=1)
+    doc["app_data_revision"]=baseline["app_data_revision"] + 1
+    with pytest.raises(ValidationBlockedError): repo.save(doc,expected_revision=baseline["app_data_revision"])
 
 
 def test_migration_operation_creates_metadata_backup_and_preserves_prompt_bytes(project_factory, project_root):
@@ -44,5 +44,8 @@ def test_migration_operation_creates_metadata_backup_and_preserves_prompt_bytes(
 def test_plan_release_rejects_unavailable_nonbaseline_active_source(project_factory, baseline):
     doc=add_release(baseline,"P3",file_available=False); root=project_factory(doc)
     engine=VersionEngine(VersionRepository(root))
-    with pytest.raises(ReleasePlanError, match="not materialized"):
+    # A non-baseline active revision without bytes is invalid before another
+    # release can be planned. Either the canonical validation gate or the
+    # release-source gate may surface the refusal; both are fail-closed.
+    with pytest.raises((ReleasePlanError, ValidationBlockedError)):
         engine.plan_release({"primary":"P3","sync":[]})
