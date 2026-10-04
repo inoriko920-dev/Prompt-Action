@@ -148,9 +148,18 @@ jobs:
           }
 
           $summary = Get-Content (($files | Where-Object { $_.Name -eq "SUMMARY.txt" } | Select-Object -First 1).FullName) -Raw
-          foreach ($text in @("Prompt file contents are NOT included", "Backup archive contents are NOT included", "Arbitrary application log contents are NOT included")) {
+          foreach ($text in @("Prompt file contents are NOT included", "Backup archive contents are NOT included", "Arbitrary application log contents are NOT included", "Absolute portable/user paths are redacted")) {
             if (-not $summary.Contains($text)) { throw "Diagnostic privacy declaration missing: $text" }
           }
+
+          $sanitizedSelfCheck = Get-Content (($files | Where-Object { $_.Name -eq "portable-self-check.txt" } | Select-Object -First 1).FullName) -Raw
+          if (-not $sanitizedSelfCheck.Contains("<PORTABLE_ROOT>")) { throw "Diagnostic self-check did not redact portable root" }
+          if ($sanitizedSelfCheck.Contains($root)) { throw "Diagnostic self-check leaked portable root path" }
+          if ($env:USERPROFILE -and $sanitizedSelfCheck.Contains($env:USERPROFILE)) { throw "Diagnostic self-check leaked USERPROFILE" }
+
+          $logIndex = Get-Content (($files | Where-Object { $_.Name -eq "LOG_INDEX.txt" } | Select-Object -First 1).FullName) -Raw
+          if ($logIndex.Contains("portable-self-check.txt")) { throw "Diagnostic log index leaked original log filename" }
+          if (-not $logIndex.Contains("ORIGINAL FILENAMES NOT INCLUDED")) { throw "Diagnostic log index missing filename-redaction declaration" }
 
       - name: Smoke test frozen EXE
         shell: pwsh
