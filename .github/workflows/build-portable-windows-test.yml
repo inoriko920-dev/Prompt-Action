@@ -168,7 +168,7 @@ jobs:
           if (Test-Path $extract) { Remove-Item $extract -Recurse -Force }
           Expand-Archive -Path $zip.FullName -DestinationPath $extract -Force
 
-          $requiredLeaf = @("SUMMARY.txt", "BUILD_INFO.txt", "portable-self-check.txt", "EXE_INFO.txt", "LOG_INDEX.txt", "STRUCTURE.txt")
+          $requiredLeaf = @("SUMMARY.txt", "BUILD_INFO.txt", "portable-launch-status.txt", "portable-self-check.txt", "EXE_INFO.txt", "LOG_INDEX.txt", "STRUCTURE.txt")
           $files = Get-ChildItem $extract -File -Recurse
           foreach ($leaf in $requiredLeaf) {
             if (-not ($files | Where-Object { $_.Name -eq $leaf })) { throw "Diagnostic bundle missing $leaf" }
@@ -184,10 +184,17 @@ jobs:
             if (-not $summary.Contains($text)) { throw "Diagnostic privacy declaration missing: $text" }
           }
 
+          foreach ($leaf in @("portable-launch-status.txt", "portable-self-check.txt")) {
+            $sanitizedText = Get-Content (($files | Where-Object { $_.Name -eq $leaf } | Select-Object -First 1).FullName) -Raw
+            if ($sanitizedText.Contains($root)) { throw "Diagnostic $leaf leaked portable root path" }
+            if ($env:USERPROFILE -and $sanitizedText.Contains($env:USERPROFILE)) { throw "Diagnostic $leaf leaked USERPROFILE" }
+          }
+
+          $sanitizedLauncher = Get-Content (($files | Where-Object { $_.Name -eq "portable-launch-status.txt" } | Select-Object -First 1).FullName) -Raw
+          if (-not $sanitizedLauncher.Contains("RESULT: FAIL")) { throw "Diagnostic launcher status missing captured failure evidence" }
+
           $sanitizedSelfCheck = Get-Content (($files | Where-Object { $_.Name -eq "portable-self-check.txt" } | Select-Object -First 1).FullName) -Raw
           if (-not $sanitizedSelfCheck.Contains("<PORTABLE_ROOT>")) { throw "Diagnostic self-check did not redact portable root" }
-          if ($sanitizedSelfCheck.Contains($root)) { throw "Diagnostic self-check leaked portable root path" }
-          if ($env:USERPROFILE -and $sanitizedSelfCheck.Contains($env:USERPROFILE)) { throw "Diagnostic self-check leaked USERPROFILE" }
 
           $logIndex = Get-Content (($files | Where-Object { $_.Name -eq "LOG_INDEX.txt" } | Select-Object -First 1).FullName) -Raw
           if ($logIndex.Contains("portable-self-check.txt")) { throw "Diagnostic log index leaked original log filename" }
