@@ -216,7 +216,9 @@ def test_t13_prompt_count_is_data_driven(tmp_path):
 # T14
 def test_t14_integrity_warning_item(tmp_path):
     doc = deepcopy(BASE_DOC)
-    doc["prompts"]["P3"]["revisions"]["R1"]["change_role"] = "PRIMARY"
+    rev = doc["prompts"]["P3"]["revisions"]["R1"]
+    rev["file_available"] = False
+    rev["file"] = None
     state = _service(tmp_path, doc).read()
     p3 = next(item for item in state.active_prompts if item.prompt_id == "P3")
     assert p3.integrity_state == "MISSING_SOURCE" and state.load_state == "degraded"
@@ -288,7 +290,9 @@ def test_t22_invalid_data_blocking_state(tmp_path):
 # T23
 def test_t23_degraded_state(tmp_path):
     doc = deepcopy(BASE_DOC)
-    doc["prompts"]["P4"]["revisions"]["R1"]["change_role"] = "PRIMARY"
+    rev = doc["prompts"]["P4"]["revisions"]["R1"]
+    rev["file_available"] = False
+    rev["file"] = None
     assert _service(tmp_path, doc).read().load_state == "degraded"
 
 
