@@ -1,0 +1,36 @@
+name: STEP 09.5 Clean Materializer
+
+on:
+  push:
+    branches:
+      - 'sol/step09-5-clean-final-20261004-v2'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: ${{ contains(github.event.head_commit.message, '[run-step095-clean]') && !contains(github.event.head_commit.message, '[step095-materialized]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+      - name: Materialize exact Prompt bytes and canonical state
+        run: python scripts/dev/materialize_step095_prompts.py
+      - name: Commit atomic materialization
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/version_history.json prompts backups docs/CHANGELOG.md docs/evidence/step095
+          if git diff --cached --quiet; then
+            echo "No changes produced; refusing to claim materialization."
+            exit 1
+          fi
+          git commit -m "STEP 09.5: materialize exact baseline + complete S001 [step095-materialized]"
+          git push origin HEAD:sol/step09-5-clean-final-20261004-v2
