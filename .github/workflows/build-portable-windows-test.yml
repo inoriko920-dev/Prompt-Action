@@ -62,7 +62,10 @@ jobs:
             "$root\BUILD_INFO.txt",
             "$root\Jalankan Prompt Action.bat",
             "$root\Cek Portable.bat",
-            "$root\scripts\portable_self_check.ps1"
+            "$root\Buat Paket Diagnostik.bat",
+            "$root\scripts\portable_self_check.ps1",
+            "$root\scripts\portable_collect_diagnostics.ps1",
+            "$root\runtime\diagnostics"
           )
           foreach ($path in $required) {
             if (-not (Test-Path $path)) { throw "Missing portable path: $path" }
@@ -93,7 +96,7 @@ jobs:
               throw "Portable user-facing text contains unexpected control characters"
             }
           }
-          foreach ($requiredText in @("Jalankan Prompt Action.bat", "Cek Portable.bat", "portable-self-check.txt", "PromptAction.exe", "_internal", "backups", "0.1.0.dev0", "Prompt Action v22.5.2")) {
+          foreach ($requiredText in @("Jalankan Prompt Action.bat", "Cek Portable.bat", "Buat Paket Diagnostik.bat", "runtime\diagnostics", "portable-self-check.txt", "PromptAction.exe", "_internal", "backups", "0.1.0.dev0", "Prompt Action v22.5.2")) {
             if (-not $readme.Contains($requiredText) -and -not $buildInfo.Contains($requiredText)) {
               throw "Portable metadata text missing required value: $requiredText"
             }
@@ -111,6 +114,42 @@ jobs:
           if (-not $text.Contains("RESULT: PASS")) { throw "Portable self-check did not report PASS" }
           foreach ($requiredText in @("ProductName: Prompt Action", "ProductVersion: 0.1.0.dev0", "Smoke test exit code: 0")) {
             if (-not $text.Contains($requiredText)) { throw "Self-check report missing: $requiredText" }
+          }
+
+      - name: Verify privacy-safe diagnostic bundle
+        shell: pwsh
+        run: |
+          $root = (Resolve-Path "portable-output\Prompt-Action-Portable-Test").Path
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$root\scripts\portable_collect_diagnostics.ps1" -Root $root
+          if ($LASTEXITCODE -ne 0) { throw "Diagnostic bundle collector failed with exit code $LASTEXITCODE" }
+
+          $diagDir = "$root\runtime\diagnostics"
+          $zip = Get-ChildItem $diagDir -Filter "Prompt-Action-Diagnostic-*.zip" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $zip) { throw "Diagnostic ZIP missing" }
+          $sidecar = "$($zip.FullName).sha256"
+          if (-not (Test-Path $sidecar)) { throw "Diagnostic ZIP SHA256 sidecar missing" }
+          $actual = (Get-FileHash -Algorithm SHA256 $zip.FullName).Hash.ToLowerInvariant()
+          $expected = ((Get-Content $sidecar -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+          if ($actual -ne $expected) { throw "Diagnostic ZIP SHA256 mismatch" }
+
+          $extract = Join-Path $env:RUNNER_TEMP "prompt-action-diagnostic-check"
+          if (Test-Path $extract) { Remove-Item $extract -Recurse -Force }
+          Expand-Archive -Path $zip.FullName -DestinationPath $extract -Force
+
+          $requiredLeaf = @("SUMMARY.txt", "BUILD_INFO.txt", "portable-self-check.txt", "EXE_INFO.txt", "LOG_INDEX.txt", "STRUCTURE.txt")
+          $files = Get-ChildItem $extract -File -Recurse
+          foreach ($leaf in $requiredLeaf) {
+            if (-not ($files | Where-Object { $_.Name -eq $leaf })) { throw "Diagnostic bundle missing $leaf" }
+          }
+
+          $forbidden = @("version_history.json", "settings.json", "Prompt-3_V1_R1.txt", "B001.zip")
+          foreach ($name in $forbidden) {
+            if ($files | Where-Object { $_.Name -eq $name }) { throw "Diagnostic bundle leaked forbidden file: $name" }
+          }
+
+          $summary = Get-Content (($files | Where-Object { $_.Name -eq "SUMMARY.txt" } | Select-Object -First 1).FullName) -Raw
+          foreach ($text in @("Prompt file contents are NOT included", "Backup archive contents are NOT included", "Arbitrary application log contents are NOT included")) {
+            if (-not $summary.Contains($text)) { throw "Diagnostic privacy declaration missing: $text" }
           }
 
       - name: Smoke test frozen EXE
