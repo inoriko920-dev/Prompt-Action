@@ -1,0 +1,42 @@
+name: One-shot fix PR11 STEP04 baseline contract
+
+on:
+  push:
+    branches: ['sol/baseline-reconcile-p3-v2252-20261004']
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: ${{ contains(github.event.head_commit.message, '[run-step04-contract-fix]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Patch verified-baseline and degraded fixtures
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('tests/step04/test_step04_dashboard.py')
+          s=p.read_text(encoding='utf-8')
+          old='''    state = _service(tmp_path, doc).read()\n    p3 = next(item for item in state.active_prompts if item.prompt_id == "P3")\n    assert p3.integrity_state == "MISSING_SOURCE" and state.load_state == "degraded"\n'''
+          new='''    state = _service(tmp_path, doc).read()\n    p3 = next(item for item in state.active_prompts if item.prompt_id == "P3")\n    assert p3.integrity_state == "VERIFIED_BASELINE" and state.load_state == "ready"\n'''
+          if old not in s: raise SystemExit('T14 pattern missing')
+          s=s.replace(old,new,1)
+          old2='''    rev = doc["prompts"]["P4"]["revisions"]["R1"]\n    rev["file_available"] = False\n    rev["file"] = None\n    assert _service(tmp_path, doc).read().load_state == "degraded"\n'''
+          new2='''    rev = doc["prompts"]["P4"]["revisions"]["R1"]\n    rev["file_available"] = False\n    rev["file"] = None\n    doc["integrity"]["baseline_verification"] = "UNVERIFIED_TEST_FIXTURE"\n    state = _service(tmp_path, doc).read()\n    p4 = next(item for item in state.active_prompts if item.prompt_id == "P4")\n    assert p4.integrity_state == "MISSING_SOURCE" and state.load_state == "degraded"\n'''
+          if old2 not in s: raise SystemExit('T23 pattern missing')
+          s=s.replace(old2,new2,1)
+          p.write_text(s,encoding='utf-8')
+      - name: Commit fix and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/fix-pr11-step04-contract.yml
+          git add tests/step04/test_step04_dashboard.py
+          git diff --cached --check
+          git commit -m "CI migration: align STEP 04 with verified baseline fallback"
+          git push origin HEAD:sol/baseline-reconcile-p3-v2252-20261004
