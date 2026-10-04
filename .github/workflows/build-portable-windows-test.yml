@@ -63,6 +63,7 @@ jobs:
             "$root\Jalankan Prompt Action.bat",
             "$root\Cek Portable.bat",
             "$root\Buat Paket Diagnostik.bat",
+            "$root\scripts\portable_launch.ps1",
             "$root\scripts\portable_self_check.ps1",
             "$root\scripts\portable_collect_diagnostics.ps1",
             "$root\runtime\diagnostics"
@@ -96,7 +97,7 @@ jobs:
               throw "Portable user-facing text contains unexpected control characters"
             }
           }
-          foreach ($requiredText in @("Jalankan Prompt Action.bat", "Cek Portable.bat", "Buat Paket Diagnostik.bat", "runtime\diagnostics", "portable-self-check.txt", "PromptAction.exe", "_internal", "backups", "0.1.0.dev0", "Prompt Action v22.5.2")) {
+          foreach ($requiredText in @("Jalankan Prompt Action.bat", "portable-launch-status.txt", "Cek Portable.bat", "Buat Paket Diagnostik.bat", "runtime\diagnostics", "portable-self-check.txt", "PromptAction.exe", "_internal", "backups", "0.1.0.dev0", "Prompt Action v22.5.2")) {
             if (-not $readme.Contains($requiredText) -and -not $buildInfo.Contains($requiredText)) {
               throw "Portable metadata text missing required value: $requiredText"
             }
@@ -114,6 +115,37 @@ jobs:
           if (-not $text.Contains("RESULT: PASS")) { throw "Portable self-check did not report PASS" }
           foreach ($requiredText in @("ProductName: Prompt Action", "ProductVersion: 0.1.0.dev0", "Smoke test exit code: 0")) {
             if (-not $text.Contains($requiredText)) { throw "Self-check report missing: $requiredText" }
+          }
+
+      - name: Verify crash-aware portable launcher
+        shell: pwsh
+        run: |
+          $root = (Resolve-Path "portable-output\Prompt-Action-Portable-Test").Path
+          $launcher = "$root\scripts\portable_launch.ps1"
+          $statusPath = "$root\runtime\logs\portable-launch-status.txt"
+
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File $launcher -Root $root -SmokeTest
+          if ($LASTEXITCODE -ne 0) { throw "Crash-aware launcher smoke path failed with exit code $LASTEXITCODE" }
+          if (-not (Test-Path $statusPath)) { throw "Portable launch status report missing" }
+          $status = Get-Content $statusPath -Raw
+          foreach ($text in @("Mode: SMOKE_TEST", "RESULT: PASS", "ExitCode: 0")) {
+            if (-not $status.Contains($text)) { throw "Launcher PASS report missing: $text" }
+          }
+
+          $exe = "$root\PromptAction.exe"
+          $hidden = "$root\PromptAction.exe.launch-test-hidden"
+          Move-Item $exe $hidden -Force
+          try {
+            powershell.exe -NoProfile -ExecutionPolicy Bypass -File $launcher -Root $root -SmokeTest
+            $failureCode = $LASTEXITCODE
+            if ($failureCode -eq 0) { throw "Launcher missing-EXE path unexpectedly returned success" }
+            $failureStatus = Get-Content $statusPath -Raw
+            if (-not $failureStatus.Contains("RESULT: FAIL")) { throw "Launcher missing-EXE path did not report FAIL" }
+            if (-not $failureStatus.Contains("PromptAction.exe is missing")) { throw "Launcher missing-EXE reason missing" }
+            $selfCheckFailure = Get-Content "$root\runtime\logs\portable-self-check.txt" -Raw
+            if (-not $selfCheckFailure.Contains("RESULT: FAIL")) { throw "Automatic self-check did not record FAIL for missing EXE" }
+          } finally {
+            Move-Item $hidden $exe -Force
           }
 
       - name: Verify privacy-safe diagnostic bundle
