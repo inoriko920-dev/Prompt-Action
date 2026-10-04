@@ -93,7 +93,7 @@ Status: UJI COBA / BELUM FINAL
 CARA MENJALANKAN
 1. Ekstrak seluruh ZIP ke satu folder biasa, misalnya C:\Prompt-Action-Test.
 2. Jangan jalankan langsung dari dalam ZIP.
-3. Klik dua kali Jalankan Prompt Action.bat.
+3. Klik dua kali Jalankan Prompt Action.bat; launcher ini akan menjalankan PromptAction.exe.
 4. Launcher mengamati startup singkat; jika EXE gagal start atau keluar dengan error, self-check dijalankan otomatis.
 5. Tidak perlu memasang Python.
 
