@@ -78,17 +78,30 @@ Status: UJI COBA / BELUM FINAL
 CARA MENJALANKAN
 1. Ekstrak seluruh ZIP ke satu folder biasa, misalnya C:\Prompt-Action-Test.
 2. Jangan jalankan langsung dari dalam ZIP.
-3. Klik dua kali `Jalankan Prompt Action.bat` atau `PromptAction.exe`.
+3. Klik dua kali Jalankan Prompt Action.bat atau PromptAction.exe.
 4. Tidak perlu memasang Python.
 
 CATATAN
 - Folder ini portable. Data, Prompt, backup, settings, dan log berada di folder hasil ekstrak.
-- Jangan pindahkan hanya file EXE; `_internal`, `data`, `prompts`, `backups`, `src`, dan folder lain harus tetap bersama.
+- Jangan pindahkan hanya file EXE; _internal, data, prompts, backups, src, dan folder lain harus tetap bersama.
 - Windows SmartScreen dapat menampilkan peringatan karena build uji coba ini belum ditandatangani digital.
 - STEP 11 Backup Engine belum diaktifkan. Fitur yang tersedia mengikuti implementasi sampai STEP 10 + gate verifier.
 - Untuk pengujian release Prompt, gunakan salinan folder ini agar data uji tidak tercampur dengan salinan lain.
 "@
-Set-Content -Path (Join-Path $PortableDir "BACA_DULU.txt") -Value $Readme -Encoding UTF8
+$ReadmePath = Join-Path $PortableDir "BACA_DULU.txt"
+Set-Content -Path $ReadmePath -Value $Readme -Encoding UTF8
+
+# Fail closed if PowerShell escaping ever introduces non-printing control bytes
+# into the user-facing portable instructions. Tabs/newlines/carriage returns are allowed.
+$ReadmeCheck = Get-Content -Path $ReadmePath -Raw
+if ($ReadmeCheck -match '[\x00-\x08\x0B\x0C\x0E-\x1F]') {
+    throw "BACA_DULU.txt contains an unexpected control character"
+}
+foreach ($requiredText in @("Jalankan Prompt Action.bat", "PromptAction.exe", "_internal", "backups")) {
+    if (-not $ReadmeCheck.Contains($requiredText)) {
+        throw "BACA_DULU.txt is missing required text: $requiredText"
+    }
+}
 
 $VersionInfo = @"
 Prompt Action Portable Test
