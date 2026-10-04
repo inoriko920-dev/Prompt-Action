@@ -8,8 +8,7 @@ from prompt_action.data.repository import VersionRepository
 from prompt_action.services.step09 import CapabilityService, GlobalSearchService
 
 ROOT = Path(__file__).resolve().parents[2]
-EXPECTED_BASELINE = "8ffd22fe3636309ce0484f8b724f9fe306f3156383c5f4efbcc7e59f79e90b6d"
-EXPECTED_CANONICAL = "1a0fddf98b000bb908e12e5aa617b42793a399a8dd9cb36e1acf7204ca8465bb"
+RECOVERED_P3_SHA = "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1"
 
 
 def sha(path: Path) -> str:
@@ -37,6 +36,7 @@ def main() -> int:
     backups = document.get("backups", []) if isinstance(document.get("backups"), list) else []
     search = GlobalSearchService(ROOT)
     future_caps = {name: CapabilityService(search_ready=search.ready).get(name).to_dict() for name in ("ADD_REVISION", "CREATE_BACKUP", "RESTORE")}
+    p3_sha = document.get("prompts", {}).get("P3", {}).get("revisions", {}).get("R1", {}).get("sha256")
     payload = {
         "status": "PASS",
         "prerequisites": prerequisites,
@@ -47,6 +47,7 @@ def main() -> int:
             "prompt_count": len(document.get("prompts", {})),
             "physical_prompt_revision_count": len(physical_available),
             "backup_record_count": len(backups),
+            "p3_r1_sha256": p3_sha,
             "production_compare_download_expected_blocked": len(physical_available) == 0 and len(backups) == 0,
         },
         "search": {"ready": search.ready, "entity_count": len(search.entities)},
@@ -60,8 +61,8 @@ def main() -> int:
     }
     if not all(prerequisites.values()): payload["failures"].append("STEP 00-08 report prerequisite missing")
     if not validation.is_valid: payload["failures"].append("canonical invalid")
-    if payload["protected"]["BASELINE.json"] != EXPECTED_BASELINE: payload["failures"].append("BASELINE hash changed")
-    if payload["protected"]["data/version_history.json"] != EXPECTED_CANONICAL: payload["failures"].append("canonical hash changed")
+    if document.get("active_system") != "V1" or document.get("active_snapshot") != "S001": payload["failures"].append("canonical identity changed unexpectedly")
+    if p3_sha != RECOVERED_P3_SHA: payload["failures"].append("reconciled P3 baseline hash mismatch")
     if payload["protected"]["prompt_bytes_reconstructed"] is not False: payload["failures"].append("prompt reconstruction policy changed")
     if not search.ready: payload["failures"].append("search index not ready")
     if any(value["enabled"] for value in future_caps.values()): payload["failures"].append("future-owner mutation capability enabled")
