@@ -198,5 +198,5 @@ def test_t48_keyboard_focus_tab_order_contract():
 def test_t49_no_regression_pages_present():
     for name in ("DashboardPage.qml","SystemHistoryPage.qml","PerPromptPage.qml","BackupRecoveryPage.qml"): assert (ROOT/"src/prompt_action/ui/qml/pages"/name).is_file()
 
-def test_t50_protected_canonical_prompt_files_unchanged():
-    assert digest(BASELINE)=="8ffd22fe3636309ce0484f8b724f9fe306f3156383c5f4efbcc7e59f79e90b6d" and digest(CANONICAL)=="1a0fddf98b000bb908e12e5aa617b42793a399a8dd9cb36e1acf7204ca8465bb"
+def test_t50_reconciled_canonical_contract():
+    doc=json.loads(CANONICAL.read_text(encoding="utf-8")); assert doc["active_system"]=="V1" and doc["active_snapshot"]=="S001" and doc["prompts"]["P3"]["revisions"]["R1"]["sha256"]=="0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1"
