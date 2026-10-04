@@ -15,6 +15,14 @@ $PyInstallerOut = Join-Path $DistRoot "PromptAction"
 $PortableDir = Join-Path $PortableRoot "Prompt-Action-Portable-Test"
 $ZipPath = Join-Path $PortableRoot "Prompt-Action-Portable-Test-Windows-x64.zip"
 $HashPath = "$ZipPath.sha256"
+$VersionResource = Join-Path $Root "scripts\windows_version_info.txt"
+
+$PyprojectText = Get-Content (Join-Path $Root "pyproject.toml") -Raw
+if ($PyprojectText -notmatch '(?m)^version\s*=\s*"([^"]+)"\s*$') {
+    throw "Unable to resolve application version from pyproject.toml"
+}
+$AppVersion = $Matches[1]
+$PromptSystemLabel = (Get-Content (Join-Path $Root "START_HERE.txt") -Raw).Trim()
 
 foreach ($path in @($BuildRoot, $DistRoot, $PortableRoot)) {
     if (Test-Path $path) { Remove-Item $path -Recurse -Force }
@@ -27,6 +35,7 @@ python -m PyInstaller `
     --windowed `
     --name "PromptAction" `
     --contents-directory "_internal" `
+    --version-file "$VersionResource" `
     --hidden-import "PySide6.QtQml" `
     --hidden-import "PySide6.QtQuick" `
     --hidden-import "PySide6.QtQuickControls2" `
@@ -71,6 +80,8 @@ Set-Content -Path (Join-Path $PortableDir "Jalankan Prompt Action.bat") -Value $
 $Readme = @"
 PROMPT ACTION — PORTABLE TEST BUILD
 
+Versi aplikasi: $AppVersion
+Baseline Prompt: $PromptSystemLabel
 Build label: $BuildLabel
 Target: Windows 11 x64
 Status: UJI COBA / BELUM FINAL
@@ -97,7 +108,7 @@ $ReadmeCheck = Get-Content -Path $ReadmePath -Raw
 if ($ReadmeCheck -match '[\x00-\x08\x0B\x0C\x0E-\x1F]') {
     throw "BACA_DULU.txt contains an unexpected control character"
 }
-foreach ($requiredText in @("Jalankan Prompt Action.bat", "PromptAction.exe", "_internal", "backups")) {
+foreach ($requiredText in @("Jalankan Prompt Action.bat", "PromptAction.exe", "_internal", "backups", $AppVersion, $PromptSystemLabel)) {
     if (-not $ReadmeCheck.Contains($requiredText)) {
         throw "BACA_DULU.txt is missing required text: $requiredText"
     }
@@ -105,6 +116,8 @@ foreach ($requiredText in @("Jalankan Prompt Action.bat", "PromptAction.exe", "_
 
 $VersionInfo = @"
 Prompt Action Portable Test
+Application version: $AppVersion
+Prompt baseline: $PromptSystemLabel
 Build: $BuildLabel
 Python runtime: 3.13.16 x64
 PyInstaller: 6.22.3
@@ -117,6 +130,8 @@ Compress-Archive -Path $PortableDir -DestinationPath $ZipPath -CompressionLevel 
 $Hash = (Get-FileHash -Algorithm SHA256 $ZipPath).Hash.ToLowerInvariant()
 Set-Content -Path $HashPath -Value "$Hash  $(Split-Path $ZipPath -Leaf)" -Encoding ASCII
 
+Write-Host "APP_VERSION=$AppVersion"
+Write-Host "PROMPT_BASELINE=$PromptSystemLabel"
 Write-Host "PORTABLE_DIR=$PortableDir"
 Write-Host "ZIP_PATH=$ZipPath"
 Write-Host "ZIP_SHA256=$Hash"
