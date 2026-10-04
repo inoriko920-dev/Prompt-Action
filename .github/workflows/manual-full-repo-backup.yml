@@ -1,0 +1,407 @@
+name: Prompt-Action Full Repository Backup
+
+on:
+  push:
+    branches:
+      - 'backup/prompt-action-full-*'
+
+permissions:
+  contents: read
+
+jobs:
+  build-backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout backup branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build and verify Prompt-Action full backup
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATE="$(date -u +%Y-%m-%d)"
+          WORK="$RUNNER_TEMP/prompt-action-master-backup"
+          ROOT="$WORK/MASTER-BACKUP-PROMPT-ACTION"
+          APP="$ROOT/APP_001_PROMPT_ACTION"
+          MIRROR="$WORK/Prompt-Action.git"
+          FINAL="$GITHUB_WORKSPACE/MASTER-BACKUP-PROMPT-ACTION-${DATE}.zip"
+          REPO_URL="https://github.com/${GITHUB_REPOSITORY}.git"
+
+          rm -rf "$WORK" "$FINAL"
+          mkdir -p \
+            "$APP/GIT" \
+            "$APP/SOURCE" \
+            "$APP/BUILD" \
+            "$APP/DOCS" \
+            "$APP/RECOVERY"
+
+          echo "== Fetch all repository heads/tags =="
+          git fetch --force --prune origin \
+            '+refs/heads/*:refs/remotes/origin/*' \
+            '+refs/tags/*:refs/tags/*'
+
+          MAIN_SHA="$(git rev-parse refs/remotes/origin/main)"
+
+          echo "== Build clean bare mirror from GitHub =="
+          git init --bare "$MIRROR"
+          git -C "$MIRROR" fetch --force "$REPO_URL" \
+            '+refs/heads/*:refs/heads/*' \
+            '+refs/tags/*:refs/tags/*'
+          git -C "$MIRROR" symbolic-ref HEAD refs/heads/main
+
+          BUNDLE="$APP/GIT/Prompt-Action-COMPLETE-GIT-HISTORY.bundle"
+          git -C "$MIRROR" bundle create "$BUNDLE" --all HEAD
+          test -s "$BUNDLE"
+          git -C "$MIRROR" bundle verify "$BUNDLE" > "$APP/GIT/BUNDLE_VERIFY.txt" 2>&1
+          git -C "$MIRROR" bundle list-heads "$BUNDLE" > "$APP/GIT/BUNDLE_REFS.txt"
+
+          echo "== Human-readable main source snapshot =="
+          SOURCE_ZIP="$APP/SOURCE/Prompt-Action-SOURCE-MAIN.zip"
+          git -C "$MIRROR" archive --format=zip --output="$SOURCE_ZIP" refs/heads/main
+          test -s "$SOURCE_ZIP"
+          unzip -t "$SOURCE_ZIP" > "$APP/SOURCE/SOURCE_ZIP_VERIFY.txt"
+          mkdir -p "$WORK/main-source"
+          unzip -q "$SOURCE_ZIP" -d "$WORK/main-source"
+
+          echo "== Secret leak scan on all reachable Git history =="
+          SECRET_SCAN="$WORK/secret-scan.txt"
+          : > "$SECRET_SCAN"
+          TOKEN_PATTERN='-----BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY-----|github_pat_[A-Za-z0-9_]{20,}|ghp_[A-Za-z0-9]{30,}|AIza[0-9A-Za-z_-]{30,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}'
+          while IFS= read -r commit; do
+            git -C "$MIRROR" grep -I -n -E "$TOKEN_PATTERN" "$commit" -- >> "$SECRET_SCAN" 2>/dev/null || true
+          done < <(git -C "$MIRROR" rev-list --all)
+          if [ -s "$SECRET_SCAN" ]; then
+            echo "Potential credential material detected anywhere in reachable Git history. Backup aborted."
+            cat "$SECRET_SCAN"
+            exit 31
+          fi
+
+          echo "== Repository metadata =="
+          {
+            echo "APP NAME: Prompt-Action"
+            echo "ORIGINAL REPO: ${GITHUB_REPOSITORY}"
+            echo "REPOSITORY URL: https://github.com/${GITHUB_REPOSITORY}"
+            echo "VISIBILITY: public"
+            echo "DEFAULT BRANCH: main"
+            echo "MAIN COMMIT: ${MAIN_SHA}"
+            echo "BACKUP DATE (UTC): ${DATE}"
+            echo "BACKUP SCOPE: ONLY Prompt-Action"
+            echo "OTHER REPOSITORIES INCLUDED: NO"
+          } > "$APP/REPOSITORY_INFO.txt"
+
+          printf '%s\n' "$MAIN_SHA" > "$APP/MAIN_COMMIT.txt"
+
+          git -C "$MIRROR" for-each-ref \
+            --sort=refname \
+            --format='%(refname:short)|%(objectname)' \
+            refs/heads > "$APP/BRANCHES.txt"
+
+          git -C "$MIRROR" for-each-ref \
+            --sort=refname \
+            --format='%(refname:short)|%(objectname)|%(objecttype)' \
+            refs/tags > "$APP/TAGS.txt"
+
+          git -C "$MIRROR" log --all --date=iso-strict \
+            --pretty=format:'%H|%P|%an|%ae|%ad|%cn|%ce|%cd|%D|%s' \
+            > "$APP/COMMIT_HISTORY.txt"
+
+          echo "== Dependency/build/recovery documentation copy =="
+          for path in docs .github data tests scripts src; do
+            if [ -e "$WORK/main-source/$path" ]; then
+              cp -a "$WORK/main-source/$path" "$APP/DOCS/"
+            fi
+          done
+          for file in \
+            README.md PLAN.md START_HERE.txt BASELINE.json \
+            pyproject.toml requirements-lock.txt .gitignore; do
+            if [ -f "$WORK/main-source/$file" ]; then
+              cp -a "$WORK/main-source/$file" "$APP/DOCS/"
+            fi
+          done
+
+          cat > "$APP/BUILD/BUILD_NOT_AVAILABLE.txt" <<'EOF'
+          BUILD_NOT_AVAILABLE
+
+          Tidak ada GitHub Release yang tersedia pada saat persiapan backup ini.
+          Workflow backup ini sengaja TIDAK membangun ulang aplikasi.
+          Source, dependency manifest, build configuration, workflow, dan seluruh riwayat Git tetap dibackup.
+          EOF
+
+          echo "== Required secret names only; never values =="
+          {
+            echo "Secret values are NEVER backed up."
+            echo "If a workflow references a repository secret, restore it manually."
+            echo
+          } > "$APP/REQUIRED_SECRETS.txt"
+          : > "$WORK/secret-names-raw.txt"
+          while IFS= read -r commit; do
+            git -C "$MIRROR" grep -I -h -oE 'secrets\.[A-Za-z_][A-Za-z0-9_]*' \
+              "$commit" -- '.github/workflows/*' >> "$WORK/secret-names-raw.txt" 2>/dev/null || true
+          done < <(git -C "$MIRROR" rev-list --all)
+          sed -E 's/^secrets\.//' "$WORK/secret-names-raw.txt" \
+            | sort -u \
+            | grep -v '^GITHUB_TOKEN$' \
+            > "$WORK/secret-names.txt" || true
+          if [ -s "$WORK/secret-names.txt" ]; then
+            while IFS= read -r name; do
+              echo "SECRET_REQUIRED_BUT_NOT_BACKED_UP: $name" >> "$APP/REQUIRED_SECRETS.txt"
+            done < "$WORK/secret-names.txt"
+          else
+            echo "NO_EXPLICIT_REPOSITORY_SECRET_REFERENCES_FOUND" >> "$APP/REQUIRED_SECRETS.txt"
+          fi
+
+          cat > "$APP/README_RESTORE.txt" <<'EOF'
+          PROMPT-ACTION — PETUNJUK PEMULIHAN SINGKAT
+
+          Kondisi awal:
+          GitHub lama dianggap sudah tidak dapat diakses.
+
+          1. Ekstrak MASTER-BACKUP-PROMPT-ACTION-YYYY-MM-DD.zip.
+          2. Masuk ke APP_001_PROMPT_ACTION.
+          3. Jalankan RECOVERY\VERIFY_BACKUP.ps1 di Windows PowerShell.
+          4. Pastikan checksum dan Git Bundle PASS.
+          5. Buat repo kosong baru di GitHub.
+          6. Jalankan RECOVERY\RESTORE_TO_NEW_GITHUB.ps1.
+          7. Masukkan URL repo GitHub baru hanya ketika diminta.
+          8. Script akan meminta konfirmasi sebelum push.
+          9. Isi kembali secret yang tercantum di REQUIRED_SECRETS.txt; nilainya memang tidak dibackup.
+          10. Jalankan workflow build/test dan cocokkan commit/checksum.
+
+          SOURCE/Prompt-Action-SOURCE-MAIN.zip adalah snapshot main yang mudah dibuka manusia.
+          GIT/Prompt-Action-COMPLETE-GIT-HISTORY.bundle adalah sumber utama untuk memulihkan riwayat Git, branch, dan tag.
+          EOF
+
+          cat > "$APP/RECOVERY/PETUNJUK_PEMULIHAN.txt" <<'EOF'
+          PEMULIHAN PROMPT-ACTION KE GITHUB BARU
+
+          - Verifikasi backup dahulu.
+          - Git Bundle menyimpan riwayat dan refs yang dibackup.
+          - Jangan mengunggah secret/token lama dari file lokal mana pun.
+          - Buat repository BARU yang kosong.
+          - Restore dari bundle ke folder kerja lokal.
+          - Periksa branch/tag.
+          - Tambahkan remote baru.
+          - Push hanya setelah konfirmasi manual.
+          EOF
+
+          cat > "$APP/RECOVERY/VERIFY_BACKUP.ps1" <<'EOF'
+          $ErrorActionPreference = "Stop"
+          $AppRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+          Write-Host "Verifying Prompt-Action backup at $AppRoot"
+
+          $sumFile = Join-Path $AppRoot "SHA256SUMS.txt"
+          if (!(Test-Path $sumFile)) { throw "SHA256SUMS.txt not found" }
+
+          foreach ($line in Get-Content $sumFile) {
+              if ([string]::IsNullOrWhiteSpace($line)) { continue }
+              $parts = $line -split '\s{2,}', 2
+              if ($parts.Count -ne 2) { throw "Invalid checksum line: $line" }
+              $expected = $parts[0].Trim().ToLower()
+              $relative = $parts[1].Trim().Replace('/', [IO.Path]::DirectorySeparatorChar)
+              $path = Join-Path $AppRoot $relative
+              if (!(Test-Path $path -PathType Leaf)) { throw "Missing file: $relative" }
+              $actual = (Get-FileHash -Algorithm SHA256 $path).Hash.ToLower()
+              if ($actual -ne $expected) { throw "Checksum mismatch: $relative" }
+          }
+
+          $bundle = Join-Path $AppRoot "GIT\Prompt-Action-COMPLETE-GIT-HISTORY.bundle"
+          if (!(Test-Path $bundle -PathType Leaf)) { throw "Git bundle missing" }
+          git bundle verify $bundle
+          if ($LASTEXITCODE -ne 0) { throw "git bundle verify failed" }
+
+          $source = Join-Path $AppRoot "SOURCE\Prompt-Action-SOURCE-MAIN.zip"
+          if (!(Test-Path $source -PathType Leaf)) { throw "Source ZIP missing" }
+          if ((Get-Item $source).Length -le 0) { throw "Source ZIP is empty" }
+
+          Write-Host "PASS: Prompt-Action backup verified." -ForegroundColor Green
+          EOF
+
+          cat > "$APP/RECOVERY/RESTORE_TO_NEW_GITHUB.ps1" <<'EOF'
+          $ErrorActionPreference = "Stop"
+          $AppRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+          & (Join-Path $AppRoot "RECOVERY\VERIFY_BACKUP.ps1")
+
+          $bundle = Join-Path $AppRoot "GIT\Prompt-Action-COMPLETE-GIT-HISTORY.bundle"
+          $defaultRestore = Join-Path (Split-Path -Parent $AppRoot) "RESTORED_Prompt-Action.git"
+          $restoreDir = Read-Host "Folder mirror restore lokal [$defaultRestore]"
+          if ([string]::IsNullOrWhiteSpace($restoreDir)) { $restoreDir = $defaultRestore }
+          if (Test-Path $restoreDir) { throw "Folder restore sudah ada: $restoreDir" }
+
+          git clone --mirror $bundle $restoreDir
+          if ($LASTEXITCODE -ne 0) { throw "Mirror clone from bundle failed" }
+          Set-Location $restoreDir
+
+          Write-Host "Refs restored from bundle:"
+          git show-ref
+
+          $newRemote = Read-Host "Masukkan URL repo GitHub BARU (kosong), contoh https://github.com/USER/Prompt-Action.git"
+          if ([string]::IsNullOrWhiteSpace($newRemote)) { throw "Remote URL wajib diisi" }
+          git remote set-url origin $newRemote
+
+          Write-Host ""
+          Write-Host "BELUM ADA YANG DI-PUSH."
+          Write-Host "Push mirror akan mengirim seluruh branch/tag/ref yang tersimpan di bundle."
+          $confirm = Read-Host "Ketik PUSH-MIRROR untuk melanjutkan"
+          if ($confirm -ne "PUSH-MIRROR") {
+              Write-Host "Dibatalkan. Mirror lokal sudah direstore, tetapi tidak dipush."
+              exit 0
+          }
+
+          git push --mirror origin
+          if ($LASTEXITCODE -ne 0) { throw "Mirror push failed" }
+          Write-Host "PASS: seluruh refs berhasil dipush ke remote baru." -ForegroundColor Green
+          EOF
+
+          cat > "$ROOT/VERIFY_ALL_BACKUP.ps1" <<'EOF'
+          $ErrorActionPreference = "Stop"
+          $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
+          & (Join-Path $Root "APP_001_PROMPT_ACTION\RECOVERY\VERIFY_BACKUP.ps1")
+          Write-Host "PASS: seluruh backup dalam paket ini terverifikasi." -ForegroundColor Green
+          EOF
+
+          cat > "$ROOT/RESTORE_ALL.ps1" <<'EOF'
+          $ErrorActionPreference = "Stop"
+          $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
+          Write-Host "[1] Prompt-Action"
+          Write-Host "[0] Batal"
+          $choice = Read-Host "Pilih nomor aplikasi yang akan direstore"
+          switch ($choice) {
+              "1" { & (Join-Path $Root "APP_001_PROMPT_ACTION\RECOVERY\RESTORE_TO_NEW_GITHUB.ps1") }
+              default { Write-Host "Tidak ada restore yang dijalankan." }
+          }
+          EOF
+
+          cat > "$ROOT/00_README_PERTAMA.txt" <<EOF
+          MASTER BACKUP KHUSUS PROMPT-ACTION
+          Backup date: ${DATE}
+          Repository: ${GITHUB_REPOSITORY}
+          Main commit: ${MAIN_SHA}
+
+          Paket ini SENGAJA hanya berisi Prompt-Action.
+          Repo/aplikasi lain TIDAK dimasukkan.
+
+          Mulai dari:
+          1. Jalankan VERIFY_ALL_BACKUP.ps1
+          2. Baca APP_001_PROMPT_ACTION/README_RESTORE.txt
+          3. Gunakan RESTORE_ALL.ps1 bila ingin memulihkan ke GitHub baru.
+          EOF
+
+          cat > "$ROOT/00_BACKUP_INFO.txt" <<EOF
+          BACKUP_TYPE: FULL_REPOSITORY_RECOVERY
+          SCOPE: Prompt-Action only
+          ORIGINAL_REPO: ${GITHUB_REPOSITORY}
+          DEFAULT_BRANCH: main
+          MAIN_COMMIT: ${MAIN_SHA}
+          BACKUP_DATE_UTC: ${DATE}
+          SOURCE_SNAPSHOT: INCLUDED
+          GIT_HISTORY_BUNDLE: INCLUDED
+          BRANCHES: INCLUDED
+          TAGS: INCLUDED
+          WORKFLOWS: INCLUDED
+          DEPENDENCY_MANIFESTS: INCLUDED_IN_SOURCE
+          DOCUMENTATION: INCLUDED
+          BUILD: BUILD_NOT_AVAILABLE
+          SECRETS: NOT_BACKED_UP
+          EOF
+
+          BRANCH_COUNT="$(git -C "$MIRROR" for-each-ref --format='%(refname)' refs/heads | wc -l | tr -d ' ')"
+          TAG_COUNT="$(git -C "$MIRROR" for-each-ref --format='%(refname)' refs/tags | wc -l | tr -d ' ')"
+          COMMIT_COUNT="$(git -C "$MIRROR" rev-list --all --count)"
+
+          cat > "$ROOT/00_MASTER_MANIFEST.txt" <<EOF
+          APP NAME: Prompt-Action
+          ORIGINAL REPO: ${GITHUB_REPOSITORY}
+          BACKUP DATE: ${DATE}
+          MAIN COMMIT: ${MAIN_SHA}
+          DEFAULT BRANCH: main
+          BRANCH COUNT: ${BRANCH_COUNT}
+          TAG COUNT: ${TAG_COUNT}
+          COMMIT OBJECT COUNT (reachable --all): ${COMMIT_COUNT}
+          GIT BUNDLE: APP_001_PROMPT_ACTION/GIT/Prompt-Action-COMPLETE-GIT-HISTORY.bundle
+          SOURCE SNAPSHOT: APP_001_PROMPT_ACTION/SOURCE/Prompt-Action-SOURCE-MAIN.zip
+          BUILD: BUILD_NOT_AVAILABLE
+          DOCS: INCLUDED
+          RECOVERY SCRIPT: INCLUDED
+          BACKUP STATUS: BACKUP_COMPLETE
+          CHECKSUM STATUS: PASS
+          EOF
+
+          cat > "$ROOT/00_MASTER_MANIFEST.csv" <<EOF
+          APP_NAME,ORIGINAL_REPO,DEFAULT_BRANCH,MAIN_COMMIT,BRANCH_COUNT,TAG_COUNT,BUILD,BACKUP_STATUS
+          Prompt-Action,${GITHUB_REPOSITORY},main,${MAIN_SHA},${BRANCH_COUNT},${TAG_COUNT},BUILD_NOT_AVAILABLE,BACKUP_COMPLETE
+          EOF
+
+          cat > "$APP/STATUS_BACKUP.txt" <<EOF
+          BACKUP_COMPLETE
+          SOURCE_MAIN: PASS
+          GIT_BUNDLE: PASS
+          GIT_BUNDLE_VERIFY: PASS
+          MAIN_COMMIT: ${MAIN_SHA}
+          BRANCH_COUNT: ${BRANCH_COUNT}
+          TAG_COUNT: ${TAG_COUNT}
+          SECRET_SCAN: PASS_NO_TOKEN_MATERIAL_DETECTED
+          BUILD: BUILD_NOT_AVAILABLE
+          EOF
+
+          echo "== Per-app checksums =="
+          (
+            cd "$APP"
+            find . -type f \
+              ! -name 'SHA256SUMS.txt' \
+              -print0 \
+              | sort -z \
+              | xargs -0 sha256sum \
+              | sed 's#  \./#  #' \
+              > SHA256SUMS.txt
+            sha256sum -c SHA256SUMS.txt
+          )
+
+          echo "== Root checksums =="
+          (
+            cd "$ROOT"
+            find . -type f \
+              ! -name '00_SHA256SUMS.txt' \
+              -print0 \
+              | sort -z \
+              | xargs -0 sha256sum \
+              | sed 's#  \./#  #' \
+              > 00_SHA256SUMS.txt
+            sha256sum -c 00_SHA256SUMS.txt
+          )
+
+          echo "== Final structural verification =="
+          test -s "$APP/MAIN_COMMIT.txt"
+          test -s "$APP/BRANCHES.txt"
+          test -f "$APP/TAGS.txt"
+          test -s "$APP/COMMIT_HISTORY.txt"
+          test -s "$APP/RECOVERY/VERIFY_BACKUP.ps1"
+          test -s "$APP/RECOVERY/RESTORE_TO_NEW_GITHUB.ps1"
+
+          git -C "$MIRROR" bundle verify "$BUNDLE"
+          unzip -t "$SOURCE_ZIP"
+
+          EXPECTED_APPS=1
+          ACTUAL_APPS="$(find "$ROOT" -maxdepth 1 -type d -name 'APP_*' | wc -l | tr -d ' ')"
+          test "$EXPECTED_APPS" = "$ACTUAL_APPS"
+
+          echo "== Create final single ZIP =="
+          (
+            cd "$WORK"
+            zip -qr "$FINAL" "MASTER-BACKUP-PROMPT-ACTION"
+          )
+          test -s "$FINAL"
+          unzip -t "$FINAL"
+          sha256sum "$FINAL" | tee "$GITHUB_WORKSPACE/MASTER-BACKUP-PROMPT-ACTION-${DATE}.sha256.txt"
+
+          echo "FINAL_ZIP=$FINAL" >> "$GITHUB_ENV"
+          echo "FINAL_NAME=MASTER-BACKUP-PROMPT-ACTION-${DATE}.zip" >> "$GITHUB_ENV"
+
+      - name: Upload verified single master ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: prompt-action-full-repository-backup
+          path: ${{ env.FINAL_ZIP }}
+          retention-days: 30
+          if-no-files-found: error
