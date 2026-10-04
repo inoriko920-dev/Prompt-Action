@@ -66,12 +66,10 @@ $UiTarget = Join-Path $PortableDir "src\prompt_action\ui"
 New-Item -ItemType Directory -Force (Split-Path $UiTarget -Parent) | Out-Null
 Copy-Item (Join-Path $Root "src\prompt_action\ui") $UiTarget -Recurse -Force
 
-# Include launcher and diagnostic tools for real Windows testing. These tools
-# never mutate canonical Prompt/release state; they only write under runtime/.
+# The application entry point is PromptAction.exe directly. Diagnostic helpers
+# remain optional support tools and never become the launcher for the app.
 $PortableScripts = Join-Path $PortableDir "scripts"
 New-Item -ItemType Directory -Force $PortableScripts | Out-Null
-Copy-Item (Join-Path $Root "scripts\portable_launch.ps1") (Join-Path $PortableScripts "portable_launch.ps1") -Force
-Copy-Item (Join-Path $Root "scripts\portable_launch_launcher.bat") (Join-Path $PortableDir "Jalankan Prompt Action.bat") -Force
 Copy-Item (Join-Path $Root "scripts\portable_self_check.ps1") (Join-Path $PortableScripts "portable_self_check.ps1") -Force
 Copy-Item (Join-Path $Root "scripts\portable_self_check_launcher.bat") (Join-Path $PortableDir "Cek Portable.bat") -Force
 Copy-Item (Join-Path $Root "scripts\portable_collect_diagnostics.ps1") (Join-Path $PortableScripts "portable_collect_diagnostics.ps1") -Force
@@ -79,6 +77,14 @@ Copy-Item (Join-Path $Root "scripts\portable_collect_diagnostics_launcher.bat") 
 
 foreach ($runtimeDir in @("runtime", "runtime\logs", "runtime\temp", "runtime\diagnostics")) {
     New-Item -ItemType Directory -Force (Join-Path $PortableDir $runtimeDir) | Out-Null
+}
+
+# Fail closed: the old BAT launcher must not be distributed anymore.
+if (Test-Path (Join-Path $PortableDir "Jalankan Prompt Action.bat")) {
+    throw "Legacy BAT launcher must not be included in the portable package"
+}
+if (Test-Path (Join-Path $PortableScripts "portable_launch.ps1")) {
+    throw "Legacy PowerShell launcher must not be included in the portable package"
 }
 
 $Readme = @"
@@ -93,14 +99,13 @@ Status: UJI COBA / BELUM FINAL
 CARA MENJALANKAN
 1. Ekstrak seluruh ZIP ke satu folder biasa, misalnya C:\Prompt-Action-Test.
 2. Jangan jalankan langsung dari dalam ZIP.
-3. Klik dua kali Jalankan Prompt Action.bat; launcher ini akan menjalankan PromptAction.exe.
-4. Launcher mengamati startup singkat; jika EXE gagal start atau keluar dengan error, self-check dijalankan otomatis.
-5. Tidak perlu memasang Python.
+3. Klik dua kali PromptAction.exe untuk membuka aplikasi.
+4. Tidak perlu memasang Python.
+5. Jangan memakai BAT sebagai launcher aplikasi.
 
 JIKA APLIKASI TIDAK TERBUKA
-1. Buka runtime\logs\portable-launch-status.txt untuk hasil startup launcher.
-2. Buka runtime\logs\portable-self-check.txt untuk hasil diagnosis otomatis.
-3. Kamu juga bisa klik Cek Portable.bat untuk menjalankan pemeriksaan lagi.
+1. Klik Cek Portable.bat untuk menjalankan pemeriksaan portable.
+2. Hasil pemeriksaan disimpan di runtime\logs\portable-self-check.txt.
 
 JIKA PERLU MENGIRIM LAPORAN BUG
 1. Klik dua kali Buat Paket Diagnostik.bat.
@@ -109,6 +114,7 @@ JIKA PERLU MENGIRIM LAPORAN BUG
 4. Isi Prompt, isi backup, settings, isi log aplikasi, path user lokal, dan nama log asli tidak dimasukkan.
 
 CATATAN
+- PromptAction.exe adalah entry point utama aplikasi.
 - Folder ini portable. Data, Prompt, backup, settings, dan log berada di folder hasil ekstrak.
 - Jangan pindahkan hanya file EXE; _internal, data, prompts, backups, src, scripts, dan folder lain harus tetap bersama.
 - Windows SmartScreen dapat menampilkan peringatan karena build uji coba ini belum ditandatangani digital.
@@ -118,16 +124,17 @@ CATATAN
 $ReadmePath = Join-Path $PortableDir "BACA_DULU.txt"
 Set-Content -Path $ReadmePath -Value $Readme -Encoding UTF8
 
-# Fail closed if PowerShell escaping ever introduces non-printing control bytes
-# into the user-facing portable instructions. Tabs/newlines/carriage returns are allowed.
 $ReadmeCheck = Get-Content -Path $ReadmePath -Raw
 if ($ReadmeCheck -match '[\x00-\x08\x0B\x0C\x0E-\x1F]') {
     throw "BACA_DULU.txt contains an unexpected control character"
 }
-foreach ($requiredText in @("Jalankan Prompt Action.bat", "portable-launch-status.txt", "Cek Portable.bat", "Buat Paket Diagnostik.bat", "runtime\diagnostics", "portable-self-check.txt", "PromptAction.exe", "_internal", "backups", $AppVersion, $PromptSystemLabel)) {
+foreach ($requiredText in @("PromptAction.exe", "Cek Portable.bat", "Buat Paket Diagnostik.bat", "runtime\diagnostics", "portable-self-check.txt", "_internal", "backups", $AppVersion, $PromptSystemLabel)) {
     if (-not $ReadmeCheck.Contains($requiredText)) {
         throw "BACA_DULU.txt is missing required text: $requiredText"
     }
+}
+if ($ReadmeCheck.Contains("Jalankan Prompt Action.bat")) {
+    throw "BACA_DULU.txt still references the removed BAT launcher"
 }
 
 $VersionInfo = @"
@@ -137,7 +144,7 @@ Prompt baseline: $PromptSystemLabel
 Build: $BuildLabel
 Python runtime: 3.13.16 x64
 PyInstaller: 6.22.3
-Crash-aware launcher: Jalankan Prompt Action.bat -> runtime\logs\portable-launch-status.txt
+Primary entry point: PromptAction.exe
 Diagnostics self-check: Cek Portable.bat -> runtime\logs\portable-self-check.txt
 Diagnostics bundle: Buat Paket Diagnostik.bat -> runtime\diagnostics
 "@
