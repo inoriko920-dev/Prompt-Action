@@ -41,20 +41,22 @@ def test_t20_revision_next_id_scoped_per_prompt():
 
 def test_t21_atomic_save_success(project_factory, baseline):
     root=project_factory(); repo=VersionRepository(root); doc=deepcopy(baseline)
-    doc["app_data_revision"]=2; result=repo.save(doc,expected_revision=1)
-    assert result.app_data_revision==2 and repo.load().app_data_revision==2
+    current=baseline["app_data_revision"]; doc["app_data_revision"]=current+1
+    result=repo.save(doc,expected_revision=current)
+    assert result.app_data_revision==current+1 and repo.load().app_data_revision==current+1
 
 
 def test_t22_simulated_save_failure_preserves_old_canonical(project_factory, baseline):
     root=project_factory(); path=root/"data/version_history.json"; before=path.read_bytes(); before_sha=hashlib.sha256(before).hexdigest()
     def fail_replace(src,dst): raise OSError("simulated atomic replace failure")
-    repo=VersionRepository(root,replace_func=fail_replace); doc=deepcopy(baseline); doc["app_data_revision"]=2
-    with pytest.raises(OSError): repo.save(doc,expected_revision=1)
+    repo=VersionRepository(root,replace_func=fail_replace); doc=deepcopy(baseline)
+    current=baseline["app_data_revision"]; doc["app_data_revision"]=current+1
+    with pytest.raises(OSError): repo.save(doc,expected_revision=current)
     assert hashlib.sha256(path.read_bytes()).hexdigest()==before_sha and path.read_bytes()==before
 
 
 def test_t23_expected_revision_conflict_rejected(project_factory, baseline):
-    root=project_factory(); repo=VersionRepository(root); doc=deepcopy(baseline); doc["app_data_revision"]=2
+    root=project_factory(); repo=VersionRepository(root); doc=deepcopy(baseline); doc["app_data_revision"]=baseline["app_data_revision"]+1
     with pytest.raises(RevisionConflictError): repo.save(doc,expected_revision=0)
 
 
@@ -81,6 +83,7 @@ def test_t27_relative_paths_survive_relocation(project_factory, baseline):
     rel=write_candidate(root,"P3","R1","materialized baseline candidate")
     doc=deepcopy(baseline); rev=doc["prompts"]["P3"]["revisions"]["R1"]
     rev["file"]=rel; rev["file_available"]=True; rev["sha256"]=hashlib.sha256((root/rel).read_bytes()).hexdigest()
+    doc["integrity"]["protected_prompt_hashes"]["P3"]=rev["sha256"]
     (root/"data/version_history.json").write_text(json.dumps(doc,indent=2)+"\n",encoding="utf-8")
     assert VersionRepository(root).validate(VersionRepository(root).load()).is_valid
 
