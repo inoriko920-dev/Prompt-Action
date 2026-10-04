@@ -1,0 +1,42 @@
+name: One-shot fix PR11 STEP04 regression
+
+on:
+  push:
+    branches: ['sol/baseline-reconcile-p3-v2252-20261004']
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: ${{ contains(github.event.head_commit.message, '[run-step04-fix]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Patch explicit unavailable-source fixtures
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('tests/step04/test_step04_dashboard.py')
+          s=p.read_text(encoding='utf-8')
+          replacements={
+          '''    doc["prompts"]["P3"]["revisions"]["R1"]["change_role"] = "PRIMARY"\n''':'''    rev = doc["prompts"]["P3"]["revisions"]["R1"]\n    rev["file_available"] = False\n    rev["file"] = None\n''',
+          '''    doc["prompts"]["P4"]["revisions"]["R1"]["change_role"] = "PRIMARY"\n''':'''    rev = doc["prompts"]["P4"]["revisions"]["R1"]\n    rev["file_available"] = False\n    rev["file"] = None\n''',
+          }
+          for old,new in replacements.items():
+              if old not in s:
+                  raise SystemExit(f'expected STEP04 fixture pattern missing: {old!r}')
+              s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+      - name: Commit fix and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/fix-pr11-step04-regression.yml
+          git add tests/step04/test_step04_dashboard.py
+          git diff --cached --check
+          git commit -m "CI migration: make STEP 04 unavailable-source fixtures explicit"
+          git push origin HEAD:sol/baseline-reconcile-p3-v2252-20261004
