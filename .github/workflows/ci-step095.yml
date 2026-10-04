@@ -61,27 +61,22 @@ jobs:
         run: python scripts/dev/capture_step07_evidence.py --output ci-step07-regression-evidence
       - name: Regenerate STEP 08 evidence
         run: python scripts/dev/capture_step08_evidence.py --output ci-step08-regression-evidence
-      - name: Prepare pre-bootstrap fixture for STEP 01-09 regression
+      - name: Capture reconciled production hashes before regression
         shell: pwsh
         run: |
-          git restore --source origin/main -- data/version_history.json
-          if (Test-Path prompts) { Remove-Item prompts -Recurse -Force }
-          if (Test-Path backups) { Remove-Item backups -Recurse -Force }
-          python -c "import hashlib,pathlib; p=pathlib.Path('data/version_history.json'); h=hashlib.sha256(p.read_bytes()).hexdigest(); assert h=='1a0fddf98b000bb908e12e5aa617b42793a399a8dd9cb36e1acf7204ca8465bb', h"
-      - name: STEP 01-09 regression
+          python -c "import hashlib,json,pathlib; root=pathlib.Path('.'); files=[root/'data/version_history.json',*sorted((root/'prompts').rglob('*')), *sorted((root/'backups').rglob('*'))]; files=[p for p in files if p.is_file()]; out={str(p).replace('\\','/'):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}; pathlib.Path('ci-step095-evidence/production-hashes-before-regression.json').write_text(json.dumps(out,sort_keys=True,indent=2)+'\n',encoding='utf-8')"
+      - name: STEP 01-09 regression on reconciled HEAD
         env:
           STEP03_EVIDENCE_DIR: ${{ github.workspace }}\ci-step03-regression-evidence
           STEP04_EVIDENCE_DIR: ${{ github.workspace }}\ci-step04-regression-evidence
         run: python -m pytest tests/step01 tests/step02 tests/step03 tests/step04 tests/step05 tests/step06 tests/step07 tests/step08 tests/step09 -q
-      - name: Restore STEP 09.5 production state
-        if: always()
+      - name: Verify regression did not mutate production baseline
         shell: pwsh
         run: |
-          git restore --source HEAD -- data/version_history.json prompts backups
+          python -c "import hashlib,json,pathlib; root=pathlib.Path('.'); expected=json.loads(pathlib.Path('ci-step095-evidence/production-hashes-before-regression.json').read_text()); files=[root/'data/version_history.json',*sorted((root/'prompts').rglob('*')), *sorted((root/'backups').rglob('*'))]; files=[p for p in files if p.is_file()]; actual={str(p).replace('\\','/'):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}; assert actual==expected,(set(actual.items())^set(expected.items()))"
+          python scripts/dev/verify_step095_bootstrap.py
       - name: Module integration smoke
         run: python -m prompt_action --smoke-test-ms 180
-      - name: Verify STEP 09.5 again
-        run: python scripts/dev/verify_step095_bootstrap.py
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
