@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13.16'
+      - name: Guarded repair of bootstrap ZIP container
+        run: python scripts/dev/repair_step095_bootstrap_zip.py
       - name: Materialize exact Prompt bytes and canonical state
         run: python scripts/dev/materialize_step095_prompts.py
       - name: Commit atomic materialization
