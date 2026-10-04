@@ -227,6 +227,13 @@ def locate_exact_prompts() -> tuple[dict[str, bytes], dict[str, str], list[dict[
             module.collect_matches(decoded, source, found, provenance)
             diagnostics.extend(scan_local_entries(decoded, source, found, provenance))
     recover_p1b2(found, provenance, diagnostics)
+    # hash-exact-baseline-recovery-p3-v22.5.2
+    p3_path = ROOT / module.canonical_rel("P3")
+    if p3_path.is_file():
+        p3_raw = p3_path.read_bytes()
+        if sha(p3_raw) == module.EXPECTED["P3"][1]:
+            found["P3"] = p3_raw
+            provenance["P3"] = "hash-exact recovered v22.5.2 baseline override"
     missing = sorted(set(module.EXPECTED) - set(found))
     if missing:
         raise SystemExit(f"exact protected Prompt bytes still missing after recovery: {missing}")

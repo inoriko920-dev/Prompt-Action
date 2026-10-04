@@ -4,7 +4,7 @@ from pathlib import Path, PurePosixPath
 import zipfile
 from prompt_action.data.repository import VersionRepository
 ROOT=Path(__file__).resolve().parents[2]
-EXPECTED={"P1A":"65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5","P1B":"7064081b9a264ba66da2c4eb297cc00f0f2d4133a97c84bed6f0171318d870cf","P1B1":"a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6","P1B2":"12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576","P2":"d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98","P3":"de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8","P4":"a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0","P5":"bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786"}
+EXPECTED={"P1A":"65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5","P1B":"7064081b9a264ba66da2c4eb297cc00f0f2d4133a97c84bed6f0171318d870cf","P1B1":"a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6","P1B2":"12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576","P2":"d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98","P3":"0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1","P4":"a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0","P5":"bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786"}
 def sha(p:Path): return hashlib.sha256(p.read_bytes()).hexdigest()
 def main():
  repo=VersionRepository(ROOT); st=repo.load(); report=repo.validate(st); d=st.document; errors=[]

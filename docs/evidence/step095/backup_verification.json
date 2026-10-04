@@ -1,11 +1,12 @@
 {
   "status": "PASS",
-  "primary_sha256": "caa83d4bbeffe73f60325526a0676e36e317f96c961c1a19f0f6008a2b9ec7f5",
-  "primary_size_bytes": 55835,
+  "primary_sha256": "f04e1b69c2613bf238c547bfab9cc81ab5708c100843e13b6750ea950f33d8a6",
+  "primary_size_bytes": 55580,
   "zip_crc": "PASS",
   "zip_paths": "PASS",
   "manifest": "PASS",
   "prompt_hashes": "PASS",
-  "second_copy_sha256": "caa83d4bbeffe73f60325526a0676e36e317f96c961c1a19f0f6008a2b9ec7f5",
-  "second_copy_verified": true
+  "second_copy_sha256": "f04e1b69c2613bf238c547bfab9cc81ab5708c100843e13b6750ea950f33d8a6",
+  "second_copy_verified": true,
+  "baseline_reconciliation": "P3_V22_5_2_HASH_EXACT"
 }

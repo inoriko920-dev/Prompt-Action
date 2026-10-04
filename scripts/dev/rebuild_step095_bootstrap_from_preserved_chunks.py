@@ -19,7 +19,7 @@ EXPECTED = {
     "P1B1": ("Prompt-1B1", "a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6"),
     "P1B2": ("Prompt-1B2", "12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576"),
     "P2": ("Prompt-2", "d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98"),
-    "P3": ("Prompt-3", "de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8"),
+    "P3": ("Prompt-3", "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1"),
     "P4": ("Prompt-4", "a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0"),
     "P5": ("Prompt-5", "bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786"),
 }
@@ -103,6 +103,13 @@ def locate_exact_prompts() -> tuple[dict[str, bytes], dict[str, str], list[dict[
         for mode, decoded in chunk_candidates(chunk_dir):
             diagnostics.append({"source": rel, "decode_mode": mode, "decoded_size": len(decoded), "sha256": sha(decoded)})
             collect_matches(decoded, f"{rel}:{mode}", found, provenance)
+    # hash-exact-baseline-recovery-p3-v22.5.2
+    p3_path = ROOT / canonical_rel("P3")
+    if p3_path.is_file():
+        p3_raw = p3_path.read_bytes()
+        if sha(p3_raw) == EXPECTED["P3"][1]:
+            found["P3"] = p3_raw
+            provenance["P3"] = "hash-exact recovered v22.5.2 baseline override"
     missing = sorted(set(EXPECTED) - set(found))
     if missing:
         raise SystemExit(f"preserved STEP 00 recovery chunks do not contain all exact protected Prompt bytes; missing={missing}")

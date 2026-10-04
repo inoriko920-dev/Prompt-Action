@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "old_p3_sha256": "de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8",
+  "recovered_p3_sha256": "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1",
+  "recovered_p3_bytes": 22320,
+  "draft_v22_6_1_sha256": "fe7f64a10f131ccffc78733ea514156338090e77e867f53c5d8153d93db41870",
+  "historical_manifest_expected_sha256": "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1",
+  "historical_manifest_match": true,
+  "normalization": "v22.5.2 -> V1/S001/P3/R1",
+  "new_revision_created": false,
+  "new_snapshot_created": false,
+  "backup_id": "B001",
+  "backup_sha256": "f04e1b69c2613bf238c547bfab9cc81ab5708c100843e13b6750ea950f33d8a6",
+  "primary_verified": true,
+  "second_copy_verified": true,
+  "prompt_bytes_reconstructed": false
+}

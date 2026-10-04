@@ -15,6 +15,17 @@
       "evidence": "BASELINE.json",
       "used_to_seed": "V1/S001",
       "note": "Verified rescue source in STEP 00; bytes are not copied or reconstructed by STEP 02."
+    },
+    {
+      "id": "V22.5.2-P3",
+      "type": "LEGACY_PROMPT_RELEASE",
+      "file_available": true,
+      "source_path": "prompts/V1/Prompt-3/Prompt-3_V1_R1.txt",
+      "sha256_manifest": "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1",
+      "manifest_verified": true,
+      "evidence": "docs/evidence/baseline-recovery-p3-v2252/recovery-proof.json",
+      "used_to_seed": "V1/S001/P3/R1",
+      "note": "Official Prompt 3 release completed before System V1 normalization; normalized as R1, not R2."
     }
   ],
   "systems": [
@@ -154,13 +165,14 @@
           "snapshot": "S001",
           "status": "ACTIVE",
           "file": "prompts/V1/Prompt-3/Prompt-3_V1_R1.txt",
-          "sha256": "de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8",
+          "sha256": "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1",
           "file_available": true,
           "change_role": "BASELINE",
           "summary": [
-            "Verified STEP 00 baseline hash; physical prompt bytes are not materialized in this repository."
+            "Hash-exact recovery of the official pre-normalization Prompt 3 v22.5.2 release.",
+            "Normalized as System V1 / Snapshot S001 / Prompt 3 R1; this is not a new R2/S002 release."
           ],
-          "reason": "Seeded from verified V22.5.1 rescue evidence without reconstructing prompt content."
+          "reason": "Baseline reconciliation: STEP 00 used the V22.5.1 Prompt 3 bytes, while preserved version history identifies v22.5.2 as the official active Prompt 3 release before System V1 normalization."
         }
       }
     },
@@ -212,15 +224,17 @@
       "verified": true,
       "second_copy_verified": true,
       "file": "backups/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip",
-      "sha256": "caa83d4bbeffe73f60325526a0676e36e317f96c961c1a19f0f6008a2b9ec7f5",
+      "sha256": "f04e1b69c2613bf238c547bfab9cc81ab5708c100843e13b6750ea950f33d8a6",
       "sha256_file": "backups/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip.sha256",
       "second_copy": "backups/second-copy/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip",
-      "second_copy_sha256": "caa83d4bbeffe73f60325526a0676e36e317f96c961c1a19f0f6008a2b9ec7f5",
+      "second_copy_sha256": "f04e1b69c2613bf238c547bfab9cc81ab5708c100843e13b6750ea950f33d8a6",
       "second_copy_sha256_file": "backups/second-copy/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip.sha256",
       "manifest_path": "bootstrap/manifest.json",
       "bootstrap": true,
       "source_rescue_sha256": "f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2",
-      "created_at": "2026-10-03T00:00:00+07:00"
+      "prompt3_release_sha256": "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1",
+      "baseline_reconciliation": "P3_V22_5_2_HASH_EXACT",
+      "created_at": "2026-10-04T00:00:00+07:00"
     }
   ],
   "release_policy": {
@@ -238,12 +252,22 @@
       "P1B1": "a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6",
       "P1B2": "12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576",
       "P2": "d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98",
-      "P3": "de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8",
+      "P3": "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1",
       "P4": "a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0",
       "P5": "bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786"
     },
     "path_policy": "PROJECT_RELATIVE_ONLY",
     "hash_algorithm": "sha256",
-    "prompt_bytes_reconstructed": false
+    "prompt_bytes_reconstructed": false,
+    "baseline_reconciliation": {
+      "id": "P3_V22_5_2_HASH_EXACT",
+      "status": "VERIFIED",
+      "old_sha256": "de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8",
+      "new_sha256": "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1",
+      "bytes": 22320,
+      "normalization_target": "V1/S001/P3/R1",
+      "new_revision_created": false,
+      "new_snapshot_created": false
+    }
   }
 }
