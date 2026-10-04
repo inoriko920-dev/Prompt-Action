@@ -1,9 +1,19 @@
 @echo off
 setlocal
-cd /d "%~dp0"
+
+set "HERE=%~dp0"
+set "CHECK=%HERE%scripts\portable_self_check.ps1"
+set "ROOT=%HERE%"
+
+if not exist "%CHECK%" (
+  set "CHECK=%HERE%portable_self_check.ps1"
+  set "ROOT=%HERE%.."
+)
+
+cd /d "%ROOT%"
 echo Prompt Action - Pemeriksaan Portable
 echo.
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\portable_self_check.ps1" -Root "%~dp0" -SmokeTest
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%CHECK%" -Root "%ROOT%" -SmokeTest
 set "EXITCODE=%ERRORLEVEL%"
 echo.
 if "%EXITCODE%"=="0" (

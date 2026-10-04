@@ -66,6 +66,13 @@ $UiTarget = Join-Path $PortableDir "src\prompt_action\ui"
 New-Item -ItemType Directory -Force (Split-Path $UiTarget -Parent) | Out-Null
 Copy-Item (Join-Path $Root "src\prompt_action\ui") $UiTarget -Recurse -Force
 
+# Include a small read-only diagnostic path for real Windows testing. It checks
+# portable structure/runtime writability and can run the frozen smoke test.
+$PortableScripts = Join-Path $PortableDir "scripts"
+New-Item -ItemType Directory -Force $PortableScripts | Out-Null
+Copy-Item (Join-Path $Root "scripts\portable_self_check.ps1") (Join-Path $PortableScripts "portable_self_check.ps1") -Force
+Copy-Item (Join-Path $Root "scripts\portable_self_check_launcher.bat") (Join-Path $PortableDir "Cek Portable.bat") -Force
+
 foreach ($runtimeDir in @("runtime", "runtime\logs", "runtime\temp")) {
     New-Item -ItemType Directory -Force (Join-Path $PortableDir $runtimeDir) | Out-Null
 }
@@ -92,9 +99,14 @@ CARA MENJALANKAN
 3. Klik dua kali Jalankan Prompt Action.bat atau PromptAction.exe.
 4. Tidak perlu memasang Python.
 
+JIKA APLIKASI TIDAK TERBUKA
+1. Klik dua kali Cek Portable.bat.
+2. Tunggu pemeriksaan selesai.
+3. Buka runtime\logs\portable-self-check.txt untuk melihat hasil diagnosis.
+
 CATATAN
 - Folder ini portable. Data, Prompt, backup, settings, dan log berada di folder hasil ekstrak.
-- Jangan pindahkan hanya file EXE; _internal, data, prompts, backups, src, dan folder lain harus tetap bersama.
+- Jangan pindahkan hanya file EXE; _internal, data, prompts, backups, src, scripts, dan folder lain harus tetap bersama.
 - Windows SmartScreen dapat menampilkan peringatan karena build uji coba ini belum ditandatangani digital.
 - STEP 11 Backup Engine belum diaktifkan. Fitur yang tersedia mengikuti implementasi sampai STEP 10 + gate verifier.
 - Untuk pengujian release Prompt, gunakan salinan folder ini agar data uji tidak tercampur dengan salinan lain.
@@ -108,7 +120,7 @@ $ReadmeCheck = Get-Content -Path $ReadmePath -Raw
 if ($ReadmeCheck -match '[\x00-\x08\x0B\x0C\x0E-\x1F]') {
     throw "BACA_DULU.txt contains an unexpected control character"
 }
-foreach ($requiredText in @("Jalankan Prompt Action.bat", "PromptAction.exe", "_internal", "backups", $AppVersion, $PromptSystemLabel)) {
+foreach ($requiredText in @("Jalankan Prompt Action.bat", "Cek Portable.bat", "portable-self-check.txt", "PromptAction.exe", "_internal", "backups", $AppVersion, $PromptSystemLabel)) {
     if (-not $ReadmeCheck.Contains($requiredText)) {
         throw "BACA_DULU.txt is missing required text: $requiredText"
     }
@@ -121,6 +133,7 @@ Prompt baseline: $PromptSystemLabel
 Build: $BuildLabel
 Python runtime: 3.13.16 x64
 PyInstaller: 6.22.3
+Diagnostics: Cek Portable.bat -> runtime\logs\portable-self-check.txt
 "@
 Set-Content -Path (Join-Path $PortableDir "BUILD_INFO.txt") -Value $VersionInfo -Encoding UTF8
 
