@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+      - name: Search all historical blobs/chunks for exact P1B2 continuation
+        run: python scripts/dev/find_p1b2_tail_in_history.py
       - name: Scan all reachable Git blobs for protected exact bytes
         run: python scripts/dev/scan_git_objects_for_step095.py
       - name: Diagnose exact capsule local ZIP entries
