@@ -3,79 +3,103 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
-import re
+import struct
+import zlib
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CAPSULE = ROOT / "docs/evidence/step095/exact_prompt_capsule"
+LOCAL = b"PK\x03\x04"
+EXPECTED = {
+    "P1A": "65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5",
+    "P1B": "7064081b9a264ba66da2c4eb297cc00f0f2d4133a97c84bed6f0171318d870cf",
+    "P1B1": "a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6",
+    "P1B2": "12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576",
+    "P2": "d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98",
+    "P3": "de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8",
+    "P4": "a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0",
+    "P5": "bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786",
+}
+BY_HASH = {v: k for k, v in EXPECTED.items()}
 
 
-def split_padded_streams(text: str) -> list[str]:
-    compact = "".join(text.split())
-    out: list[str] = []
+def decode_capsule() -> bytes:
+    text = "".join("".join(p.read_text(encoding="ascii").split()) for p in sorted(CAPSULE.glob("part*.b64")))
+    return base64.b64decode(text, validate=True)
+
+
+def scan(raw: bytes) -> list[dict]:
+    out = []
     start = 0
-    i = 0
-    while i < len(compact):
-        if compact[i] == "=":
-            j = i
-            while j + 1 < len(compact) and compact[j + 1] == "=":
-                j += 1
-            seg = compact[start:j + 1]
-            if seg:
-                out.append(seg)
-            start = j + 1
-            i = j + 1
+    while True:
+        pos = raw.find(LOCAL, start)
+        if pos < 0:
+            break
+        item = {"offset": pos}
+        if pos + 30 > len(raw):
+            item["status"] = "truncated_header"
+            out.append(item)
+            break
+        _sig, _ver, flags, method, _mt, _md, crc, csize, usize, nlen, xlen = struct.unpack_from("<IHHHHHIIIHH", raw, pos)
+        ns = pos + 30
+        ne = ns + nlen
+        ds = ne + xlen
+        name = raw[ns:ne].decode("utf-8", errors="replace") if ne <= len(raw) else "<truncated>"
+        item.update({
+            "name": name,
+            "flags": flags,
+            "method": method,
+            "compressed_size": csize,
+            "uncompressed_size": usize,
+            "data_offset": ds,
+            "available_from_data_offset": max(0, len(raw) - ds),
+        })
+        if flags & 0x08:
+            item["status"] = "data_descriptor_not_scanned"
         else:
-            i += 1
-    if start < len(compact):
-        out.append(compact[start:])
-    return [s for s in out if s]
-
-
-def decode_segment(seg: str) -> bytes | None:
-    padded = seg + ("=" * ((-len(seg)) % 4))
-    try:
-        return base64.b64decode(padded, validate=True)
-    except Exception:
-        return None
+            de = ds + csize
+            if de > len(raw):
+                item["status"] = "truncated_payload"
+                item["bytes_missing"] = de - len(raw)
+                if method == zipfile.ZIP_DEFLATED and ds < len(raw):
+                    obj = zlib.decompressobj(-15)
+                    try:
+                        partial = obj.decompress(raw[ds:])
+                        item["partial_uncompressed_bytes"] = len(partial)
+                        item["inflate_eof"] = obj.eof
+                    except zlib.error as exc:
+                        item["inflate_error"] = str(exc)
+            else:
+                cdata = raw[ds:de]
+                try:
+                    data = cdata if method == zipfile.ZIP_STORED else zlib.decompress(cdata, -15)
+                    actual_crc = zlib.crc32(data) & 0xFFFFFFFF
+                    digest = hashlib.sha256(data).hexdigest()
+                    item.update({
+                        "status": "PASS" if len(data) == usize and actual_crc == crc else "CRC_OR_SIZE_FAIL",
+                        "actual_uncompressed_size": len(data),
+                        "crc_match": actual_crc == crc,
+                        "sha256": digest,
+                        "protected_prompt_match": BY_HASH.get(digest),
+                    })
+                except Exception as exc:
+                    item["status"] = "inflate_error"
+                    item["error"] = str(exc)
+        out.append(item)
+        start = pos + 4
+    return out
 
 
 def main() -> int:
-    report: dict[str, object] = {"parts": []}
-    concatenated_raw = bytearray()
-    for path in sorted(CAPSULE.glob("part*.b64")):
-        text = path.read_text(encoding="ascii")
-        compact = "".join(text.split())
-        segs = split_padded_streams(text)
-        seg_report = []
-        for idx, seg in enumerate(segs, 1):
-            raw = decode_segment(seg)
-            seg_report.append({
-                "index": idx,
-                "chars": len(seg),
-                "mod4": len(seg) % 4,
-                "ends_padding": seg.endswith("="),
-                "decoded_bytes": len(raw) if raw is not None else None,
-                "decoded_sha256": hashlib.sha256(raw).hexdigest() if raw is not None else None,
-                "starts_pk": bool(raw and raw.startswith(b"PK")),
-            })
-            if raw is not None:
-                concatenated_raw.extend(raw)
-        report["parts"].append({
-            "name": path.name,
-            "chars": len(compact),
-            "padding_chars": compact.count("="),
-            "segments": seg_report,
-        })
-    raw = bytes(concatenated_raw)
-    report["decoded_segments_concat"] = {
-        "bytes": len(raw),
-        "sha256": hashlib.sha256(raw).hexdigest(),
+    raw = decode_capsule()
+    report = {
+        "decoded_bytes": len(raw),
+        "decoded_sha256": hashlib.sha256(raw).hexdigest(),
         "starts_pk": raw.startswith(b"PK"),
-        "local_headers": len(re.findall(re.escape(b"PK\x03\x04"), raw)),
-        "eocd_headers": len(re.findall(re.escape(b"PK\x05\x06"), raw)),
+        "entries": scan(raw),
     }
-    print(json.dumps(report, indent=2))
+    print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
 
 
