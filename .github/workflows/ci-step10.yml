@@ -13,8 +13,15 @@ on:
       - 'src/prompt_action/data/transaction_journal.py'
       - 'src/prompt_action/data/release_repository.py'
       - 'src/prompt_action/domain/errors.py'
+      - 'src/prompt_action/presentation/per_prompt_view_model.py'
+      - 'src/prompt_action/ui/viewmodels/release_wizard_view_model.py'
+      - 'src/prompt_action/ui/qml/dialogs/*Release*.qml'
+      - 'src/prompt_action/ui/qml/dialogs/AddRevisionDialog.qml'
+      - 'src/prompt_action/ui/qml/shell/**'
+      - 'src/prompt_action/main.py'
       - 'tests/step10/**'
       - 'scripts/dev/verify_step10_preflight.py'
+      - 'scripts/dev/capture_step10_evidence.py'
       - 'docs/implementation/STEP_10_SOL_EXECUTION_REPORT.md'
       - '.github/workflows/ci-step10.yml'
 
@@ -48,10 +55,15 @@ jobs:
           python scripts/dev/verify_step10_preflight.py | Tee-Object -FilePath ci-step10-evidence/preflight.json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python -c "import hashlib,json,pathlib; root=pathlib.Path('.'); files=[root/'data/version_history.json',*sorted((root/'prompts').rglob('*.txt'))]; out={str(p).replace('\\','/'):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}; pathlib.Path('ci-step10-evidence/baseline-hashes.json').write_text(json.dumps(out,sort_keys=True,indent=2)+'\n',encoding='utf-8')"
-      - name: STEP 10 T01-T70
+      - name: STEP 10 T01-T70 + UI acceptance
         shell: pwsh
         run: |
           python -m pytest tests/step10 -q | Tee-Object -FilePath ci-step10-evidence/pytest-step10.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Capture STEP 10 Release Wizard evidence
+        shell: pwsh
+        run: |
+          python scripts/dev/capture_step10_evidence.py --output ci-step10-evidence | Tee-Object -FilePath ci-step10-evidence/ui-capture.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: STEP 09.5 regression
         run: python -m pytest tests/step095 -q
