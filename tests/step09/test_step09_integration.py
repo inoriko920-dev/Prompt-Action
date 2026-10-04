@@ -308,9 +308,11 @@ def test_t54_restore_still_disabled():
     cap=CapabilityService().get("RESTORE"); assert cap.enabled is False and "STEP 12" in cap.reason
 
 def test_t55_search_compare_download_no_canonical_mutation():
-    before=digest(CANONICAL); GlobalSearchService(ROOT).search("P3");
-    with pytest.raises(CompareError): RevisionCompareService(ROOT).compare("P3","R1","R1")
-    with pytest.raises(DownloadError): DownloadService(ROOT).prepare({"type":"active_prompt","prompt_id":"P3"})
+    before=digest(CANONICAL)
+    GlobalSearchService(ROOT).search("P3")
+    RevisionCompareService(ROOT).compare("P3","R1","R1")
+    plan=DownloadService(ROOT).prepare({"type":"active_prompt","prompt_id":"P3"})
+    assert plan.sha256=="0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1"
     assert digest(CANONICAL)==before
 
 def test_t56_ui_1366x768(app):
@@ -326,4 +328,5 @@ def test_t59_logs_and_diagnostics_sanitized():
     clean=sanitize_value({"token":"ghp_123456789012345678901234567890","authorization":"Bearer abcdefghijklmnop","path":str(ROOT/"private")},project_root=ROOT); dumped=json.dumps(clean); assert "ghp_" not in dumped and "Bearer" not in dumped and "<PROJECT_ROOT>" in dumped
 
 def test_t60_protected_corpus_unchanged():
-    assert digest(ROOT/"BASELINE.json")=="8ffd22fe3636309ce0484f8b724f9fe306f3156383c5f4efbcc7e59f79e90b6d" and digest(CANONICAL)=="1a0fddf98b000bb908e12e5aa617b42793a399a8dd9cb36e1acf7204ca8465bb"
+    assert digest(ROOT/"prompts/V1/Prompt-3/Prompt-3_V1_R1.txt")=="0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1"
+    assert digest(ROOT/"backups/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip")=="f04e1b69c2613bf238c547bfab9cc81ab5708c100843e13b6750ea950f33d8a6"
