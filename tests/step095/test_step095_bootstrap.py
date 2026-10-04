@@ -12,7 +12,7 @@ def rev(pid): return D['prompts'][pid]['revisions']['R1']
 def backup(): return next(x for x in D['backups'] if x['id']=='B001')
 def zopen(): return zipfile.ZipFile(ROOT/backup()['file'])
 def test_t01_prior_steps_pass():
- paths=[ROOT/'STEP_00_BASELINE_REPORT.md']+[ROOT/f'docs/implementation/STEP_{n:02d}_SOL_EXECUTION_REPORT.md' for n in range(1,10)]
+ paths=[ROOT/'docs/implementation/STEP_00_BASELINE_REPORT.md']+[ROOT/f'docs/implementation/STEP_{n:02d}_SOL_EXECUTION_REPORT.md' for n in range(1,10)]
  assert all(p.is_file() and 'PASS' in p.read_text(encoding='utf-8',errors='ignore') for p in paths)
 def test_t02_identity_unchanged(): assert D['active_system']=='V1' and D['active_snapshot']=='S001'
 def test_t03_single_data_revision_increment(): assert D['app_data_revision']==2
