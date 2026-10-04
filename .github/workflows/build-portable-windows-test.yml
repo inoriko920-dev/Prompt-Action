@@ -46,7 +46,7 @@ jobs:
         shell: pwsh
         run: ./scripts/build_portable_windows.ps1 -BuildLabel "${{ github.sha }}"
 
-      - name: Verify portable layout
+      - name: Verify direct-EXE portable layout
         shell: pwsh
         run: |
           $root = "portable-output\Prompt-Action-Portable-Test"
@@ -60,16 +60,20 @@ jobs:
             "$root\src\prompt_action\ui\qml\App.qml",
             "$root\BACA_DULU.txt",
             "$root\BUILD_INFO.txt",
-            "$root\Jalankan Prompt Action.bat",
             "$root\Cek Portable.bat",
             "$root\Buat Paket Diagnostik.bat",
-            "$root\scripts\portable_launch.ps1",
             "$root\scripts\portable_self_check.ps1",
             "$root\scripts\portable_collect_diagnostics.ps1",
             "$root\runtime\diagnostics"
           )
           foreach ($path in $required) {
             if (-not (Test-Path $path)) { throw "Missing portable path: $path" }
+          }
+          foreach ($forbidden in @(
+            "$root\Jalankan Prompt Action.bat",
+            "$root\scripts\portable_launch.ps1"
+          )) {
+            if (Test-Path $forbidden) { throw "Legacy application launcher still packaged: $forbidden" }
           }
 
       - name: Verify Windows EXE metadata
@@ -82,11 +86,8 @@ jobs:
           if ($info.OriginalFilename -ne "PromptAction.exe") { throw "Unexpected OriginalFilename: $($info.OriginalFilename)" }
           if ($info.ProductVersion -ne "0.1.0.dev0") { throw "Unexpected ProductVersion: $($info.ProductVersion)" }
           if ($info.FileVersion -ne "0.1.0.0") { throw "Unexpected FileVersion: $($info.FileVersion)" }
-          Write-Host "PRODUCT_NAME=$($info.ProductName)"
-          Write-Host "PRODUCT_VERSION=$($info.ProductVersion)"
-          Write-Host "FILE_VERSION=$($info.FileVersion)"
 
-      - name: Verify portable user-facing text
+      - name: Verify direct EXE user instructions
         shell: pwsh
         run: |
           $root = "portable-output\Prompt-Action-Portable-Test"
@@ -97,10 +98,25 @@ jobs:
               throw "Portable user-facing text contains unexpected control characters"
             }
           }
-          foreach ($requiredText in @("Jalankan Prompt Action.bat", "portable-launch-status.txt", "Cek Portable.bat", "Buat Paket Diagnostik.bat", "runtime\diagnostics", "portable-self-check.txt", "PromptAction.exe", "_internal", "backups", "0.1.0.dev0", "Prompt Action v22.5.2")) {
+          foreach ($requiredText in @("Klik dua kali PromptAction.exe", "Primary entry point: PromptAction.exe", "Cek Portable.bat", "Buat Paket Diagnostik.bat", "0.1.0.dev0", "Prompt Action v22.5.2")) {
             if (-not $readme.Contains($requiredText) -and -not $buildInfo.Contains($requiredText)) {
               throw "Portable metadata text missing required value: $requiredText"
             }
+          }
+          foreach ($forbiddenText in @("Jalankan Prompt Action.bat", "portable-launch-status.txt")) {
+            if ($readme.Contains($forbiddenText) -or $buildInfo.Contains($forbiddenText)) {
+              throw "Portable metadata still references legacy launcher: $forbiddenText"
+            }
+          }
+
+      - name: Smoke test frozen EXE directly
+        shell: pwsh
+        run: |
+          $exe = (Resolve-Path "portable-output\Prompt-Action-Portable-Test\PromptAction.exe").Path
+          $process = Start-Process -FilePath $exe -ArgumentList "--smoke-test-ms", "800" -Wait -PassThru
+          if ($process.ExitCode -ne 0) {
+            Write-Host "Frozen EXE exit code: $($process.ExitCode)"
+            exit $process.ExitCode
           }
 
       - name: Run packaged portable self-check
@@ -115,44 +131,6 @@ jobs:
           if (-not $text.Contains("RESULT: PASS")) { throw "Portable self-check did not report PASS" }
           foreach ($requiredText in @("ProductName: Prompt Action", "ProductVersion: 0.1.0.dev0", "Smoke test exit code: 0")) {
             if (-not $text.Contains($requiredText)) { throw "Self-check report missing: $requiredText" }
-          }
-
-      - name: Verify crash-aware portable launcher
-        shell: pwsh
-        run: |
-          $root = (Resolve-Path "portable-output\Prompt-Action-Portable-Test").Path
-          $launcher = "$root\scripts\portable_launch.ps1"
-          $statusPath = "$root\runtime\logs\portable-launch-status.txt"
-
-          powershell.exe -NoProfile -ExecutionPolicy Bypass -File $launcher -Root $root -SmokeTest
-          if ($LASTEXITCODE -ne 0) { throw "Crash-aware launcher smoke path failed with exit code $LASTEXITCODE" }
-          if (-not (Test-Path $statusPath)) { throw "Portable launch status report missing" }
-          $status = Get-Content $statusPath -Raw
-          foreach ($text in @("Mode: SMOKE_TEST", "RESULT: PASS", "ExitCode: 0")) {
-            if (-not $status.Contains($text)) { throw "Launcher PASS report missing: $text" }
-          }
-
-          $exe = "$root\PromptAction.exe"
-          $hidden = "$root\PromptAction.exe.launch-test-hidden"
-          Move-Item $exe $hidden -Force
-          try {
-            $failureArgs = @(
-              "-NoProfile",
-              "-ExecutionPolicy", "Bypass",
-              "-File", $launcher,
-              "-Root", $root,
-              "-SmokeTest"
-            )
-            $failureProcess = Start-Process -FilePath "powershell.exe" -ArgumentList $failureArgs -Wait -PassThru
-            $failureCode = $failureProcess.ExitCode
-            if ($failureCode -eq 0) { throw "Launcher missing-EXE path unexpectedly returned success" }
-            $failureStatus = Get-Content $statusPath -Raw
-            if (-not $failureStatus.Contains("RESULT: FAIL")) { throw "Launcher missing-EXE path did not report FAIL" }
-            if (-not $failureStatus.Contains("PromptAction.exe is missing")) { throw "Launcher missing-EXE reason missing" }
-            $selfCheckFailure = Get-Content "$root\runtime\logs\portable-self-check.txt" -Raw
-            if (-not $selfCheckFailure.Contains("RESULT: FAIL")) { throw "Automatic self-check did not record FAIL for missing EXE" }
-          } finally {
-            Move-Item $hidden $exe -Force
           }
 
       - name: Verify privacy-safe diagnostic bundle
@@ -174,52 +152,32 @@ jobs:
           $extract = Join-Path $env:RUNNER_TEMP "prompt-action-diagnostic-check"
           if (Test-Path $extract) { Remove-Item $extract -Recurse -Force }
           Expand-Archive -Path $zip.FullName -DestinationPath $extract -Force
-
-          $requiredLeaf = @("SUMMARY.txt", "BUILD_INFO.txt", "portable-launch-status.txt", "portable-self-check.txt", "EXE_INFO.txt", "LOG_INDEX.txt", "STRUCTURE.txt")
           $files = Get-ChildItem $extract -File -Recurse
-          foreach ($leaf in $requiredLeaf) {
+
+          foreach ($leaf in @("SUMMARY.txt", "BUILD_INFO.txt", "portable-self-check.txt", "EXE_INFO.txt", "LOG_INDEX.txt", "STRUCTURE.txt")) {
             if (-not ($files | Where-Object { $_.Name -eq $leaf })) { throw "Diagnostic bundle missing $leaf" }
           }
+          if ($files | Where-Object { $_.Name -eq "portable-launch-status.txt" }) {
+            throw "Diagnostic bundle still contains legacy launcher status"
+          }
 
-          $forbidden = @("version_history.json", "settings.json", "Prompt-3_V1_R1.txt", "B001.zip")
-          foreach ($name in $forbidden) {
+          foreach ($name in @("version_history.json", "settings.json", "Prompt-3_V1_R1.txt", "B001.zip")) {
             if ($files | Where-Object { $_.Name -eq $name }) { throw "Diagnostic bundle leaked forbidden file: $name" }
           }
 
           $summary = Get-Content (($files | Where-Object { $_.Name -eq "SUMMARY.txt" } | Select-Object -First 1).FullName) -Raw
-          foreach ($text in @("Prompt file contents are NOT included", "Backup archive contents are NOT included", "Arbitrary application log contents are NOT included", "Absolute portable/user paths are redacted")) {
-            if (-not $summary.Contains($text)) { throw "Diagnostic privacy declaration missing: $text" }
+          foreach ($text in @("Primary entry point: PromptAction.exe", "Prompt file contents are NOT included", "Backup archive contents are NOT included", "Arbitrary application log contents are NOT included")) {
+            if (-not $summary.Contains($text)) { throw "Diagnostic declaration missing: $text" }
           }
 
-          foreach ($leaf in @("portable-launch-status.txt", "portable-self-check.txt")) {
-            $sanitizedText = Get-Content (($files | Where-Object { $_.Name -eq $leaf } | Select-Object -First 1).FullName) -Raw
-            if ($sanitizedText.Contains($root)) { throw "Diagnostic $leaf leaked portable root path" }
-            if ($env:USERPROFILE -and $sanitizedText.Contains($env:USERPROFILE)) { throw "Diagnostic $leaf leaked USERPROFILE" }
-          }
-
-          $sanitizedLauncher = Get-Content (($files | Where-Object { $_.Name -eq "portable-launch-status.txt" } | Select-Object -First 1).FullName) -Raw
-          if (-not $sanitizedLauncher.Contains("RESULT: FAIL")) { throw "Diagnostic launcher status missing captured failure evidence" }
-
-          $sanitizedSelfCheck = Get-Content (($files | Where-Object { $_.Name -eq "portable-self-check.txt" } | Select-Object -First 1).FullName) -Raw
-          if (-not $sanitizedSelfCheck.Contains("<PORTABLE_ROOT>")) { throw "Diagnostic self-check did not redact portable root" }
+          $selfCheck = Get-Content (($files | Where-Object { $_.Name -eq "portable-self-check.txt" } | Select-Object -First 1).FullName) -Raw
+          if ($selfCheck.Contains($root)) { throw "Diagnostic self-check leaked portable root path" }
+          if ($env:USERPROFILE -and $selfCheck.Contains($env:USERPROFILE)) { throw "Diagnostic self-check leaked USERPROFILE" }
+          if (-not $selfCheck.Contains("<PORTABLE_ROOT>")) { throw "Diagnostic self-check did not redact portable root" }
 
           $logIndex = Get-Content (($files | Where-Object { $_.Name -eq "LOG_INDEX.txt" } | Select-Object -First 1).FullName) -Raw
           if ($logIndex.Contains("portable-self-check.txt")) { throw "Diagnostic log index leaked original log filename" }
           if (-not $logIndex.Contains("ORIGINAL FILENAMES NOT INCLUDED")) { throw "Diagnostic log index missing filename-redaction declaration" }
-
-      - name: Smoke test frozen EXE
-        shell: pwsh
-        run: |
-          $exe = (Resolve-Path "portable-output\Prompt-Action-Portable-Test\PromptAction.exe").Path
-          $process = Start-Process -FilePath $exe -ArgumentList "--smoke-test-ms", "800" -Wait -PassThru
-          if ($process.ExitCode -ne 0) {
-            Write-Host "Frozen EXE exit code: $($process.ExitCode)"
-            Get-ChildItem "portable-output\Prompt-Action-Portable-Test\runtime\logs" -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
-              Write-Host "LOG: $($_.FullName)"
-              if (-not $_.PSIsContainer) { Get-Content $_.FullName -ErrorAction SilentlyContinue }
-            }
-            exit $process.ExitCode
-          }
 
       - name: Verify ZIP checksum
         shell: pwsh
