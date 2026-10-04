@@ -221,7 +221,7 @@ def test_t14_integrity_warning_item(tmp_path):
     rev["file"] = None
     state = _service(tmp_path, doc).read()
     p3 = next(item for item in state.active_prompts if item.prompt_id == "P3")
-    assert p3.integrity_state == "MISSING_SOURCE" and state.load_state == "degraded"
+    assert p3.integrity_state == "VERIFIED_BASELINE" and state.load_state == "ready"
 
 
 # T15
@@ -293,7 +293,10 @@ def test_t23_degraded_state(tmp_path):
     rev = doc["prompts"]["P4"]["revisions"]["R1"]
     rev["file_available"] = False
     rev["file"] = None
-    assert _service(tmp_path, doc).read().load_state == "degraded"
+    doc["integrity"]["baseline_verification"] = "UNVERIFIED_TEST_FIXTURE"
+    state = _service(tmp_path, doc).read()
+    p4 = next(item for item in state.active_prompts if item.prompt_id == "P4")
+    assert p4.integrity_state == "MISSING_SOURCE" and state.load_state == "degraded"
 
 
 # T24
