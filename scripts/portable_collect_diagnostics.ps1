@@ -45,7 +45,9 @@ $summary.Add("- Prompt file contents are NOT included.")
 $summary.Add("- Backup archive contents are NOT included.")
 $summary.Add("- Settings files are NOT included.")
 $summary.Add("- Arbitrary application log contents are NOT included.")
-$summary.Add("- Only build metadata, self-check output, EXE metadata, and a log file index are collected.")
+$summary.Add("- Absolute portable/user paths are redacted from exported self-check output.")
+$summary.Add("- Original runtime log filenames are not exported; only numbered metadata entries are included.")
+$summary.Add("- Only build metadata, sanitized self-check output, EXE metadata, and a redacted log index are collected.")
 Write-Utf8File (Join-Path $Stage "SUMMARY.txt") $summary
 
 $buildInfo = Join-Path $Root "BUILD_INFO.txt"
@@ -55,7 +57,12 @@ if (Test-Path $buildInfo) {
 
 $selfCheckReport = Join-Path $LogDir "portable-self-check.txt"
 if (Test-Path $selfCheckReport) {
-    Copy-Item $selfCheckReport (Join-Path $Stage "portable-self-check.txt") -Force
+    $sanitized = Get-Content $selfCheckReport -Raw
+    $sanitized = $sanitized.Replace($Root, "<PORTABLE_ROOT>")
+    if ($env:USERPROFILE) {
+        $sanitized = $sanitized.Replace($env:USERPROFILE, "<USERPROFILE>")
+    }
+    Set-Content -Path (Join-Path $Stage "portable-self-check.txt") -Value $sanitized -Encoding UTF8
 }
 
 $exe = Join-Path $Root "PromptAction.exe"
@@ -74,12 +81,17 @@ if (Test-Path $exe) {
 }
 Write-Utf8File (Join-Path $Stage "EXE_INFO.txt") $exeLines
 
-# Include only metadata about runtime log files, never their content.
+# Include only redacted metadata about runtime log files, never their content or
+# original filenames. This prevents user-supplied names from leaking via logs.
 $logIndex = New-Object System.Collections.Generic.List[string]
-$logIndex.Add("RUNTIME LOG INDEX - CONTENTS NOT INCLUDED")
+$logIndex.Add("RUNTIME LOG INDEX - CONTENTS AND ORIGINAL FILENAMES NOT INCLUDED")
 if (Test-Path $LogDir) {
-    Get-ChildItem $LogDir -File -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
-        $logIndex.Add("$($_.Name) | bytes=$($_.Length) | modified=$($_.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss zzz'))")
+    $i = 0
+    Get-ChildItem $LogDir -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime | ForEach-Object {
+        $i += 1
+        $ext = $_.Extension
+        if ([string]::IsNullOrWhiteSpace($ext)) { $ext = "<none>" }
+        $logIndex.Add("log[$i] | ext=$ext | bytes=$($_.Length) | modified=$($_.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss zzz'))")
     }
 }
 Write-Utf8File (Join-Path $Stage "LOG_INDEX.txt") $logIndex
