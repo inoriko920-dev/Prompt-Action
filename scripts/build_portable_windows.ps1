@@ -66,11 +66,12 @@ $UiTarget = Join-Path $PortableDir "src\prompt_action\ui"
 New-Item -ItemType Directory -Force (Split-Path $UiTarget -Parent) | Out-Null
 Copy-Item (Join-Path $Root "src\prompt_action\ui") $UiTarget -Recurse -Force
 
-# Include diagnostic tools for real Windows testing. The self-check is read-only
-# except for its runtime report. The bundle collector intentionally excludes
-# Prompt contents, backup contents, settings, and arbitrary log contents.
+# Include launcher and diagnostic tools for real Windows testing. These tools
+# never mutate canonical Prompt/release state; they only write under runtime/.
 $PortableScripts = Join-Path $PortableDir "scripts"
 New-Item -ItemType Directory -Force $PortableScripts | Out-Null
+Copy-Item (Join-Path $Root "scripts\portable_launch.ps1") (Join-Path $PortableScripts "portable_launch.ps1") -Force
+Copy-Item (Join-Path $Root "scripts\portable_launch_launcher.bat") (Join-Path $PortableDir "Jalankan Prompt Action.bat") -Force
 Copy-Item (Join-Path $Root "scripts\portable_self_check.ps1") (Join-Path $PortableScripts "portable_self_check.ps1") -Force
 Copy-Item (Join-Path $Root "scripts\portable_self_check_launcher.bat") (Join-Path $PortableDir "Cek Portable.bat") -Force
 Copy-Item (Join-Path $Root "scripts\portable_collect_diagnostics.ps1") (Join-Path $PortableScripts "portable_collect_diagnostics.ps1") -Force
@@ -79,13 +80,6 @@ Copy-Item (Join-Path $Root "scripts\portable_collect_diagnostics_launcher.bat") 
 foreach ($runtimeDir in @("runtime", "runtime\logs", "runtime\temp", "runtime\diagnostics")) {
     New-Item -ItemType Directory -Force (Join-Path $PortableDir $runtimeDir) | Out-Null
 }
-
-$Launcher = @'
-@echo off
-cd /d "%~dp0"
-start "" "%~dp0PromptAction.exe"
-'@
-Set-Content -Path (Join-Path $PortableDir "Jalankan Prompt Action.bat") -Value $Launcher -Encoding ASCII
 
 $Readme = @"
 PROMPT ACTION — PORTABLE TEST BUILD
@@ -99,19 +93,20 @@ Status: UJI COBA / BELUM FINAL
 CARA MENJALANKAN
 1. Ekstrak seluruh ZIP ke satu folder biasa, misalnya C:\Prompt-Action-Test.
 2. Jangan jalankan langsung dari dalam ZIP.
-3. Klik dua kali Jalankan Prompt Action.bat atau PromptAction.exe.
-4. Tidak perlu memasang Python.
+3. Klik dua kali Jalankan Prompt Action.bat; launcher ini akan menjalankan PromptAction.exe.
+4. Launcher mengamati startup singkat; jika EXE gagal start atau keluar dengan error, self-check dijalankan otomatis.
+5. Tidak perlu memasang Python.
 
 JIKA APLIKASI TIDAK TERBUKA
-1. Klik dua kali Cek Portable.bat.
-2. Tunggu pemeriksaan selesai.
-3. Buka runtime\logs\portable-self-check.txt untuk melihat hasil diagnosis.
+1. Buka runtime\logs\portable-launch-status.txt untuk hasil startup launcher.
+2. Buka runtime\logs\portable-self-check.txt untuk hasil diagnosis otomatis.
+3. Kamu juga bisa klik Cek Portable.bat untuk menjalankan pemeriksaan lagi.
 
 JIKA PERLU MENGIRIM LAPORAN BUG
 1. Klik dua kali Buat Paket Diagnostik.bat.
 2. ZIP diagnostik dibuat di runtime\diagnostics.
-3. Paket hanya berisi metadata build, self-check, metadata EXE, dan indeks nama log.
-4. Isi Prompt, isi backup, settings, dan isi log aplikasi tidak dimasukkan.
+3. Paket hanya berisi metadata build, self-check, metadata EXE, dan indeks log yang sudah disamarkan.
+4. Isi Prompt, isi backup, settings, isi log aplikasi, path user lokal, dan nama log asli tidak dimasukkan.
 
 CATATAN
 - Folder ini portable. Data, Prompt, backup, settings, dan log berada di folder hasil ekstrak.
@@ -129,7 +124,7 @@ $ReadmeCheck = Get-Content -Path $ReadmePath -Raw
 if ($ReadmeCheck -match '[\x00-\x08\x0B\x0C\x0E-\x1F]') {
     throw "BACA_DULU.txt contains an unexpected control character"
 }
-foreach ($requiredText in @("Jalankan Prompt Action.bat", "Cek Portable.bat", "Buat Paket Diagnostik.bat", "runtime\diagnostics", "portable-self-check.txt", "PromptAction.exe", "_internal", "backups", $AppVersion, $PromptSystemLabel)) {
+foreach ($requiredText in @("Jalankan Prompt Action.bat", "portable-launch-status.txt", "Cek Portable.bat", "Buat Paket Diagnostik.bat", "runtime\diagnostics", "portable-self-check.txt", "PromptAction.exe", "_internal", "backups", $AppVersion, $PromptSystemLabel)) {
     if (-not $ReadmeCheck.Contains($requiredText)) {
         throw "BACA_DULU.txt is missing required text: $requiredText"
     }
@@ -142,6 +137,7 @@ Prompt baseline: $PromptSystemLabel
 Build: $BuildLabel
 Python runtime: 3.13.16 x64
 PyInstaller: 6.22.3
+Crash-aware launcher: Jalankan Prompt Action.bat -> runtime\logs\portable-launch-status.txt
 Diagnostics self-check: Cek Portable.bat -> runtime\logs\portable-self-check.txt
 Diagnostics bundle: Buat Paket Diagnostik.bat -> runtime\diagnostics
 "@

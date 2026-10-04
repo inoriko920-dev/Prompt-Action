@@ -21,6 +21,16 @@ function Write-Utf8File([string]$Path, [string[]]$Lines) {
     $Lines | Set-Content -Path $Path -Encoding UTF8
 }
 
+function Export-SanitizedText([string]$Source, [string]$Destination) {
+    if (-not (Test-Path $Source)) { return }
+    $sanitized = Get-Content $Source -Raw
+    $sanitized = $sanitized.Replace($Root, "<PORTABLE_ROOT>")
+    if ($env:USERPROFILE) {
+        $sanitized = $sanitized.Replace($env:USERPROFILE, "<USERPROFILE>")
+    }
+    Set-Content -Path $Destination -Value $sanitized -Encoding UTF8
+}
+
 # Run the portable self-check first. A FAIL result is still useful evidence, so
 # diagnostic collection continues even when the check returns a non-zero code.
 $selfCheck = Join-Path $Root "scripts\portable_self_check.ps1"
@@ -45,9 +55,9 @@ $summary.Add("- Prompt file contents are NOT included.")
 $summary.Add("- Backup archive contents are NOT included.")
 $summary.Add("- Settings files are NOT included.")
 $summary.Add("- Arbitrary application log contents are NOT included.")
-$summary.Add("- Absolute portable/user paths are redacted from exported self-check output.")
+$summary.Add("- Absolute portable/user paths are redacted from exported launcher/self-check output.")
 $summary.Add("- Original runtime log filenames are not exported; only numbered metadata entries are included.")
-$summary.Add("- Only build metadata, sanitized self-check output, EXE metadata, and a redacted log index are collected.")
+$summary.Add("- Only build metadata, sanitized launcher/self-check output, EXE metadata, and a redacted log index are collected.")
 Write-Utf8File (Join-Path $Stage "SUMMARY.txt") $summary
 
 $buildInfo = Join-Path $Root "BUILD_INFO.txt"
@@ -55,15 +65,8 @@ if (Test-Path $buildInfo) {
     Copy-Item $buildInfo (Join-Path $Stage "BUILD_INFO.txt") -Force
 }
 
-$selfCheckReport = Join-Path $LogDir "portable-self-check.txt"
-if (Test-Path $selfCheckReport) {
-    $sanitized = Get-Content $selfCheckReport -Raw
-    $sanitized = $sanitized.Replace($Root, "<PORTABLE_ROOT>")
-    if ($env:USERPROFILE) {
-        $sanitized = $sanitized.Replace($env:USERPROFILE, "<USERPROFILE>")
-    }
-    Set-Content -Path (Join-Path $Stage "portable-self-check.txt") -Value $sanitized -Encoding UTF8
-}
+Export-SanitizedText (Join-Path $LogDir "portable-launch-status.txt") (Join-Path $Stage "portable-launch-status.txt")
+Export-SanitizedText (Join-Path $LogDir "portable-self-check.txt") (Join-Path $Stage "portable-self-check.txt")
 
 $exe = Join-Path $Root "PromptAction.exe"
 $exeLines = New-Object System.Collections.Generic.List[string]
@@ -106,6 +109,7 @@ $structure = @(
     "src\prompt_action\ui\qml\App.qml",
     "BUILD_INFO.txt",
     "BACA_DULU.txt",
+    "Jalankan Prompt Action.bat",
     "Cek Portable.bat",
     "Buat Paket Diagnostik.bat"
 )
