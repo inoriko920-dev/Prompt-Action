@@ -1,0 +1,20 @@
+{
+  "allowed_changes": [
+    "app_data_revision 1 -> 2",
+    "eight R1.file null -> canonical project-relative paths",
+    "eight R1.file_available false -> true",
+    "backups [] -> [B001]",
+    "S001.backup_id null -> B001",
+    "S001.status BACKUP_REQUIRED -> COMPLETE"
+  ],
+  "forbidden_changes_verified_absent": [
+    "new System V",
+    "new Snapshot S",
+    "new Revision R",
+    "protected baseline SHA mutation",
+    "prompt byte reconstruction",
+    "old history overwrite/delete"
+  ],
+  "prompt_hashes_unchanged": true,
+  "prompt_bytes_reconstructed": false
+}

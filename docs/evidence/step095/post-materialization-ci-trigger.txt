@@ -1,0 +1,1 @@
+Post-materialization CI trigger. Canonical S001 is COMPLETE with B001 VALID; no prompt/canonical bytes changed by this file.

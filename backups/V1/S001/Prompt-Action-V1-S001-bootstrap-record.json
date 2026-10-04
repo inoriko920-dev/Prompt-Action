@@ -1,0 +1,20 @@
+{
+  "id": "B001",
+  "system": "V1",
+  "snapshot": "S001",
+  "status": "VALID",
+  "verified": true,
+  "second_copy_verified": true,
+  "file": "backups/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip",
+  "sha256": "f04e1b69c2613bf238c547bfab9cc81ab5708c100843e13b6750ea950f33d8a6",
+  "sha256_file": "backups/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip.sha256",
+  "second_copy": "backups/second-copy/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip",
+  "second_copy_sha256": "f04e1b69c2613bf238c547bfab9cc81ab5708c100843e13b6750ea950f33d8a6",
+  "second_copy_sha256_file": "backups/second-copy/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip.sha256",
+  "manifest_path": "bootstrap/manifest.json",
+  "bootstrap": true,
+  "source_rescue_sha256": "f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2",
+  "prompt3_release_sha256": "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1",
+  "baseline_reconciliation": "P3_V22_5_2_HASH_EXACT",
+  "created_at": "2026-10-04T00:00:00+07:00"
+}

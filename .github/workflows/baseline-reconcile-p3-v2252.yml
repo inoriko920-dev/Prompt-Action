@@ -1,0 +1,75 @@
+name: Baseline Reconcile Prompt 3 v22.5.2
+
+on:
+  push:
+    branches:
+      - 'sol/baseline-reconcile-p3-v2252-20261004'
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    if: ${{ contains(github.event.head_commit.message, '[run-baseline-reconcile]') && !contains(github.event.head_commit.message, '[baseline-reconciled]') }}
+    runs-on: windows-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+      QT_QUICK_BACKEND: software
+      QSG_RHI_BACKEND: software
+      QSG_RENDER_LOOP: basic
+      QT_QUICK_CONTROLS_STYLE: Basic
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+          architecture: x64
+      - name: Install exact lock
+        run: python -m pip install -r requirements-lock.txt
+      - name: Install Prompt Action editable
+        run: python -m pip install -e . --no-deps --no-build-isolation
+      - name: Reconcile P3 v22.5.2 baseline and rebuild B001
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force ci-baseline-recovery-evidence | Out-Null
+          python scripts/dev/reconcile_p3_v2252_baseline.py | Tee-Object -FilePath ci-baseline-recovery-evidence/reconcile.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify STEP 09.5 bootstrap
+        shell: pwsh
+        run: |
+          python scripts/dev/verify_step095_bootstrap.py | Tee-Object -FilePath ci-baseline-recovery-evidence/verify-step095.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: STEP 09.5 regression
+        run: python -m pytest tests/step095 -q
+      - name: STEP 10 preflight
+        run: python scripts/dev/verify_step10_preflight.py
+      - name: STEP 10 regression
+        run: python -m pytest tests/step10 -q
+      - name: Git diff safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          test "$(git status --porcelain prompts/V1/Prompt-3/Prompt-3_V1_R1.txt | wc -l)" -eq 0
+      - name: Commit reconciled baseline atomically
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add BASELINE.json data/version_history.json docs/VERSIONING_RULES.md docs/evidence/step095 docs/evidence/baseline-recovery-p3-v2252 docs/implementation/BASELINE_RECOVERY_P3_V2252_REPORT.md backups scripts/dev/rebuild_step095_bootstrap_from_preserved_chunks.py scripts/dev/run_step095_exact_capsule_rebuild.py scripts/dev/materialize_step095_prompts.py scripts/dev/verify_step095_bootstrap.py tests/step095/test_step095_bootstrap.py
+          if git diff --cached --quiet; then
+            echo "No generated reconciliation changes; refusing false completion."
+            exit 1
+          fi
+          git commit -m "BASELINE RECOVERY: reconcile hash-exact P3 v22.5.2 + B001 [baseline-reconciled]"
+          git push origin HEAD:sol/baseline-reconcile-p3-v2252-20261004
+      - name: Upload recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline-reconcile-p3-v2252-evidence
+          path: ci-baseline-recovery-evidence
+          retention-days: 30

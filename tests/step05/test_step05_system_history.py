@@ -61,14 +61,14 @@ def test_t10_baseline_has_no_fake_sync():
     assert SystemHistoryQueryService(ROOT).read()["selected_snapshot"]["sync_changes"] == []
 
 
-def test_t11_backup_required_is_honest():
+def test_t11_completed_backup_is_honest():
     detail = SystemHistoryQueryService(ROOT).read()["selected_snapshot"]
-    assert detail["status"] == "BACKUP_REQUIRED" and detail["backup_status"] == "PERLU BACKUP"
+    assert detail["status"] == "COMPLETE" and detail["backup_status"] == "VALID" and detail["backup_id"] == "B001"
 
 
-def test_t12_backup_download_disabled_without_evidence():
+def test_t12_backup_download_enabled_with_verified_evidence():
     caps = SystemHistoryQueryService(ROOT).read()["selected_snapshot"]["capabilities"]
-    assert caps["can_download_snapshot_backup"] is False
+    assert caps["can_download_snapshot_backup"] is True
 
 
 def test_t13_compare_disabled_for_baseline():
@@ -140,12 +140,12 @@ def test_t30_master_reference_exists():
     assert (ROOT / "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/02-Sejarah-Sistem.jpg").is_file()
 
 
-def test_t31_protected_baseline_unchanged_marker():
-    assert digest(ROOT / "BASELINE.json") == "8ffd22fe3636309ce0484f8b724f9fe306f3156383c5f4efbcc7e59f79e90b6d"
+def test_t31_reconciled_b001_hash_protected():
+    assert digest(ROOT / "backups/V1/S001/Prompt-Action-V1-S001-BOOTSTRAP-FULL-BACKUP.zip") == "f04e1b69c2613bf238c547bfab9cc81ab5708c100843e13b6750ea950f33d8a6"
 
 
-def test_t32_version_history_hash_unchanged():
-    assert digest(CANONICAL) == "1a0fddf98b000bb908e12e5aa617b42793a399a8dd9cb36e1acf7204ca8465bb"
+def test_t32_recovered_p3_hash_protected():
+    assert digest(ROOT / "prompts/V1/Prompt-3/Prompt-3_V1_R1.txt") == "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1"
 
 
 def test_t33_legacy_reason_is_real_metadata():

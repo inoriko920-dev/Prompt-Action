@@ -1,0 +1,178 @@
+# PROMPT 4 FINAL — GABUNG LOGIS DAN AUDIT SATU BLOK
+
+VERSI ATURAN: V22.5.1 — AUDIT BERBASIS JSON N/J, NARASI V22.5 ACAK SATU LOKASI FLEKSIBEL, DIALOG TANPA ACAK, AKSI AMBIL–LEWATI, CAMPURAN AKSI-DOMINAN, OUTPUT 1 JSON PER BLOK
+
+## TUJUAN
+
+Mengaudit tepat satu B-xxx dengan membaca seluruh JSON N-xxx dan J-xxx yang menyusun blok, menyusun posisi timeline absolut secara logis, lalu memeriksa cerita, audio, visual, kontinuitas, timestamp, dan aturan teknis tanpa merender preview atau membuat keputusan kreatif baru.
+
+## INPUT WAJIB
+
+1. Rencana induk Prompt 1B2.
+2. Semua JSON N-xxx dan J-xxx yang masuk blok.
+3. Dokumen final Prompt 1B1 sebagai acuan cerita/dialog.
+4. MP4/SRT/audio sumber hanya bila diperlukan untuk memverifikasi masalah yang tidak dapat dipastikan dari JSON.
+5. Registrasi pusat yang direferensikan oleh JSON unit.
+
+Hentikan jika ada unit dalam blok yang belum berstatus `TERKUNCI`.
+
+## TUGAS UTAMA
+
+1. Baca urutan tayang blok dari Prompt 1B2.
+2. Gabungkan keputusan unit secara data/logis tanpa mengubah isi internal unit.
+3. Hitung posisi timeline absolut setiap N/J dalam blok.
+4. Audit cerita, audio, visual, kontinuitas, dan teknis.
+5. Audit overlap timestamp dan kepemilikan visual.
+6. Tentukan status blok.
+7. Jika ada masalah, tunjuk unit asal dan revisi yang diperlukan.
+8. Jangan memperbaiki kreatif secara diam-diam.
+9. Simpan hasil sebagai satu JSON B-xxx.
+10. Berhenti setelah satu blok.
+
+# AUDIT CERITA
+
+Periksa:
+
+- urutan tayang sesuai Prompt 1B2;
+- narasi mengantar ke Jangkar pada waktu yang tepat;
+- Jangkar tidak muncul sebelum konteks yang diperlukan;
+- tidak ada informasi yang dibocorkan terlalu awal;
+- tidak ada lompatan sebab-akibat;
+- lokasi, tokoh, tindakan, dan hasil dapat dipahami;
+- awal dan akhir blok terasa utuh sebagai rangkaian kecil.
+
+# AUDIT NARASI V22.5
+
+Untuk setiap N-xxx:
+
+1. Safe padding audio narasi aman dan tidak memotong kata.
+2. Durasi visual mengikuti audio final setelah safe padding.
+3. Mode sah: `ACAK SATU LOKASI` bila aman atau `MODE DARURAT — TANPA ACAK` bila pengacakan tidak aman/tidak memungkinkan.
+4. Setiap potongan visual final setelah speed/freeze 2,00–5,00 detik, termasuk potongan terakhir.
+5. Visual yang sama tidak bertahan >5,00 detik dan tidak ada pergantian palsu dari shot/frame yang sama.
+6. Lokasi fisik sesuai frasa; acak tidak boleh lintas lokasi.
+7. `VISUAL PRESISI` benar-benar sesuai informasi yang dibacakan.
+8. `HANDOFF KE J-xxx` memakai adegan sebelum Jangkar yang relevan dan tidak mengambil momen inti Jangkar.
+9. Audio asli film pada unit Narasi tetap muted.
+10. Speed/freeze/hold sesuai keputusan Prompt 3 dan tidak diubah oleh Prompt 4.
+11. Tidak ada overlap timestamp, spoiler, frame hitam, freeze tidak disengaja, atau kontinuitas yang rusak.
+
+# AUDIT JANGKAR V22.5.1
+
+## DIALOG
+
+Periksa:
+
+- dialog yang terdengar sama dengan hasil Prompt 1B1;
+- audio dan urutan ucapan kronologis;
+- visual mengikuti urutan source asli dan cut kamera asli;
+- tidak ada acak lokal atau cutaway acak lintas blok;
+- setiap visual maksimal 3,00 detik;
+- native short shot <2 detik boleh bila memang cut kamera asli;
+- tidak ada artificial short cut yang menimbulkan kedipan;
+- pembagian visual natural dan tidak merusak kalimat/lip-sync;
+- speed tetap 1,00×.
+
+## AKSI
+
+Periksa:
+
+- rangkaian dibaca per kamera/shot asli;
+- sistem AMBIL–LEWATI benar-benar diterapkan dan tidak mengambil semua shot tanpa seleksi;
+- bagian LEWATI tidak diam-diam dimasukkan kembali ke Jangkar;
+- momen sebab-akibat penting tetap dilindungi;
+- setiap visual maksimal 3,00 detik; 3 detik bukan target;
+- long take dibagi berdasarkan fase gerak natural, bukan pola angka otomatis;
+- acak hanya terjadi jika aman; tidak ada kewajiban mengacak;
+- jika tetap kronologis karena sebab-akibat/continuity, itu sah;
+- visual dan audio asli setiap potongan tetap satu paket;
+- speed tetap 1,00×;
+- sambungan posisi, arah gerak, benda, keadaan tubuh, ruang, dan waktu tetap masuk akal.
+
+## CAMPURAN
+
+Periksa:
+
+- mekanisme visual mengikuti AKSI;
+- aksi tetap dominan;
+- dialog hanya penguat kecil dan setiap D tetap maksimal 3,00 detik sesuai hasil 1B/1B1;
+- ucapan yang dipertahankan tetap sinkron dengan orang dan momen yang benar;
+- mekanisme AMBIL–LEWATI/acak aman tidak merusak lip-sync atau arti ucapan.
+
+# AUDIT ANTARUNIT
+
+Periksa:
+
+- timestamp tidak dipakai ulang oleh unit berbeda;
+- Narasi dan Jangkar tidak memakai momen inti yang sama;
+- shot akhir unit dan shot awal unit berikutnya tidak menimbulkan kedipan/jump membingungkan;
+- safe padding audio tidak overlap;
+- transisi lokasi/waktu tidak membingungkan;
+- registrasi pusat konsisten dengan keputusan unit.
+
+# BATAS KEWENANGAN
+
+Prompt 4 boleh menghitung posisi timeline, membandingkan data, menulis masalah/revisi, dan menentukan status blok.
+
+Prompt 4 tidak boleh memilih timestamp baru, mengganti visual, memotong Dialog, mengubah AMBIL/LEWATI, mengacak ulang Aksi, mengubah mode Narasi, mengubah speed/freeze, atau membuat keputusan kreatif baru. Masalah kreatif harus kembali ke Prompt 2 atau Prompt 3.
+
+# KEPUTUSAN AUDIT
+
+Jika lulus:
+
+`LOLOS AUDIT — BLOK TERKUNCI`
+
+Jika gagal:
+
+`PERLU REVISI UNIT`
+
+Catat unit asal, jenis masalah, aturan yang dilanggar, data/timestamp terkait, dan Prompt yang harus dipakai untuk revisi.
+
+# OUTPUT WAJIB
+
+Tepat **1 file JSON untuk setiap Blok**:
+
+`B-[XXX] Part-[N] [JUDUL-FILM].json`
+
+Isi JSON minimal:
+
+- ID blok
+- urutan unit final dalam blok
+- daftar N/J penyusun blok
+- referensi ke masing-masing JSON N/J
+- posisi timeline absolut setiap unit
+- posisi mulai absolut unit
+- posisi akhir absolut unit
+- hasil audit cerita
+- hasil audit audio
+- hasil audit visual
+- hasil audit kontinuitas
+- hasil audit teknis
+- daftar masalah yang ditemukan
+- unit asal dari setiap masalah
+- revisi yang diperlukan
+- ringkasan timestamp terpakai
+- ringkasan perubahan registrasi
+- status blok
+
+Jika lolos, statusnya:
+
+`LOLOS AUDIT — BLOK TERKUNCI`
+
+**Output akhir Prompt 4:**
+
+`1 Blok = 1 JSON`
+
+Contoh:
+
+`B-001 Part-1 Atlas King.json`
+`B-002 Part-1 Atlas King.json`
+`B-003 Part-1 Atlas King.json`
+
+Tidak menghasilkan WFP atau ZIP per blok.
+
+Karena satu blok menghasilkan tepat satu file JSON, file diberikan langsung tanpa ZIP. Jika satu perintah khusus menghasilkan dua atau lebih file, seluruh file wajib masuk satu ZIP sesuai Aturan ZIP Output.
+
+# LARANGAN
+
+Jangan mengaudit lebih dari satu blok, mengubah unit secara diam-diam, membuat WFP/MP4/ZIP per blok, atau mengirim blok ke Prompt 5 sebelum berstatus `LOLOS AUDIT — BLOK TERKUNCI`.

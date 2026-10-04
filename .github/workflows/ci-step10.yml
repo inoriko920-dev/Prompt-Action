@@ -1,0 +1,100 @@
+name: STEP 10 Revision Snapshot Release CI
+
+on:
+  push:
+    branches:
+      - 'sol/step10-*'
+  pull_request:
+    paths:
+      - 'src/prompt_action/services/release_*.py'
+      - 'src/prompt_action/services/revision_allocator.py'
+      - 'src/prompt_action/services/snapshot_allocator.py'
+      - 'src/prompt_action/data/atomic_writer.py'
+      - 'src/prompt_action/data/transaction_journal.py'
+      - 'src/prompt_action/data/release_repository.py'
+      - 'src/prompt_action/domain/errors.py'
+      - 'src/prompt_action/presentation/per_prompt_view_model.py'
+      - 'src/prompt_action/ui/viewmodels/release_wizard_view_model.py'
+      - 'src/prompt_action/ui/qml/dialogs/*Release*.qml'
+      - 'src/prompt_action/ui/qml/dialogs/AddRevisionDialog.qml'
+      - 'src/prompt_action/ui/qml/shell/**'
+      - 'src/prompt_action/main.py'
+      - 'tests/step10/**'
+      - 'scripts/dev/verify_step10_preflight.py'
+      - 'scripts/dev/capture_step10_evidence.py'
+      - 'docs/implementation/STEP_10_SOL_EXECUTION_REPORT.md'
+      - '.github/workflows/ci-step10.yml'
+
+jobs:
+  validate-step10:
+    runs-on: windows-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+      QT_QUICK_BACKEND: software
+      QSG_RHI_BACKEND: software
+      QSG_RENDER_LOOP: basic
+      QT_QUICK_CONTROLS_STYLE: Basic
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+          architecture: x64
+      - name: Verify exact Python
+        run: python -c "import platform,sys; assert sys.version_info[:3] == (3,13,16); assert platform.architecture()[0] == '64bit'"
+      - name: Install exact lock
+        run: python -m pip install -r requirements-lock.txt
+      - name: Install Prompt Action editable
+        run: python -m pip install -e . --no-deps --no-build-isolation
+      - name: Capture production baseline hashes
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force ci-step10-evidence | Out-Null
+          python scripts/dev/verify_step10_preflight.py | Tee-Object -FilePath ci-step10-evidence/preflight.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -c "import hashlib,json,pathlib; root=pathlib.Path('.'); files=[root/'data/version_history.json',*sorted((root/'prompts').rglob('*')), *sorted((root/'backups').rglob('*'))]; files=[p for p in files if p.is_file()]; out={str(p).replace('\\','/'):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}; pathlib.Path('ci-step10-evidence/baseline-hashes.json').write_text(json.dumps(out,sort_keys=True,indent=2)+'\n',encoding='utf-8')"
+      - name: STEP 10 T01-T70 + UI acceptance
+        shell: pwsh
+        run: |
+          python -m pytest tests/step10 -q | Tee-Object -FilePath ci-step10-evidence/pytest-step10.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Capture STEP 10 Release Wizard evidence
+        shell: pwsh
+        run: |
+          python scripts/dev/capture_step10_evidence.py --output ci-step10-evidence | Tee-Object -FilePath ci-step10-evidence/ui-capture.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: STEP 09.5 regression
+        run: python -m pytest tests/step095 -q
+      - name: Regenerate STEP 03 evidence
+        run: python scripts/dev/capture_step03_evidence.py --output ci-step03-regression-evidence
+      - name: Regenerate STEP 04 evidence
+        run: python scripts/dev/capture_step04_evidence.py --output ci-step04-regression-evidence
+      - name: Regenerate STEP 05 evidence
+        run: python scripts/dev/capture_step05_evidence.py --output ci-step05-regression-evidence
+      - name: Regenerate STEP 06 evidence
+        run: python scripts/dev/capture_step06_evidence.py --output ci-step06-regression-evidence
+      - name: Regenerate STEP 07 evidence
+        run: python scripts/dev/capture_step07_evidence.py --output ci-step07-regression-evidence
+      - name: Regenerate STEP 08 evidence
+        run: python scripts/dev/capture_step08_evidence.py --output ci-step08-regression-evidence
+      - name: STEP 01-09 regression on reconciled HEAD
+        env:
+          STEP03_EVIDENCE_DIR: ${{ github.workspace }}\ci-step03-regression-evidence
+          STEP04_EVIDENCE_DIR: ${{ github.workspace }}\ci-step04-regression-evidence
+        run: python -m pytest tests/step01 tests/step02 tests/step03 tests/step04 tests/step05 tests/step06 tests/step07 tests/step08 tests/step09 -q
+      - name: Verify tests did not mutate production baseline
+        shell: pwsh
+        run: |
+          python -c "import hashlib,json,pathlib; root=pathlib.Path('.'); expected=json.loads(pathlib.Path('ci-step10-evidence/baseline-hashes.json').read_text()); files=[root/'data/version_history.json',*sorted((root/'prompts').rglob('*')), *sorted((root/'backups').rglob('*'))]; files=[p for p in files if p.is_file()]; actual={str(p).replace('\\','/'):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}; assert actual==expected,(set(actual.items())^set(expected.items()))"
+          python scripts/dev/verify_step10_preflight.py
+      - name: Module integration smoke
+        run: python -m prompt_action --smoke-test-ms 180
+      - name: Upload STEP 10 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: step10-revision-snapshot-release-evidence
+          path: ci-step10-evidence
+          retention-days: 30

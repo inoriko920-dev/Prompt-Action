@@ -1,0 +1,530 @@
+# PROMPT 1B1 FINAL — SINKRONISASI NASKAH BERSIH, DIALOG, TIMESTAMP, DAN PENGUNCIAN HASIL
+
+KOMPATIBILITAS WORKFLOW: V22.5.1 — Prompt 1B1 membaca dan memperbarui satu DOCX yang sama, lalu mengaudit dominasi narasi, aturan D maksimal 3,00 detik, CAMPURAN aksi-dominan, dan konsistensi hasil Audit Jangkar Aksi Terlewat dari Prompt 1B.
+VERSI ATURAN: V20.7 DIPERBARUI DARI V18.7; PROFIL DASAR V12.7
+
+PROFIL DASAR:
+- aksi sekitar 45%, jangkar selektif dan ritme padat; Dialog Prompt 2 mengikuti urutan kamera asli tanpa cutaway acak lintas blok, sedangkan Aksi memakai AMBIL–LEWATI dan acak lokal hanya jika aman.
+- Jumlah total jangkar tetap mengikuti cerita.
+- Narasi wajib menjadi pembawa utama alur.
+- Dialog memakai default 1 D per beat; D tambahan hanya bila benar-benar saling membutuhkan; setiap D-xxx maksimal 3,00 detik dan 3 detik bukan target.
+- Pengguna mengedit narasi dan dialog pada Naskah Bersih tanpa memperbaiki menit secara manual.
+- Kecepatan visual narasi mengikuti Prompt 3 aktif V22.5: `0,50×` tetap default/maksimum dan speed <`0,50×`/intentional freeze tetap boleh bila diperlukan; setiap potongan visual final setelah speed/freeze wajib `2,00–5,00 detik`. Jika pengacakan digunakan, pengacakan hanya boleh antar-shot dari **tempat/lokasi fisik yang sama** dan tetap aman secara kontinuitas. Jika pengacakan tidak dapat dilakukan secara natural/aman, Prompt 3 boleh memakai `MODE DARURAT — TANPA ACAK` tanpa dianggap gagal, selama visual tetap relevan, satu lokasi sesuai frasa, kronologis bila diperlukan, dan batas 2–5 detik tetap terpenuhi.
+- MP4 jangkar tetap 1,00× dengan audio asli.
+
+==================================================
+POSISI DALAM WORKFLOW
+==================================================
+
+Urutan kerja:
+
+Prompt 1A
+↓
+Prompt 1B — Satu DOCX: Bagian A Teknis + Bagian B Naskah Bersih
+↓
+EDIT MANUAL BAGIAN B LANGSUNG DI DOCX YANG SAMA, LALU SIMPAN DENGAN NAMA YANG SAMA
+↓
+Prompt 1B1 — Sinkronisasi, Penguncian, dan Pembaruan DOCX yang Sama
+↓
+Pembuatan Audio Narasi Final
+↓
+Prompt 1B2 — Identifikasi Blok dan Kepemilikan Visual
+↓
+Prompt 2 dan Prompt 3 — Eksekusi Satu Unit per Perintah
+↓
+Prompt 4 — Gabung dan Audit Per Blok
+↓
+Prompt 5 — Finalisasi Seluruh Part
+
+Prompt 1B1 tidak boleh dijalankan sebelum Bagian B Naskah Bersih pada DOCX yang sama selesai diedit dan disimpan.
+
+==================================================
+TUJUAN UTAMA
+==================================================
+
+Prompt 1B1 bertugas:
+
+1. Membandingkan Bagian A teknis asli dengan Bagian B Naskah Bersih hasil edit pengguna di dalam DOCX yang sama. Teks asli setiap unit N/D dibaca dari Bagian A, sehingga tidak diperlukan salinan Naskah Bersih asli dalam file terpisah.
+2. Menggunakan teks narasi hasil edit sebagai narasi final.
+3. Mendeteksi dialog yang dipertahankan, dipendekkan, dihapus, dipindahkan, atau diganti.
+4. Menghapus seluruh metadata dialog yang sudah dihapus.
+5. Mencari dialog yang dipertahankan atau diganti melalui SRT dan MP4.
+6. Menyesuaikan timestamp awal dan akhir dialog berdasarkan ucapan yang benar-benar tersisa.
+7. Menghitung ulang durasi dialog dan jangkar.
+8. Mengubah jenis jangkar jika komposisinya berubah.
+9. Menghapus jangkar yang tidak lagi memiliki dialog atau aksi yang dipertahankan.
+10. Menomori ulang jangkar secara berurutan.
+11. Memperbarui seluruh narasi sebelum dan sesudah jangkar berdasarkan naskah hasil edit.
+12. Memeriksa kronologi, sebab-akibat, kontinuitas, dan rujukan yang sudah tidak ada.
+13. Menguji apakah narasi final tetap membawa alur utama dan tidak bergantung pada dialog panjang.
+14. Menguji bahwa setiap D-xxx maksimal 3,00 detik, default satu D per beat diterapkan, dan CAMPURAN tetap aksi-dominan.
+15. Memperbarui DOCX yang sama menjadi dokumen final terkunci yang menjadi satu-satunya sumber sah Prompt 1B2 sampai Prompt 5.
+
+Pengguna tidak wajib memperbaiki nomor, menit, timestamp, durasi, jumlah potongan, jenis jangkar, atau posisi timeline.
+
+==================================================
+SUMBER DAN URUTAN PRIORITAS
+==================================================
+
+Gunakan prioritas berikut:
+
+1. Bagian B `NASKAH BERSIH UNTUK EDIT MANUAL` pada `Prompt 1B Part [N] [JUDUL FILM].docx` menentukan narasi dan dialog yang ingin dipakai.
+2. Bagian A teknis dalam DOCX yang sama menentukan teks asli unit N/D, hubungan ID, jangkar, konteks, timestamp kandidat, dan beat aksi awal.
+3. SRT menentukan lokasi teks dialog dan urutan ucapan.
+4. MP4 serta audio asli menentukan batas awal, batas akhir, jeda, reaksi, dan konteks yang aman.
+5. Prompt 1A menentukan fakta, kronologi, tokoh, dan konteks film.
+
+Jika terjadi konflik:
+
+- Keputusan pengguna menentukan apa yang ingin dipertahankan atau dihapus.
+- MP4 dan SRT menentukan apakah dialog benar-benar ada serta timestamp yang benar.
+- Bagian A teknis tidak boleh menghidupkan kembali teks yang telah dihapus dari Bagian B Naskah Bersih.
+
+==================================================
+INPUT WAJIB
+==================================================
+
+1. `Pemahaman Film [JUDUL FILM].docx` hasil Prompt 1A.
+2. Tepat satu file `Prompt 1B Part [N] [JUDUL FILM].docx` yang sudah diedit pengguna pada Bagian B dan masih memiliki Bagian A utuh.
+3. MP4 sumber part atau film.
+4. SRT asli yang sesuai.
+5. Pembagian timestamp part jika tersedia.
+6. Full SRT apabila diperlukan.
+7. Dokumen sambungan part jika tersedia.
+8. Audio narasi final jika sudah dibuat. Secara normal audio dibuat setelah Prompt 1B1.
+
+Hentikan proses jika:
+
+- file `Prompt 1B Part [N] [JUDUL FILM].docx` tidak tersedia;
+- Bagian A teknis asli di dalam file yang sama tidak tersedia atau sudah diubah;
+- Bagian B Naskah Bersih hasil edit tidak tersedia;
+- ditemukan dua DOCX bersaing untuk part yang sama dan tidak jelas mana yang terbaru;
+- media sumber tidak cukup untuk memverifikasi dialog yang berubah.
+
+==================================================
+SISTEM ID DAN CARA MEMBACA EDIT
+==================================================
+
+ID yang digunakan:
+
+- `N-xxx` = unit narasi.
+- `D-xxx` = unit dialog.
+- `J-xxx` = jangkar.
+
+Aturan pembacaan:
+
+1. ID N atau D ada dan teks sama: `DIPERTAHANKAN`.
+2. ID ada dan teks berubah: `DIUBAH` atau `DIPENDEKKAN`.
+3. ID yang ada di Bagian A tetapi tidak ada pada Bagian B hasil edit: `DIHAPUS`.
+4. ID ada tetapi isi kosong: `DIHAPUS`.
+5. ID dipindahkan bersama bloknya: `DIPINDAH`.
+6. Teks baru berada di bawah ID lama: `DIGANTI`.
+7. ID baru atau teks tanpa ID: cocokkan dengan posisi, isi, dan konteks. Jika aman, buat ID final baru dan laporkan. Jika tidak aman, gunakan `PERLU KONFIRMASI PENGGUNA`.
+8. Jika pengguna menggabungkan dua narasi, gunakan teks final persis dari Naskah Bersih dan catat semua ID asal.
+9. Jika pengguna menghapus ID tetapi teks masih jelas sama, lakukan pencocokan semantik dan laporkan sebagai `ID HILANG — BERHASIL DICOCOKKAN`.
+10. Jangan menganggap metadata lama sebagai bukti bahwa dialog masih dipakai apabila blok D sudah hilang atau kosong.
+
+Aturan keputusan keras:
+
+> Jika dialog ada di Bagian A teknis tetapi ID D atau teksnya tidak lagi ada pada Bagian B Naskah Bersih hasil edit, dialog dianggap sengaja dihapus. Timestamp, durasi, jumlah potongan, rencana MP4, dan seluruh metadata dialog tersebut wajib ikut dihapus atau dihitung ulang.
+
+==================================================
+PROSEDUR PERBANDINGAN WAJIB
+==================================================
+
+LANGKAH 1 — INVENTARISASI BAGIAN TEKNIS
+
+Catat setiap:
+
+- ID N dan teks narasi asli;
+- ID D dan teks dialog asli;
+- ID J dan jenis jangkar;
+- hubungan D ke J;
+- hubungan N sebelum dan sesudah J;
+- timestamp kandidat;
+- durasi;
+- beat aksi;
+- urutan cerita.
+
+LANGKAH 2 — INVENTARISASI BAGIAN B NASKAH BERSIH HASIL EDIT
+
+Baca semua ID N, D, penanda J, urutan, teks yang berubah, blok yang hilang, dan blok baru. Bandingkan langsung dengan unit asal pada Bagian A.
+
+LANGKAH 3 — SUSUN STATUS PERUBAHAN
+
+Susun tabel status:
+
+- DIPERTAHANKAN;
+- NARASI DIUBAH;
+- NARASI DIPENDEKKAN;
+- NARASI DIHAPUS;
+- NARASI DIGABUNG;
+- NARASI DIPINDAH;
+- DIALOG DIPERTAHANKAN;
+- DIALOG DIPENDEKKAN;
+- DIALOG DIHAPUS;
+- DIALOG DIGANTI;
+- DIALOG DIPINDAH;
+- ID HILANG;
+- BLOK BARU;
+- PERLU KONFIRMASI.
+
+LANGKAH 4 — PERBARUI BAGIAN A TEKNIS
+
+Jangan hanya membuat laporan. Seluruh isi Bagian A wajib ditulis ulang agar sesuai dengan Naskah Bersih final.
+
+LANGKAH 5 — TULIS LAPORAN PENYESUAIAN DI DALAM DOCX YANG SAMA DAN AUDIT SILANG
+
+Pastikan tidak ada teks, timestamp, durasi, jumlah potongan, atau nomor lama yang masih tertinggal.
+
+==================================================
+ATURAN NARASI HASIL EDIT
+==================================================
+
+Jika narasi diubah:
+
+1. Gunakan teks pengguna sebagai teks utama.
+2. Jangan mengembalikan versi lama karena dianggap lebih bagus.
+3. Periksa kesesuaian fakta, kronologi, dan sebab-akibat.
+4. Perbarui semua kolom `Narasi sebelum adegan`, `Narasi setelah adegan`, dan kalimat pemicu.
+5. Perbarui Naskah Bersih Final pada bagian paling bawah DOCX yang sama.
+6. Hitung ulang estimasi durasi baca.
+7. Jika audio final tersedia, gunakan durasi aktual.
+8. Jika audio belum tersedia, gunakan status `DURASI NARASI MENUNGGU AUDIO FINAL`.
+
+Jika narasi dihapus:
+
+1. Hapus unit tersebut dari narasi final.
+2. Hapus semua rujukan teknis terhadap ID N itu.
+3. Jangan mengubah timestamp sumber jangkar yang tidak berubah.
+4. Periksa sambungan dua elemen yang sekarang berdekatan.
+5. Jangan menambah narasi baru tanpa izin.
+6. Jika sambungan terputus, gunakan status `BELUM AMAN — NARASI PENGHUBUNG HILANG` dan berikan saran minimal terpisah.
+
+Jika narasi digabung atau dipindah:
+
+1. Pertahankan teks dan urutan final sesuai Naskah Bersih.
+2. Catat semua ID asal.
+3. Perbarui hubungan dengan jangkar di posisi baru.
+4. Jangan memindahkan jangkar hanya karena narasi dipindah, kecuali penanda J juga dipindahkan secara sengaja dan konteksnya aman.
+
+==================================================
+ATURAN DIALOG DIHAPUS
+==================================================
+
+Dialog dianggap dihapus apabila:
+
+- seluruh blok `[DIALOG D-xxx]` hilang;
+- blok tetap ada tetapi kosong;
+- teks dialog diganti dengan penanda penghapusan yang jelas.
+
+Jika dialog dihapus:
+
+1. Hapus dialog dari naskah final.
+2. Hapus timestamp dialog tersebut.
+3. Hapus durasi dialog tersebut.
+4. Hapus jumlah potongan yang hanya berkaitan dengan dialog itu.
+5. Hapus rencana unit JSON dan data subtitle dialog tersebut.
+6. Hapus rujukan narasi yang menjadi tidak masuk akal.
+7. Jangan mencari dialog pengganti.
+8. Jangan mempertahankan metadata lama hanya karena ID J masih ada.
+9. Hitung ulang komposisi jangkar.
+
+Perubahan jenis jangkar:
+
+- `DIALOG` tanpa dialog tersisa dan tanpa aksi penting → hapus jangkar.
+- `CAMPURAN` setelah semua dialog dihapus tetapi aksi masih dipertahankan → ubah menjadi `AKSI`.
+- `CAMPURAN` setelah aksi dibuang tetapi dialog masih dipertahankan → ubah menjadi `DIALOG`.
+- `CAMPURAN` dengan sebagian dialog dan aksi masih tersisa → tetap `CAMPURAN`, tetapi jumlah dialog diperbarui.
+- Jangkar yang kehilangan semua isi wajib dihapus dan nomor berikutnya diperbarui.
+
+==================================================
+ATURAN DIALOG DIPENDEKKAN
+==================================================
+
+Jika pengguna menyisakan sebagian dialog:
+
+1. Gunakan hanya teks yang masih ada pada Naskah Bersih.
+2. Cari kalimat pertama dan terakhir yang dipertahankan di SRT.
+3. Verifikasi batas audio melalui MP4.
+4. Pilih awal dan akhir yang natural tanpa memotong kata.
+5. Sertakan jeda atau reaksi hanya jika diperlukan agar dialog tidak terasa rusak.
+6. Hapus timestamp milik kalimat yang dibuang.
+7. Hitung durasi baru hingga dua angka desimal.
+8. Perbarui jumlah potongan.
+9. Perbarui data subtitle dialog yang akan disimpan di JSON unit.
+10. Catat timestamp lama dan baru dalam laporan.
+
+Jika kalimat yang dipertahankan tidak berurutan di sumber:
+
+- jangan memakai satu rentang panjang yang memasukkan kembali dialog yang telah dihapus;
+- pecah menjadi beberapa segmen berurutan, misalnya `D-003A` dan `D-003B`;
+- setiap segmen memiliki timestamp dan durasi sendiri;
+- Prompt 1B2 wajib mencatat pemisahan ini, dan Prompt 2 wajib menerimanya sebagai kebutuhan teknis, bukan dialog baru.
+
+==================================================
+ATURAN DIALOG DIGANTI
+==================================================
+
+Jika teks di bawah ID D berubah menjadi dialog lain:
+
+1. Cari teks pengganti di SRT.
+2. Verifikasi audio dan konteks melalui MP4.
+3. Pastikan dialog berasal dari tokoh, lokasi, fase cerita, dan kondisi yang aman.
+4. Jika dialog ditemukan dan konteksnya sesuai, ganti teks, timestamp, durasi, sumber, dan hubungan jangkar.
+5. Jika dialog ditemukan tetapi berada pada konteks cerita yang berbeda dan akan merusak kronologi, gunakan status `BELUM AMAN — DIALOG PENGGANTI TIDAK SESUAI KONTEKS`.
+6. Jika dialog tidak ditemukan, gunakan status `BELUM AMAN — DIALOG PENGGANTI TIDAK DITEMUKAN DALAM SUMBER`.
+7. Jangan mengarang timestamp.
+8. Jangan mengubah kalimat buatan pengguna menjadi audio dialog asli.
+9. Dialog yang tidak ada dalam sumber hanya dapat dijadikan narasi voice-over, dubbing baru, diganti, atau dihapus setelah keputusan pengguna.
+
+==================================================
+ATURAN JANGKAR AKSI DAN PENANDA POSISI
+==================================================
+
+Penanda jangkar aksi pada Naskah Bersih berfungsi menjaga urutan, bukan sebagai teks narasi.
+
+1. Jika penanda J tetap ada, pertahankan jangkar aksi sesuai Bagian A kecuali ada instruksi penghapusan yang jelas.
+2. Jika penanda J tidak sengaja hilang tetapi narasi sebelum dan sesudahnya masih menunjukkan posisi yang sama, jangan langsung menghapus jangkar aksi. Gunakan Bagian A sebagai sumber dan laporkan `PENANDA POSISI HILANG — JANGKAR AKSI DIPERTAHANKAN`.
+3. Jika pengguna secara jelas menulis bahwa jangkar aksi dihapus, hapus jangkar dan periksa sambungan.
+4. Penghapusan dialog dalam jangkar campuran tidak otomatis menghapus beat aksi.
+5. Jangan mencari Jangkar Aksi baru. Audit Jangkar Aksi Terlewat adalah kewenangan Prompt 1B; Prompt 1B1 hanya memverifikasi bahwa hasil 1B konsisten dan tidak kehilangan Jangkar yang sudah dipilih.
+
+==================================================
+TIMESTAMP, DURASI, DAN TIGA JENIS WAKTU
+==================================================
+
+A. TIMESTAMP SUMBER FILM
+
+- Menunjukkan posisi asli adegan dalam MP4.
+- Tidak berubah hanya karena narasi diubah atau dihapus.
+- Berubah jika dialog atau rentang adegan dipendekkan, diperpanjang, diganti, atau dipecah.
+- Wajib diverifikasi melalui SRT dan MP4.
+
+B. DURASI DIALOG ATAU JANGKAR
+
+- Dihitung dari timestamp sumber final.
+- Tidak boleh mempertahankan durasi lama setelah teks dialog berubah.
+- Gunakan `durasi = waktu akhir - waktu awal`.
+
+C. POSISI TIMELINE VIDEO FINAL
+
+- Berbeda dari timestamp sumber.
+- Bergeser ketika durasi narasi atau jangkar berubah.
+- Jika audio narasi final belum tersedia, gunakan `TIMELINE FINAL MENUNGGU AUDIO NARASI`.
+- Jangan mengunci estimasi sebagai angka final.
+
+Format timestamp:
+
+`HH:MM:SS.mmm`
+
+==================================================
+PENOMORAN ULANG DAN PEMBARUAN MENYELURUH
+==================================================
+
+Setelah semua edit diproses:
+
+1. Nomori ulang jangkar final mulai dari ADEGAN 01.
+2. Pertahankan ID J lama dalam kolom riwayat agar perubahan dapat dilacak.
+3. Perbarui seluruh rujukan nomor jangkar dalam narasi, pemetaan, daftar scene, kelompok pertarungan, dan catatan kontinuitas.
+4. Perbarui jumlah total jangkar.
+5. Perbarui jumlah dialog per jangkar.
+6. Perbarui jenis jangkar.
+7. Perbarui timestamp, durasi, dan jumlah potongan.
+8. Perbarui nama unit JSON hasil Prompt 2 yang direncanakan.
+9. Hapus semua baris teknis milik elemen yang sudah dihapus.
+10. Jangan menyisakan penanda dialog kosong.
+
+==================================================
+AUDIT KHUSUS V22.5.1 — DOMINASI NARASI, DIALOG MAKSIMAL 3 DETIK PER D, DAN CAMPURAN AKSI-DOMINAN
+==================================================
+
+Prompt 1B1 tidak boleh mengubah pilihan kreatif pengguna secara diam-diam. Namun hasil final hanya dapat dikunci bila keseimbangan berikut lulus:
+
+1. Narasi saja masih menjelaskan kejadian utama, alasan, perubahan konflik, dan akibat.
+2. Informasi penting dari dialog yang dihapus tidak ikut hilang dari cerita. Jika pengguna menghapus dialog tanpa menambahkan narasi pengganti dan alur menjadi tidak lengkap, gunakan status `BELUM AMAN — INFORMASI DIALOG HILANG`.
+3. Dialog terpilih memberi nilai tambah dan tidak hanya menjadi penjelasan utama yang seharusnya dibawa narator.
+4. Default satu D per beat diterapkan terlebih dahulu.
+5. D kedua atau D tambahan hanya dipertahankan bila ucapan benar-benar saling membutuhkan dan alasannya dapat dijelaskan.
+6. Setiap D-xxx maksimal 3,00 detik. Tiga detik bukan target dan dialog tidak boleh dipanjangkan hanya untuk mengisi batas.
+7. Pemotongan D harus menjaga makna utuh dan intonasi natural; jangan memotong kata atau frasa secara kasar.
+8. Tidak ada target total 6–10 detik atau batas normal 12 detik per Jangkar. Pengendalian dilakukan per D dan lewat seleksi jumlah D.
+9. Untuk CAMPURAN, aksi tetap dominan dan dialog hanya penguat singkat; jangan mengurangi aksi hanya supaya dialog lebih banyak.
+10. Tidak ada dua Jangkar Dialog berturut-turut tanpa perkembangan narasi, kecuali masih satu rangkaian yang tidak dapat dipisahkan dan sudah dijelaskan.
+11. Narasi tidak mengulang utuh dialog terpilih tepat sebelum dialog diputar.
+12. Satu Jangkar mewakili satu beat utama, bukan satu kalimat.
+13. Prompt 1B telah menjalankan Audit Jangkar Aksi Terlewat; Prompt 1B1 hanya memastikan Jangkar hasil audit itu tidak hilang atau berubah tanpa alasan pengguna.
+
+Jika pengguna mempertahankan D lebih dari 3,00 detik, Prompt 1B1 tidak boleh menghapusnya diam-diam. Tandai `BELUM AMAN — DIALOG >3 DETIK PERLU KEPUTUSAN PENGGUNA` dan berikan saran minimal untuk memilih frasa yang selesai secara natural.
+
+Jika narasi kurang tetapi pengguna tidak mengizinkan penambahan, jangan menulis narasi baru secara diam-diam. Tandai masalah dan minta keputusan pengguna.
+
+==================================================
+AUDIT WAJIB SEBELUM PENGUNCIAN
+==================================================
+
+Hasil hanya boleh berstatus siap jika seluruh pemeriksaan berikut lulus:
+
+1. Jumlah blok dialog final sama dengan dialog yang benar-benar masih ada pada Naskah Bersih hasil edit.
+2. Tidak ada dialog yang dihapus muncul kembali.
+3. Tidak ada timestamp dialog lama tertinggal.
+4. Tidak ada durasi lama tertinggal setelah dialog dipendekkan atau diganti.
+5. Tidak ada jumlah potongan lama yang salah.
+6. Tidak ada jangkar DIALOG tanpa dialog.
+7. Tidak ada jangkar CAMPURAN yang masih disebut campuran setelah seluruh dialog atau aksinya hilang.
+8. Semua ID N dan D hasil edit telah diproses.
+9. Semua ID baru atau hilang telah dijelaskan dalam laporan.
+10. Narasi final persis mengikuti hasil edit pengguna, kecuali koreksi minimal yang dilaporkan.
+11. Kronologi dan sebab-akibat tetap aman.
+12. Tidak ada fakta, motif, emosi, dialog, atau adegan baru yang dikarang.
+13. Seluruh timestamp yang berubah telah diverifikasi melalui media.
+14. Narasi final dapat dipahami tanpa bergantung pada dialog panjang.
+15. Informasi penting dari dialog yang dihapus tetap terwakili atau dinyatakan aman untuk dibuang.
+16. Setiap D-xxx maksimal 3,00 detik.
+17. Default satu D per beat sudah diuji; setiap D tambahan memiliki alasan kebutuhan langsung.
+18. Setiap CAMPURAN tetap aksi-dominan dan tidak berubah menjadi percakapan panjang.
+19. Tidak ada pengulangan utuh antara narasi dan dialog terpilih.
+20. Tidak ada rangkaian jangkar dialog yang memutus perkembangan narasi tanpa alasan.
+21. Tidak ada Jangkar Aksi hasil Audit Jangkar Aksi Terlewat dari Prompt 1B yang hilang tanpa instruksi pengguna.
+
+Jika satu pemeriksaan gagal, jangan mengunci hasil.
+
+==================================================
+STATUS KEAMANAN
+==================================================
+
+Gunakan salah satu:
+
+1. `AMAN — SIAP DIKUNCI`
+2. `AMAN DENGAN PERBAIKAN MINIMAL`
+3. `BELUM AMAN — PERLU KONFIRMASI PENGGUNA`
+4. `BELUM AMAN — KRONOLOGI TERPUTUS`
+5. `BELUM AMAN — DIALOG TIDAK DAPAT DICOCOKKAN`
+6. `BELUM AMAN — DIALOG PENGGANTI TIDAK DITEMUKAN`
+7. `BELUM AMAN — DIALOG PENGGANTI TIDAK SESUAI KONTEKS`
+8. `BELUM AMAN — TIMESTAMP TIDAK DAPAT DIVERIFIKASI`
+9. `BELUM AMAN — INFORMASI DIALOG HILANG`
+10. `BELUM AMAN — DIALOG >3 DETIK PERLU KEPUTUSAN PENGGUNA`
+11. `BELUM AMAN — KESEIMBANGAN NARASI–DIALOG BELUM LULUS`
+
+Jangan menghasilkan status final terkunci jika masih berstatus BELUM AMAN.
+
+==================================================
+OUTPUT WAJIB — TEPAT SATU DOCX PER PART
+==================================================
+
+Prompt 1B1 tidak membuat DOCX kedua.
+
+Gunakan dan perbarui file yang sama:
+
+`Prompt 1B Part [N] [JUDUL FILM].docx`
+
+Nama file tidak berubah sebelum dan sesudah Prompt 1B1. Simpan pembaruan pada file yang sama. Setelah proses selesai, file itu berubah status dari pra-penguncian menjadi final terkunci.
+
+Struktur dokumen setelah Prompt 1B1:
+
+## BAGIAN A — TEKNIS FINAL TERKUNCI
+
+Berisi:
+
+1. Identitas film dan part.
+2. Status keamanan.
+3. Narasi final sesuai Bagian B hasil edit.
+4. Semua jangkar final.
+5. Nomor adegan final dan ID J asal.
+6. Dialog final dengan ID D.
+7. Jenis jangkar final.
+8. Timestamp sumber final.
+9. Durasi final.
+10. Jumlah potongan final.
+11. Narasi sebelum dan sesudah jangkar yang sudah diperbarui.
+12. Urutan elemen final.
+13. Status timeline final.
+14. Konfirmasi bahwa elemen yang dihapus tidak dikembalikan.
+
+## LAMPIRAN PENYESUAIAN DAN AUDIT
+
+Bagian ini ditempatkan setelah Bagian A dan sebelum Naskah Bersih Final. Isinya:
+
+A. Ringkasan perubahan narasi.
+B. Ringkasan dialog dipertahankan, dipendekkan, dihapus, dan diganti.
+C. Tabel ID N lama ke status final.
+D. Tabel ID D lama ke status final.
+E. Tabel nomor dan ID jangkar lama ke nomor final.
+F. Timestamp dan durasi lama serta baru.
+G. Perubahan jenis jangkar.
+H. Segmen dialog yang dipecah karena bagian tersisa tidak berurutan.
+I. ID hilang atau ID baru.
+J. Koreksi minimal yang dilakukan.
+K. Masalah yang membutuhkan keputusan pengguna.
+L. Hasil audit wajib.
+M. Distribusi D per Jangkar dan durasi setiap D-xxx.
+N. Alasan setiap D tambahan di atas default satu D per beat.
+O. Audit CAMPURAN aksi-dominan dan konfirmasi setiap D ≤3,00 detik.
+P. Audit dominasi narasi serta informasi dialog yang dialihkan.
+Q. Verifikasi Jangkar Aksi hasil Audit Jangkar Aksi Terlewat tidak hilang tanpa instruksi.
+R. Status akhir `SIAP KE PROMPT 1B2` atau `BELUM SIAP`.
+
+## BAGIAN B — NASKAH BERSIH FINAL
+
+Bagian B tetap menjadi bagian PALING BAWAH dokumen. Setelah dikunci, judulnya diubah menjadi:
+
+`NASKAH BERSIH FINAL — SUMBER AUDIO NARASI`
+
+Bagian ini berisi narasi, dialog, dan penanda posisi jangkar final tanpa timestamp atau catatan teknis.
+
+File yang sama ini menjadi satu-satunya sumber sah Prompt 1B2 sampai Prompt 5.
+
+DILARANG MEMBUAT:
+
+- `Prompt-1B-Final-Terkunci-Part-[N]-[JUDUL-FILM].docx`;
+- `Laporan-Penyesuaian-Edit-Manual-Part-[N]-[JUDUL-FILM].docx`;
+- salinan, copy, atau DOCX lain untuk part yang sama.
+
+==================================================
+ATURAN INPUT PROMPT 1B2
+==================================================
+
+Prompt 1B2 hanya menggunakan:
+
+1. Hasil Prompt 1A.
+2. MP4 sumber.
+3. SRT asli.
+4. File tunggal `Prompt 1B Part [N] [JUDUL FILM].docx` yang sudah berstatus `SIAP KE PROMPT 1B2`.
+
+Laporan penyesuaian dibaca dari Lampiran Penyesuaian dan Audit dalam file yang sama. Tidak ada laporan DOCX terpisah.
+
+==================================================
+ATURAN AUDIO NARASI
+==================================================
+
+Audio narasi final dibuat setelah Prompt 1B1 selesai dan menggunakan Naskah Bersih Final pada dokumen terkunci.
+
+Jangan menggunakan audio dari narasi sebelum edit.
+
+Jika audio lama sudah dibuat:
+
+- audio lama dianggap tidak final;
+- rekam ulang atau edit sesuai teks final;
+- jangan memaksa Prompt 3 mengikuti audio lama.
+
+==================================================
+ATURAN KERAS
+==================================================
+
+- Jangan mengembalikan narasi atau dialog yang dihapus.
+- Jangan membiarkan metadata lama mengalahkan Bagian B Naskah Bersih hasil edit.
+- Jangan menambah dialog pengganti tanpa keputusan pengguna.
+- Jangan mengarang timestamp.
+- Jangan memakai satu rentang audio yang memasukkan kembali kalimat yang telah dihapus.
+- Jangan mempertahankan durasi atau jumlah potongan lama setelah dialog berubah.
+- Jangan meminta pengguna memperbaiki menit secara manual jika MP4 dan SRT tersedia.
+- Jangan mengubah hasil cerita.
+- Jangan mengunci hasil jika audit Dialog V22.5.1 tidak cocok.
+- Jangan mengunci hasil jika narasi tidak dapat membawa alur utama tanpa dialog panjang.
+- Jangan menerima D-xxx >3,00 detik sebagai kondisi aman; default satu D per beat harus diuji dan setiap D tambahan harus punya alasan kebutuhan langsung.
+- Jangan menghapus dialog pilihan pengguna atau menambah narasi baru secara diam-diam hanya untuk meluluskan audit V22.5.1.
+- Jangan melanjutkan ke Prompt 1B2 jika status masih BELUM AMAN.
+- Semua penyesuaian narasi teknis, dialog, timestamp, durasi, jenis jangkar, dan nomor menjadi tanggung jawab Prompt 1B1.
+- Jangan membuat file final atau laporan terpisah; semua hasil wajib ditulis ke DOCX yang sama.
+- Jangan mengubah nama file `Prompt 1B Part [N] [JUDUL FILM].docx`.

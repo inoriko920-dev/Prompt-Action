@@ -5,6 +5,9 @@ from typing import Any
 
 from PySide6.QtCore import QObject, Property, Signal, Slot
 
+from prompt_action.data.repository import VersionRepository
+from prompt_action.data.transaction_journal import TransactionJournalStore
+from prompt_action.domain.errors import ReleaseWorkflowError
 from prompt_action.services.step09 import CapabilityService, CompareError, RevisionCompareService
 from .per_prompt_query_service import PerPromptQueryService
 
@@ -15,10 +18,12 @@ class PerPromptViewModel(QObject):
     actionRejected = Signal(str)
     downloadRequested = Signal(str)
     compareRequested = Signal('QVariant')
+    addRevisionRequested = Signal(str)
 
     def __init__(self, project_root: Path, *, query_service: PerPromptQueryService | None = None, compare_service: RevisionCompareService | None = None, auto_refresh: bool = True):
         super().__init__()
         root = Path(project_root).resolve()
+        self._root = root
         self._query = query_service or PerPromptQueryService(root)
         self._compare = compare_service or RevisionCompareService(root)
         self._capabilities = CapabilityService()
@@ -40,6 +45,35 @@ class PerPromptViewModel(QObject):
         self._apply_step09_capabilities()
         self.stateChanged.emit()
 
+    def _release_availability(self) -> tuple[bool, str]:
+        try:
+            repository = VersionRepository(self._root)
+            state = repository.load()
+            report = repository.validate(state)
+            if not report.is_valid:
+                return False, "Canonical data tidak valid; Tambah Revisi diblokir."
+            pending = TransactionJournalStore(self._root).inspect_pending()
+            if pending is not None:
+                return False, "Ada transaksi release yang belum selesai; lakukan recovery terlebih dahulu."
+            snapshot = next(
+                (item for item in state.document.get("snapshots", []) if item.get("id") == state.active_snapshot),
+                None,
+            )
+            if not isinstance(snapshot, dict) or snapshot.get("status") != "COMPLETE":
+                return False, "Snapshot aktif belum COMPLETE. Selesaikan backup sebelum Tambah Revisi."
+            prompt_id = str(self._state.get("selected_prompt_id") or "")
+            if not prompt_id or prompt_id not in state.document.get("prompts", {}):
+                return False, "Pilih Prompt yang valid terlebih dahulu."
+            active_revision = state.document["prompts"][prompt_id].get("active_revision")
+            revision = state.document["prompts"][prompt_id].get("revisions", {}).get(active_revision, {})
+            if revision.get("file_available") is not True:
+                return False, "File Prompt aktif belum termaterialisasi."
+            return True, ""
+        except ReleaseWorkflowError as exc:
+            return False, exc.message
+        except Exception as exc:
+            return False, f"Tambah Revisi belum tersedia: {exc}"
+
     def _apply_step09_capabilities(self) -> None:
         caps = self._state.get("capabilities", {})
         detail = self._state.get("selected_revision", {})
@@ -54,8 +88,9 @@ class PerPromptViewModel(QObject):
         compare_cap = self._capabilities.get("COMPARE_REVISION", {"same_prompt": True, "verified_files": int(selected_valid) + int(parent_valid)})
         caps["can_compare"] = bool(parent) and compare_cap.enabled
         caps["disabled_reason_compare"] = "Revision baseline tidak memiliki parent untuk dibandingkan." if not parent else compare_cap.reason
-        caps["can_add_revision"] = False
-        caps["disabled_reason_add_revision"] = self._capabilities.get("ADD_REVISION").reason
+        can_add, add_reason = self._release_availability()
+        caps["can_add_revision"] = can_add
+        caps["disabled_reason_add_revision"] = add_reason
 
     @Slot(str)
     def selectPrompt(self, prompt_id: str) -> None:
@@ -127,7 +162,14 @@ class PerPromptViewModel(QObject):
     @Slot()
     def addRevision(self) -> None:
         caps = self._state.get("capabilities", {})
-        self.actionRejected.emit(str(caps.get("disabled_reason_add_revision") or self._capabilities.get("ADD_REVISION").reason))
+        if not caps.get("can_add_revision"):
+            self.actionRejected.emit(str(caps.get("disabled_reason_add_revision") or "Tambah Revisi belum tersedia."))
+            return
+        prompt_id = str(self._state.get("selected_prompt_id") or "")
+        if not prompt_id:
+            self.actionRejected.emit("Pilih Prompt terlebih dahulu.")
+            return
+        self.addRevisionRequested.emit(prompt_id)
 
     @staticmethod
     def _loading_state() -> dict[str, Any]:

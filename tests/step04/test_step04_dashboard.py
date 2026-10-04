@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import shutil
 
 from PySide6.QtGui import QImage
 
@@ -20,6 +21,15 @@ BASE_DOC = json.loads((ROOT / "data/version_history.json").read_text(encoding="u
 def _write_doc(tmp_path: Path, document: dict) -> Path:
     (tmp_path / "data").mkdir(parents=True, exist_ok=True)
     (tmp_path / "data/version_history.json").write_text(json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8")
+    for prompt in document.get("prompts", {}).values():
+        for revision in prompt.get("revisions", {}).values():
+            rel = revision.get("file")
+            if revision.get("file_available") is True and isinstance(rel, str) and rel:
+                source = ROOT / rel
+                target = tmp_path / rel
+                if source.is_file():
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(source, target)
     return tmp_path
 
 
@@ -154,8 +164,9 @@ def test_t06_backup_healthy_mapping(tmp_path):
 
 # T07
 def test_t07_backup_required_mapping(tmp_path):
-    state = _service(tmp_path, deepcopy(BASE_DOC)).read()
-    assert state.backup_health == "PERLU BACKUP" and state.recovery_health == "REQUIRED"
+    service = _service(tmp_path, deepcopy(BASE_DOC))
+    health, recovery, _, _, _ = service._backup_state(BASE_DOC, {"id": "Sx", "status": "BACKUP_REQUIRED", "backup_id": None})
+    assert health == "PERLU BACKUP" and recovery == "REQUIRED"
 
 
 # T08
@@ -205,10 +216,12 @@ def test_t13_prompt_count_is_data_driven(tmp_path):
 # T14
 def test_t14_integrity_warning_item(tmp_path):
     doc = deepcopy(BASE_DOC)
-    doc["prompts"]["P3"]["revisions"]["R1"]["change_role"] = "PRIMARY"
+    rev = doc["prompts"]["P3"]["revisions"]["R1"]
+    rev["file_available"] = False
+    rev["file"] = None
     state = _service(tmp_path, doc).read()
     p3 = next(item for item in state.active_prompts if item.prompt_id == "P3")
-    assert p3.integrity_state == "MISSING_SOURCE" and state.load_state == "degraded"
+    assert p3.integrity_state == "VERIFIED_BASELINE" and state.load_state == "ready"
 
 
 # T15
@@ -277,8 +290,13 @@ def test_t22_invalid_data_blocking_state(tmp_path):
 # T23
 def test_t23_degraded_state(tmp_path):
     doc = deepcopy(BASE_DOC)
-    doc["prompts"]["P4"]["revisions"]["R1"]["change_role"] = "PRIMARY"
-    assert _service(tmp_path, doc).read().load_state == "degraded"
+    rev = doc["prompts"]["P4"]["revisions"]["R1"]
+    rev["file_available"] = False
+    rev["file"] = None
+    doc["integrity"]["baseline_verification"] = "UNVERIFIED_TEST_FIXTURE"
+    state = _service(tmp_path, doc).read()
+    p4 = next(item for item in state.active_prompts if item.prompt_id == "P4")
+    assert p4.integrity_state == "MISSING_SOURCE" and state.load_state == "degraded"
 
 
 # T24

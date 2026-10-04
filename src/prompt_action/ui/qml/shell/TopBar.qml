@@ -11,6 +11,8 @@ Rectangle {
     property string pageSubtitle: "Foundation shell"
     readonly property string displayedSubtitle: pageSubtitle.indexOf("[STEP 07] ") === 0 ? pageSubtitle.substring(10) : pageSubtitle
     property string systemLabel: "System V1 • S001"
+    property string backupLabel: "Backup • —"
+    property string backupTone: "neutral"
     property bool narrow: false
     property var searchViewModel: null
 
@@ -95,8 +97,8 @@ Rectangle {
         }
         PA.PAStatusPill {
             objectName: "topbar_backup_status"
-            text: topbar.narrow ? "Backup • placeholder" : "Backup status • placeholder"
-            tone: "neutral"
+            text: topbar.narrow ? topbar.backupLabel.replace("Backup ", "") : topbar.backupLabel
+            tone: topbar.backupTone
         }
     }
 }

@@ -32,10 +32,10 @@ def test_t10_baseline_snapshot_s001(): assert state()["selected_revision"]["snap
 def test_t11_baseline_role(): assert state()["selected_revision"]["change_role"] == "BASELINE"
 def test_t12_no_fake_change_item(): assert state()["selected_revision"]["change_item"] is None
 def test_t13_no_fake_sync_impact(): assert state()["selected_revision"]["sync_impacts"] == []
-def test_t14_history_only_file_state(): assert state()["selected_revision"]["file_state"] == "HISTORY_ONLY"
+def test_t14_materialized_file_state(): assert state()["selected_revision"]["file_state"] == "VALID"
 def test_t15_hash_is_real_baseline(): assert state()["selected_revision"]["sha256"] == "65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5"
-def test_t16_active_download_disabled(): assert state()["capabilities"]["can_download_active"] is False
-def test_t17_selected_download_disabled(): assert state()["capabilities"]["can_download_selected"] is False
+def test_t16_active_download_enabled_for_verified_bytes(): assert state()["capabilities"]["can_download_active"] is True
+def test_t17_selected_download_enabled_for_verified_bytes(): assert state()["capabilities"]["can_download_selected"] is True
 def test_t18_compare_disabled_baseline(): assert state()["capabilities"]["can_compare"] is False
 def test_t19_snapshot_navigation_enabled(): assert state()["capabilities"]["can_view_snapshot"] is True
 def test_t20_changelog_not_faked(): assert state()["capabilities"]["can_view_changelog"] is False
@@ -70,8 +70,8 @@ def test_t39_no_mock_r3_or_s004_in_production_qml():
 def test_t40_main_wires_per_prompt_vm():
     text=(ROOT/"src/prompt_action/main.py").read_text(encoding="utf-8"); assert "PerPromptViewModel" in text and '"perPromptViewModel": per_prompt_vm' in text
 def test_t41_master_reference_exists(): assert (ROOT/"docs/UI_REFERENCE_PACKAGE_V1/materialized/images/03-Per-Prompt.jpg").is_file()
-def test_t42_baseline_hash_protected(): assert digest(ROOT/"BASELINE.json") == "8ffd22fe3636309ce0484f8b724f9fe306f3156383c5f4efbcc7e59f79e90b6d"
-def test_t43_version_history_hash_protected(): assert digest(CANONICAL) == "1a0fddf98b000bb908e12e5aa617b42793a399a8dd9cb36e1acf7204ca8465bb"
+def test_t42_materialized_p1a_hash_protected(): assert digest(ROOT/"prompts/V1/Prompt-1A/Prompt-1A_V1_R1.txt") == "65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5"
+def test_t43_recovered_p3_hash_protected(): assert digest(ROOT/"prompts/V1/Prompt-3/Prompt-3_V1_R1.txt") == "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1"
 def test_t44_no_write_api_exposed():
     vm=PerPromptViewModel(ROOT); assert not hasattr(vm,"save") and not hasattr(vm,"edit") and not hasattr(vm,"createRevision") and not hasattr(vm,"deleteRevision")
 def test_t45_baseline_reason_is_canonical(): assert state()["selected_revision"]["reason"].startswith("Seeded from verified V22.5.1")

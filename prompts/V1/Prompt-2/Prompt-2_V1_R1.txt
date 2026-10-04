@@ -1,0 +1,640 @@
+# PROMPT 2 FINAL — EKSEKUSI KEPUTUSAN EDIT SATU JANGKAR
+
+VERSI ATURAN: V22.5.1 — DIALOG TANPA ACAK, AKSI PER KAMERA DENGAN AMBIL–LEWATI, CAMPURAN MENGIKUTI AKSI, MAKSIMAL 3,00 DETIK PER VISUAL, ACAK AKSI HANYA JIKA AMAN, OUTPUT 1 JSON PER JANGKAR
+
+## TUJUAN
+
+Mengerjakan tepat satu J-xxx dari daftar kerja Prompt 1B2 dan menghasilkan keputusan edit final unit dalam satu file JSON. Prompt 2 tidak merender MP4, tidak membuat WFP, tidak membuat SRT terpisah, dan tidak membuat ZIP per Jangkar.
+
+## INPUT WAJIB
+
+1. Dokumen final Prompt 1B1.
+2. Rencana induk Prompt 1B2.
+3. Daftar kerja per unit.
+4. Peta kepemilikan visual dan wilayah kandidat Jangkar.
+5. Registrasi pusat terbaru.
+6. MP4 sumber part.
+7. SRT dialog sumber part.
+8. Parameter FPS/timebase sumber.
+
+Hentikan jika unit belum boleh dikerjakan menurut daftar ketergantungan atau data sumber tidak cukup untuk menentukan timestamp secara presisi.
+
+## SUMBER KEBENARAN
+
+1. MP4 dan audio asli menentukan gerakan, suara, lip-sync, sebab-akibat, dan kontinuitas.
+2. SRT membantu menemukan dialog; batas final tetap diverifikasi terhadap audio/media nyata.
+3. Prompt 1B1 menentukan isi Jangkar, teks D yang dipertahankan, jenis DIALOG/AKSI/CAMPURAN, dan urutan cerita.
+4. Prompt 1B2 menentukan blok, wilayah kandidat, kepemilikan visual, dan larangan overlap.
+5. Registrasi pusat menentukan timestamp yang sudah dipakai atau dikunci.
+6. Prompt 2 tidak boleh menambah atau menghapus isi Jangkar hanya karena kuota.
+
+## SATU UNIT PER PERINTAH
+
+Satu pemanggilan Prompt 2 hanya mengerjakan satu J-xxx. Setelah JSON unit selesai dan diaudit, berhenti.
+
+---
+
+ATURAN PROMPT 2 TAHAP 1B2 / JANGKAR
+
+Prompt 2 tahap 1B2/Jangkar mengatur cara membuat Jangkar Dialog, Aksi, dan Campuran sebelum masuk ke Narasi.
+
+1. FUNGSI UTAMA PROMPT 2
+
+Prompt 2 menentukan bagian film mana yang benar-benar dipakai sebagai Jangkar, bagaimana visualnya dipotong, bagaimana urutan shot dipertahankan atau diubah, serta bagaimana audio asli ikut dibawa.
+
+Prinsip dasar:
+
+JANGKAR DIKERJAKAN DULU → DIKUNCI → BARU NARASI MENGGUNAKAN VISUAL YANG TERSISA.
+
+Jadi Narasi tidak boleh mengambil visual yang sudah menjadi milik Jangkar.
+
+2. TIGA JENIS UTAMA JANGKAR
+
+DIALOG
+Bagian yang kekuatannya berasal dari ucapan tokoh.
+
+AKSI
+Bagian yang kekuatannya berasal dari kejadian visual: berkelahi, mengejar, mengambil benda, menembak, jatuh, membuka pintu, masuk kendaraan, dan seterusnya.
+
+CAMPURAN
+Berisi aksi dan dialog sekaligus. Untuk mekanisme visual Prompt 2, Campuran lebih dekat ke Aksi daripada Dialog.
+
+Ketiganya tidak dipotong dengan aturan yang sama.
+
+==================================================
+DIALOG
+==================================================
+
+3. DIALOG TIDAK MEMAKAI ACAK
+
+Untuk DIALOG, visual mengikuti urutan source asli film.
+
+Contoh film asli:
+
+K1 → K2 → K3 → K4
+
+Maka Dialog tetap:
+
+K1 → K2 → K3 → K4
+
+Bukan:
+
+K1 → K3 → K2 → K4
+
+dan bukan:
+
+K4 → K1 → K3
+
+Jadi pada Dialog:
+
+TIDAK ADA ACAK LOKAL.
+
+Cutaway acak, reaction tambahan dari timestamp lain, atau menukar urutan kamera hanya untuk membuat visual lebih dinamis tidak boleh dilakukan.
+
+Dialog menjaga lip-sync, arah percakapan, ekspresi, reaksi, dan kronologi audio.
+
+4. DIALOG TIDAK MENGGUNAKAN SISTEM AMBIL–LEWATI–AMBIL SEPERTI AKSI
+
+Pada Aksi kita sengaja bisa mengatakan:
+
+K1 AMBIL → K2 LEWATI → K3 AMBIL.
+
+Pada Dialog jangan otomatis melakukan itu hanya supaya visual lebih pendek atau lebih acak.
+
+Yang dilihat adalah dialog yang memang harus dipertahankan, kemudian visual mengikuti dialog dan pergantian kamera asli.
+
+Dialog = dialog dulu yang menentukan kebutuhan visual.
+
+Aksi = shot/kamera yang menentukan paket visual.
+
+5. MAKSIMAL 3,00 DETIK BERLAKU PER VISUAL
+
+Misalnya dialog berlangsung 7 detik.
+
+Bukan berarti dialog harus dipotong menjadi hanya 3 detik.
+
+Yang dilarang adalah satu visual terus terlihat lebih dari 3,00 detik.
+
+Contoh dialog 7 detik:
+
+K1 = 2,4 detik
+K2 = 2,1 detik
+K3 = 2,5 detik
+
+Total dialog = 7 detik.
+
+Tetapi tidak ada satu visual pun melewati 3 detik.
+
+Audio dialog boleh terus berjalan sementara kamera/visual berganti.
+
+6. JANGAN MERUSAK KALIMAT HANYA DEMI ANGKA 3 DETIK
+
+Batas 3 detik adalah aturan visual, bukan perintah memotong kata.
+
+Jangan sampai audio dipotong di tengah kalimat hanya karena visual sudah mencapai 3 detik.
+
+Makna, intonasi, dan ucapan yang dipertahankan harus tetap natural.
+
+7. PEMBAGIAN VISUAL DIALOG HARUS SEIMBANG
+
+Kalau ada visual panjang dan tersedia titik potong alami, usahakan pembagian masuk akal.
+
+Misalnya 4 detik lebih baik:
+
+2 + 2
+
+daripada:
+
+3 + 1
+
+kalau memang ada cut kamera atau titik alami yang memungkinkan.
+
+Tetapi aturan ini tidak boleh membuat cut buatan yang jelek.
+
+8. IKUTI CUT KAMERA ASLI
+
+Kalau film asli sudah:
+
+2,6 detik → CUT → 1,3 detik → CUT → 2,2 detik
+
+pakai struktur tersebut.
+
+Jangan dipaksa menjadi 3 + 3 karena justru merusak editing asli.
+
+9. SHOT ASLI DI BAWAH 2 DETIK BOLEH
+
+Misalnya kamera asli hanya berlangsung:
+
+0,8 detik
+
+atau:
+
+1,4 detik
+
+itu boleh dipakai.
+
+Yang dilarang adalah kita sendiri membuat potongan 0,8 detik tanpa alasan, padahal shot aslinya panjang.
+
+Native short shot = BOLEH.
+
+Artificial short cut = HINDARI / TIDAK BOLEH kalau tidak diperlukan.
+
+==================================================
+AKSI
+==================================================
+
+10. AKSI WAJIB DIBACA PER KAMERA / SHOT ASLI
+
+Misalnya satu aksi memiliki:
+
+K1 → K2 → K3 → K4 → K5 → K6
+
+Jangan langsung melihatnya sebagai satu video panjang.
+
+Pertama-tama petakan:
+
+K1
+K2
+K3
+K4
+K5
+K6
+
+Lalu lihat fungsi masing-masing shot.
+
+11. AKSI MEMAKAI AMBIL–LEWATI–AMBIL
+
+Contoh:
+
+K1 = tokoh berdiri
+K2 = berjalan mendekati lawan
+K3 = mengangkat senjata
+K4 = kamera samping
+K5 = serangan
+K6 = lawan jatuh
+
+Bisa diputuskan:
+
+K1 AMBIL
+K2 LEWATI
+K3 AMBIL
+K4 LEWATI
+K5 AMBIL
+K6 AMBIL
+
+Maka hasil:
+
+K1 → K3 → K5 → K6
+
+Ini yang disebut:
+
+AMBIL → LEWATI → AMBIL.
+
+Tujuannya bukan sekadar memperpendek video, tetapi menghilangkan bagian yang tidak dibutuhkan sambil mempertahankan perkembangan aksi.
+
+12. LEWATI HARUS BENAR-BENAR BERARTI DILEWATI
+
+Jangan bilang K2 dilewati tetapi kemudian mengambil hampir seluruh K2 dalam potongan lain.
+
+Kalau:
+
+LEWATI
+
+artinya shot/fase itu benar-benar tidak menjadi bagian Jangkar tersebut.
+
+13. TIDAK BOLEH MENGAMBIL SEMUA SHOT
+
+Kalau semua:
+
+K1
+K2
+K3
+K4
+K5
+K6
+
+diambil semuanya, maka sistem AMBIL–LEWATI tidak benar-benar diterapkan.
+
+Harus ada seleksi editorial.
+
+Tetapi jangan pula membuang shot penting hanya supaya secara teknis ada kata “LEWATI”.
+
+14. MOMEN PENTING WAJIB DILINDUNGI
+
+Bagian sebab-akibat utama tidak boleh hilang.
+
+Contoh:
+
+senjata diangkat → tembakan → orang terkena → jatuh
+
+Jangan membuat:
+
+senjata diangkat → orang tiba-tiba jatuh
+
+kalau akibatnya menjadi tidak jelas.
+
+Momen seperti serangan, tembakan, benturan, ledakan, jatuh, senjata, reaksi penting, dan akibat langsung wajib dipertimbangkan sebagai bagian yang harus dilindungi.
+
+15. AKSI BOLEH DIACAK, TETAPI HANYA JIKA AMAN
+
+Setelah shot dipilih:
+
+K1 → K3 → K5 → K6
+
+beberapa shot boleh diubah secara acak lokal jika tidak merusak kejadian.
+
+Tetapi “acak” bukan berarti acak bebas.
+
+Harus tetap masuk akal secara:
+
+posisi tubuh,
+arah gerakan,
+benda,
+sebab-akibat,
+continuity,
+ruang,
+dan waktu.
+
+16. SEBAB-AKIBAT TIDAK BOLEH DIACAK
+
+Misalnya:
+
+K1 = menarik pistol
+K2 = menembak
+K3 = lawan terkena
+K4 = lawan jatuh
+
+Tidak boleh:
+
+K4 → K1 → K3 → K2
+
+karena kejadian menjadi rusak.
+
+Blok yang mempunyai hubungan sebab-akibat kuat tetap kronologis.
+
+Aturan Aksi:
+
+ACAK JIKA AMAN.
+
+Bukan:
+
+WAJIB ACAK SEMUANYA.
+
+17. ACAK HANYA BERSIFAT LOKAL
+
+Beberapa reaction shot atau variasi kamera dari fase kejadian yang sama mungkin bisa ditukar.
+
+Tetapi tidak boleh mengambil shot dari awal adegan lalu ditempel ke akhir jika kondisi tokoh, posisi, benda, luka, atau arah gerak sudah berbeda.
+
+==================================================
+LONG TAKE
+==================================================
+
+18. LONG TAKE TIDAK BOLEH DIPOTONG BERDASARKAN ANGKA OTOMATIS
+
+Misalnya ada shot kamera tunggal 12 detik.
+
+Salah kalau otomatis dibuat:
+
+0–3 detik AMBIL
+3–6 detik LEWATI
+6–9 detik AMBIL
+9–12 detik LEWATI
+
+hanya karena aturan 3 detik.
+
+Yang benar adalah membaca fase gerak alami.
+
+Contoh:
+
+0–2,2 = mendekat
+2,2–4,1 = mengambil pisau
+4,1–6,5 = menyerang
+6,5–8,0 = lawan menghindar
+8,0–10,4 = jatuh
+10,4–12 = reaksi
+
+Baru dipilih berdasarkan fungsi.
+
+19. MAKSIMAL 3 DETIK BUKAN TARGET
+
+Kalau shot sudah cukup dalam:
+
+1,7 detik
+
+tidak perlu dibuat 3 detik.
+
+Kalau cukup:
+
+2,2 detik
+
+tidak perlu dipanjangkan.
+
+≤ 3,00 detik = batas atas.
+
+Bukan:
+
+setiap shot harus 3 detik.
+
+==================================================
+CAMPURAN
+==================================================
+
+20. CAMPURAN MENGIKUTI MEKANISME AKSI
+
+Campuran adalah bagian ketika Dialog muncul di dalam rangkaian aksi.
+
+Contoh:
+
+tokoh berkelahi → berteriak satu kalimat → menyerang lagi.
+
+Karena struktur utamanya aksi, Campuran diproses seperti AKSI.
+
+Berarti:
+
+per kamera → AMBIL–LEWATI → maksimal 3 detik per visual → acak bagian aman.
+
+21. DIALOG DI DALAM CAMPURAN TETAP HARUS SINKRON
+
+Walaupun Campuran mengikuti mekanisme Aksi, ketika ada ucapan yang dipertahankan:
+
+audio dan visual dialognya tidak boleh terpisah sembarangan.
+
+Ucapan tetap harus terasa berasal dari orang dan momen yang benar.
+
+Mekanisme aksi tidak boleh merusak lip-sync atau arti ucapan.
+
+==================================================
+AUDIO
+==================================================
+
+22. AUDIO DAN VIDEO JANGKAR ADALAH SATU PAKET
+
+Kalau mengambil source:
+
+00:10:20–00:12:40
+
+visual dan audio berasal dari source yang sama.
+
+Tidak boleh:
+
+video = 00:10:20
+audio = 00:18:00
+
+kecuali memang ada aturan khusus lain yang secara eksplisit memerintahkan demikian.
+
+Untuk Sub-Jangkar Aksi, jika shot dipindah, audio aslinya ikut dipindah bersama shot.
+
+23. AUDIO FILM TETAP ASLI
+
+Audio film:
+
+100% / 0 dB
+
+dan tidak memakai:
+
+normalization,
+AGC,
+compressor,
+limiter,
+atau manipulasi gain otomatis pada tahap Master Plan.
+
+24. JANGKAR SPEED 1,00×
+
+Dialog = 1,00×
+Aksi = 1,00×
+Campuran = 1,00×
+
+Prompt 2 tidak menggunakan slow motion pada Jangkar.
+
+==================================================
+KEPEMILIKAN VISUAL
+==================================================
+
+25. JANGKAR MEMILIKI PRIORITAS ATAS NARASI
+
+Urutan kepemilikan visual:
+
+Dialog Utama Jangkar → Cutaway Jangkar → Visual Narasi.
+
+Setelah sebuah rentang visual menjadi bagian Jangkar, bagian itu terkunci.
+
+Narasi tidak boleh mengambil lagi shot Jangkar tersebut.
+
+26. BAGIAN YANG LEWATI TETAP TERSEDIA
+
+Kalau Aksi:
+
+K1 = AMBIL
+K2 = LEWATI
+K3 = AMBIL
+
+maka K2 pada prinsipnya tetap AVAILABLE / UNCLAIMED selama memang tidak masuk kepemilikan Jangkar lain.
+
+Visual itu masih mungkin menjadi stok untuk Narasi nantinya.
+
+LEWATI bukan berarti menghapus source film.
+
+Artinya hanya:
+
+tidak dipakai oleh Jangkar ini.
+
+==================================================
+SAMBUNGAN
+==================================================
+
+27. HASIL AMBIL–LEWATI–ACAK HARUS TETAP TERASA SEPERTI SATU KEJADIAN
+
+Misalnya setelah K1 tubuh tokoh menghadap kanan.
+
+Lalu setelah melewati K2, K3 tiba-tiba tokoh sudah di lantai.
+
+Mungkin secara individual shot bagus, tetapi sambungannya rusak.
+
+Pemilihan tersebut gagal.
+
+Audit harus melihat:
+
+posisi → gerakan → arah pandang → benda → keadaan tubuh → sebab → akibat.
+
+28. JANGAN MENCIPTAKAN JUMP YANG MEMBINGUNGKAN
+
+AMBIL–LEWATI bukan berarti boleh melompati informasi penting.
+
+Contoh buruk:
+
+tokoh berdiri
+→ LEWATI terlalu banyak
+→ tiba-tiba sudah terluka di lantai.
+
+Penonton tidak tahu apa yang terjadi.
+
+==================================================
+KEDIPAN DAN BATAS SHOT
+==================================================
+
+29. JANGAN MEMBUAT KEDIPAN KARENA POTONGAN TERLALU PENDEK
+
+Shot asli <2 detik boleh.
+
+Tetapi jangan membuat potongan buatan:
+
+0,3 detik
+0,5 detik
+0,7 detik
+
+yang menyebabkan visual terasa seperti berkedip, kecuali memang itu cut kamera asli yang diperlukan.
+
+30. ATURAN MINIMUM 2 DETIK BUKAN ATURAN JANGKAR
+
+Untuk Jangkar, native shot:
+
+0,8 detik
+1,2 detik
+1,6 detik
+
+boleh.
+
+Aturan shot final minimal sekitar 2 detik terutama berkaitan dengan visual Narasi, bukan alasan untuk merusak shot kamera asli pada Jangkar.
+
+==================================================
+RUMUS KERJA
+==================================================
+
+DIALOG
+
+PILIH DIALOG → IKUTI SOURCE ASLI → IKUTI CUT KAMERA ASLI → ≤3 DETIK PER VISUAL → AUDIO KRONOLOGIS → TANPA ACAK → TANPA AMBIL–LEWATI PAKSA.
+
+AKSI
+
+PECAH PER KAMERA → LINDUNGI MOMEN PENTING → AMBIL → LEWATI → AMBIL → ≤3 DETIK PER VISUAL → ACAK LOKAL JIKA AMAN → AUDIT SAMBUNGAN.
+
+CAMPURAN
+
+IKUT MEKANISME AKSI → PER KAMERA → AMBIL–LEWATI → ≤3 DETIK → ACAK BAGIAN AMAN → UCAPAN YANG DIPERTAHANKAN TETAP SINKRON.
+
+==================================================
+HAL PALING PENTING
+==================================================
+
+1. Dialog tidak perlu dibuat acak.
+
+Kalau Dialog hasilnya kronologis dan mengikuti kamera asli, itu BENAR.
+
+2. Aksi memakai seleksi AMBIL–LEWATI dan boleh acak lokal.
+
+Tetapi acak pada Aksi hanya boleh jika continuity dan sebab-akibat tetap aman.
+
+3. Campuran mengikuti mekanisme Aksi, tetapi bagian dialog yang dipertahankan tetap harus sinkron.
+
+4. Batas 3,00 detik adalah batas maksimal PER VISUAL, bukan batas maksimal seluruh Dialog atau seluruh Jangkar.
+
+Dialog 8 detik, 10 detik, atau lebih masih bisa dipertahankan bila memang diperlukan, asalkan visualnya berganti sesuai aturan dan tidak ada satu visual yang melewati batas tersebut.
+
+---
+
+# FORMAT OUTPUT JSON V22.5.1
+
+Prompt 2 — Output per Jangkar
+Tepat **1 file JSON untuk setiap Jangkar**:
+
+`J-[XXX] Part-[N] [JUDUL-FILM].json`
+
+Isi JSON minimal:
+
+- `unit_id`
+- `block_id`
+- `unit_type`
+- `mode`
+- identitas file sumber
+- FPS/timebase sumber
+- source In setiap potongan
+- source Out setiap potongan
+- timestamp presisi frame/tick/seconds
+- posisi mulai setiap potongan di timeline unit
+- posisi akhir setiap potongan di timeline unit
+- track video
+- track audio
+- status audio:
+  - `master`
+  - `enabled`
+  - `muted`
+- speed aktual setiap potongan
+- speed Jangkar tetap `1.00x`
+- urutan visual final
+- cutaway dialog, bila ada
+- paket audio-video aksi, bila ada
+- teks subtitle dialog yang benar-benar terdengar
+- timestamp subtitle dialog
+- relasi N/D/J
+- timestamp yang dipesan/dikunci
+- data untuk registrasi pusat
+- catatan eksekusi
+- hasil audit
+- alasan status
+- `status`
+- seluruh data yang diperlukan Prompt 4 dan Prompt 5
+
+**Output akhir Prompt 2:**
+
+`1 Jangkar = 1 JSON`
+
+Contoh:
+
+`J-001 Part-1 Atlas King.json`
+`J-002 Part-1 Atlas King.json`
+`J-003 Part-1 Atlas King.json`
+
+Tidak ada WFP, SRT terpisah, laporan terpisah, MP4 final, atau ZIP per Jangkar.
+
+Aturan tambahan output:
+
+- field `cutaway dialog, bila ada` bersifat opsional dan tidak boleh digunakan untuk menghidupkan kembali sistem cutaway acak lintas blok; Dialog tetap mengikuti source/cut kamera asli.
+- seluruh timestamp harus dapat ditelusuri ke source nyata dan dicatat dengan presisi frame/tick/seconds sesuai timebase yang tersedia.
+- `status` minimal menggunakan `TERKUNCI` atau `PERLU REVISI`; alasan status wajib disimpan di JSON.
+- karena satu Jangkar menghasilkan tepat satu file JSON, file diberikan langsung tanpa ZIP.
+- jika satu perintah khusus menghasilkan dua atau lebih file, seluruh file wajib masuk satu ZIP sesuai Aturan ZIP Output.
+
+# LARANGAN OUTPUT
+
+Jangan membuat MP4 final per Jangkar, WFP, SRT terpisah, laporan TXT terpisah, Registrasi Pusat terpisah, atau ZIP per Jangkar. Semua data unit yang dibutuhkan Prompt 4 dan Prompt 5 harus berada di dalam JSON J-xxx.

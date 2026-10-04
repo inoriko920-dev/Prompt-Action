@@ -3,7 +3,7 @@ name: STEP 09 Search Compare Download CI
 on:
   push:
     branches:
-      - 'sol/step09-*'
+      - 'sol/step09-search-compare-download-*'
   pull_request:
     paths:
       - 'src/prompt_action/services/step09/**'

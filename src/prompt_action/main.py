@@ -65,6 +65,7 @@ def run(argv: Sequence[str] | None = None) -> int:
         from .presentation.backup_view_model import BackupRecoveryViewModel
         from .ui.viewmodels.settings_view_model import SettingsViewModel
         from .ui.viewmodels.search_view_model import SearchViewModel
+        from .ui.viewmodels.release_wizard_view_model import ReleaseWizardViewModel
 
         logger.info("startup.begin app_version=%s", APP_VERSION)
         logger.info("runtime.python=%s", platform.python_version())
@@ -89,12 +90,14 @@ def run(argv: Sequence[str] | None = None) -> int:
             backup_vm = BackupRecoveryViewModel(paths.project_root)
             settings_vm = SettingsViewModel(paths.project_root, runtime_root=paths.runtime_root)
             search_vm = SearchViewModel(paths.project_root)
+            release_wizard_vm = ReleaseWizardViewModel(paths.project_root)
             logger.info("dashboard.state=%s", dashboard_vm.state.get("load_state"))
             logger.info("history.state=%s", history_vm.state.get("load_state"))
             logger.info("per_prompt.state=%s", per_prompt_vm.state.get("load_state"))
             logger.info("backup.state=%s", backup_vm.state.get("load_state"))
             logger.info("settings.state=%s", settings_vm.state.get("load_state"))
             logger.info("search.state=%s", search_vm.state.get("state"))
+            logger.info("release.availability=%s", release_wizard_vm.state.get("availability", {}).get("can_start"))
             engine = load_qml(qml_path, {
                 "dashboardViewModel": dashboard_vm,
                 "historyViewModel": history_vm,
@@ -102,6 +105,7 @@ def run(argv: Sequence[str] | None = None) -> int:
                 "backupViewModel": backup_vm,
                 "settingsViewModel": settings_vm,
                 "searchViewModel": search_vm,
+                "releaseWizardViewModel": release_wizard_vm,
             })
         except Exception:
             logger.exception("qt.initialization_failure")

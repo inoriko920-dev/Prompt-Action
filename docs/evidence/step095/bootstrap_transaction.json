@@ -1,0 +1,8 @@
+{
+  "status": "COMMITTED",
+  "source_canonical_sha256": "4185ff45aec0eeb056dee8a90617359487b4d215639cad5976761c3618ef6289",
+  "final_canonical_sha256": "e5056eebef5baa597789e0c65cd491d3020933feae579f31798f578c83d8a747",
+  "backup_id": "B001",
+  "snapshot": "S001",
+  "final_snapshot_status": "COMPLETE"
+}

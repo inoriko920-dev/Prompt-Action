@@ -43,11 +43,31 @@
     "workflow_validation": "JPEG_320x180_ALL_5",
     "integrity_basis": "Exact Git blob identities for all five materialized JPGs plus successful materialization workflow and verified canonical package SHA256.",
     "files": [
-      {"path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/01-Dashboard.jpg", "bytes": 2883, "git_blob": "35b32a6964d19550ddaa75b9d3ed2ef78140cb22"},
-      {"path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/02-Sejarah-Sistem.jpg", "bytes": 2720, "git_blob": "bf53fb88743426ac0058527387c1399b8df917b6"},
-      {"path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/03-Per-Prompt.jpg", "bytes": 2706, "git_blob": "32b4ec3c6b941a10e410f826baf018735358713b"},
-      {"path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/04-Backup-Recovery.jpg", "bytes": 3124, "git_blob": "ee47b7cf821cb3170208d718634f43f9eeacf15b"},
-      {"path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/05-Pengaturan.jpg", "bytes": 2903, "git_blob": "742a03965fd00a2282f95a9f82a0fd1046231bf4"}
+      {
+        "path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/01-Dashboard.jpg",
+        "bytes": 2883,
+        "git_blob": "35b32a6964d19550ddaa75b9d3ed2ef78140cb22"
+      },
+      {
+        "path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/02-Sejarah-Sistem.jpg",
+        "bytes": 2720,
+        "git_blob": "bf53fb88743426ac0058527387c1399b8df917b6"
+      },
+      {
+        "path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/03-Per-Prompt.jpg",
+        "bytes": 2706,
+        "git_blob": "32b4ec3c6b941a10e410f826baf018735358713b"
+      },
+      {
+        "path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/04-Backup-Recovery.jpg",
+        "bytes": 3124,
+        "git_blob": "ee47b7cf821cb3170208d718634f43f9eeacf15b"
+      },
+      {
+        "path": "docs/UI_REFERENCE_PACKAGE_V1/materialized/images/05-Pengaturan.jpg",
+        "bytes": 2903,
+        "git_blob": "742a03965fd00a2282f95a9f82a0fd1046231bf4"
+      }
     ],
     "canonical_package": {
       "path": "docs/UI_REFERENCE_PACKAGE_V1/Prompt-Action-UI-Reference-Materialized-V1.zip",
@@ -72,14 +92,54 @@
     "nested_archives": 0
   },
   "prompts": {
-    "Prompt 1A": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 5401, "sha256": "65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5"},
-    "Prompt 1B": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 43390, "sha256": "7064081b9a264ba66da2c4eb297cc00f0f2d4133a97c84bed6f0171318d870cf"},
-    "Prompt 1B1": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 25510, "sha256": "a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6"},
-    "Prompt 1B2": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 19437, "sha256": "12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576"},
-    "Prompt 2": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 15810, "sha256": "d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98"},
-    "Prompt 3": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 23652, "sha256": "de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8"},
-    "Prompt 4": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 6514, "sha256": "a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0"},
-    "Prompt 5": {"status": "VERIFIED_SOURCE", "via": "VERIFIED_RESCUE_ZIP", "bytes": 6107, "sha256": "bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786"}
+    "Prompt 1A": {
+      "status": "VERIFIED_SOURCE",
+      "via": "VERIFIED_RESCUE_ZIP",
+      "bytes": 5401,
+      "sha256": "65fb561dfaf328b204bb86ef2a55789e835fa56cfab01d89f1c67a7b348a46c5"
+    },
+    "Prompt 1B": {
+      "status": "VERIFIED_SOURCE",
+      "via": "VERIFIED_RESCUE_ZIP",
+      "bytes": 43390,
+      "sha256": "7064081b9a264ba66da2c4eb297cc00f0f2d4133a97c84bed6f0171318d870cf"
+    },
+    "Prompt 1B1": {
+      "status": "VERIFIED_SOURCE",
+      "via": "VERIFIED_RESCUE_ZIP",
+      "bytes": 25510,
+      "sha256": "a750b81cc0aa3b0fef5d6daaaaddddbae2be4c522ea4813784952f09eed26cc6"
+    },
+    "Prompt 1B2": {
+      "status": "VERIFIED_SOURCE",
+      "via": "VERIFIED_RESCUE_ZIP",
+      "bytes": 19437,
+      "sha256": "12cc083ac1e107a2ffa4b10269b644df30f401ee3bd10a5fe42c9605c7b46576"
+    },
+    "Prompt 2": {
+      "status": "VERIFIED_SOURCE",
+      "via": "VERIFIED_RESCUE_ZIP",
+      "bytes": 15810,
+      "sha256": "d972981dde11a5f07a76d8c9357c9ce2ae84ac2a52a6e06545936ca45c27ef98"
+    },
+    "Prompt 3": {
+      "status": "VERIFIED_SOURCE",
+      "via": "HASH_EXACT_V22_5_2_RELEASE_RECOVERY",
+      "bytes": 22320,
+      "sha256": "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1"
+    },
+    "Prompt 4": {
+      "status": "VERIFIED_SOURCE",
+      "via": "VERIFIED_RESCUE_ZIP",
+      "bytes": 6514,
+      "sha256": "a1bdb7c980de1aadd10e9492730892977e7a525d6dbbd5e8643ddec4da48b1c0"
+    },
+    "Prompt 5": {
+      "status": "VERIFIED_SOURCE",
+      "via": "VERIFIED_RESCUE_ZIP",
+      "bytes": 6107,
+      "sha256": "bf0c0ea1dca1414794ad54a6c9f9d2a0617766706e55d366c2df081944fb2786"
+    }
   },
   "recovery": {
     "ui_reference_package": "PASS_FOR_CLAIMED_UI_REFERENCE_SCOPE",
@@ -112,5 +172,17 @@
     "T00-10_no_feature_code_created": "PASS"
   },
   "blocking_reasons": [],
-  "next_allowed_action": "READY FOR ASTRA/USER REVIEW. Do not start STEP 01 automatically."
+  "next_allowed_action": "READY FOR ASTRA/USER REVIEW. Do not start STEP 01 automatically.",
+  "baseline_reconciliation": {
+    "status": "PASS",
+    "reason": "STEP 00 originally seeded P3 from V22.5.1 although the pre-normalization official Prompt 3 release was v22.5.2.",
+    "normalization": "legacy Prompt 3 v22.5.2 -> System V1 / Snapshot S001 / Prompt 3 R1",
+    "historical_release_sha256": "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1",
+    "historical_release_bytes": 22320,
+    "source_draft_v22_6_1_sha256": "fe7f64a10f131ccffc78733ea514156338090e77e867f53c5d8153d93db41870",
+    "recovery_method": "single exact version-label substitution V22.6.1 -> V22.5.2 on preserved draft; accepted only because the resulting bytes exactly match the historical release SHA-256",
+    "old_incorrect_p3_sha256": "de7268db093be34156ccbdff04ada92956bc7469d75f222ec7bf3e5f19d77fc8",
+    "prompt_bytes_reconstructed": false,
+    "scope": "P3 baseline identity only; no new System, Snapshot, or Revision"
+  }
 }

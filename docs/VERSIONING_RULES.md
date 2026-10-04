@@ -22,7 +22,9 @@ Aturan paling penting:
 
 `V22.5.1` adalah **LEGACY SOURCE**, bukan nomor aktif Prompt Action.
 
-Semua isi awal Prompt Action diambil dari baseline legacy ini, lalu dinormalkan menjadi:
+Baseline System V1 memakai tujuh Prompt yang tetap identik dengan legacy V22.5.1. Prompt 3 memakai rilis resmi legacy `v22.5.2` yang telah diselesaikan sebelum normalisasi System V1. Rilis Prompt 3 tersebut dinormalkan sebagai **Prompt 3 V1 R1**, bukan sebagai R2/S002.
+
+Seluruh baseline dinormalkan menjadi:
 
 - System V1
 - Snapshot S001

@@ -33,8 +33,9 @@ def main() -> int:
     loaded = repo.load()
     validation = validate_settings(loaded.settings, root)
     protected = {"BASELINE.json":sha256(root/"BASELINE.json"),"data/version_history.json":sha256(root/"data/version_history.json"),"master":master_info["sha256"]}
-    if protected["BASELINE.json"] != "8ffd22fe3636309ce0484f8b724f9fe306f3156383c5f4efbcc7e59f79e90b6d": failures.append("BASELINE.json hash changed")
-    if protected["data/version_history.json"] != "1a0fddf98b000bb908e12e5aa617b42793a399a8dd9cb36e1acf7204ca8465bb": failures.append("canonical version_history.json hash changed")
+    canonical = json.loads((root/"data/version_history.json").read_text(encoding="utf-8"))
+    if canonical.get("active_system") != "V1" or canonical.get("active_snapshot") != "S001": failures.append("canonical identity changed unexpectedly")
+    if canonical.get("prompts", {}).get("P3", {}).get("revisions", {}).get("R1", {}).get("sha256") != "0aa955989b428700293a4d76793718bd33c78015f3b0021256a665dd386c3de1": failures.append("reconciled P3 baseline hash mismatch")
     result = {"status":"PASS" if not failures else "BLOCKED","prerequisites":reports,"master_settings":master_info,"settings":{"source":loaded.source,"degraded":loaded.degraded,"error":loaded.error,"valid":validation.valid,"errors":validation.errors,"warnings":validation.warnings,"settings_path":str(repo.settings_path.relative_to(root))},"protected":protected,"failures":failures}
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0 if not failures else 2

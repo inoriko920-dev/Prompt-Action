@@ -43,8 +43,9 @@ def main() -> int:
         failures.append("Canonical version history invalid")
     document = state.document
     legacy = document.get("legacy_sources", [])
-    if len(legacy) != 1 or legacy[0].get("id") != "V22.5.1":
-        failures.append("STEP 05 requires one canonical Legacy V22.5.1 node")
+    baseline_legacy = [item for item in legacy if isinstance(item, dict) and item.get("id") == "V22.5.1"]
+    if len(baseline_legacy) != 1:
+        failures.append("STEP 05 requires exactly one canonical Legacy V22.5.1 baseline node")
 
     protected_paths = [root / "BASELINE.json", root / "data/version_history.json", root / "docs/UI_REFERENCE_PACKAGE_V1/materialized/VERSIONING_RULES.md", master]
     result = {

@@ -93,9 +93,12 @@ def test_t14_sha_mismatch_is_blocking(project_root, load_fixture):
     assert not report.is_valid and "INV-10-SHA-MISMATCH" in codes(report)
 
 
-def test_t15_history_only_unavailable_file_allowed(project_root, baseline):
+def test_t15_materialized_baseline_files_are_valid(project_root, baseline):
     assert VersionValidator(project_root).validate(baseline).is_valid
-    assert baseline["prompts"]["P3"]["revisions"]["R1"]["file_available"] is False
+    for prompt in baseline["prompts"].values():
+        revision = prompt["revisions"][prompt["active_revision"]]
+        assert revision["file_available"] is True
+        assert revision["file"]
 
 
 def test_t16_draft_does_not_alter_active_state(project_root, baseline):
