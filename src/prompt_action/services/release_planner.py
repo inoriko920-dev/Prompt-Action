@@ -99,9 +99,16 @@ class ReleasePlanner:
         return " ".join(normalized.split())
 
     def _verify_active_sources(self, document: dict[str, Any]) -> None:
-        snapshot = next(item for item in document["snapshots"] if item["id"] == document["active_snapshot"])
-        for prompt_id, revision_id in snapshot["prompt_state"].items():
-            revision = document["prompts"][prompt_id]["revisions"][revision_id]
+        try:
+            snapshot = next(item for item in document["snapshots"] if item["id"] == document["active_snapshot"])
+            prompt_state = snapshot["prompt_state"]
+        except (KeyError, StopIteration, TypeError) as exc:
+            raise ReleaseWorkflowError("RECOVERY_REQUIRED", "Canonical active snapshot graph is not readable") from exc
+        for prompt_id, revision_id in prompt_state.items():
+            try:
+                revision = document["prompts"][prompt_id]["revisions"][revision_id]
+            except (KeyError, TypeError) as exc:
+                raise ReleaseWorkflowError("RECOVERY_REQUIRED", f"Active revision graph is incomplete: {prompt_id}:{revision_id}") from exc
             relative = revision.get("file")
             expected = revision.get("sha256")
             if revision.get("file_available") is not True or not isinstance(relative, str) or not isinstance(expected, str):
@@ -146,14 +153,21 @@ class ReleasePlanner:
         if self.journals.inspect_pending() is not None:
             raise ReleaseWorkflowError("RECOVERY_REQUIRED", "An unresolved release transaction must be recovered first")
         state = self.version_repository.load()
+        document = state.document
+        try:
+            active_snapshot = next(item for item in document["snapshots"] if item["id"] == document["active_snapshot"])
+        except (KeyError, StopIteration, TypeError) as exc:
+            raise ReleaseWorkflowError("RECOVERY_REQUIRED", "Canonical active snapshot cannot be resolved") from exc
+        if active_snapshot.get("status") != "COMPLETE":
+            raise ReleaseWorkflowError("PREVIOUS_BACKUP_INCOMPLETE", "Active snapshot must be COMPLETE before a new release")
+
+        # Verify byte-level integrity before the broad canonical gate so an
+        # active-file tamper is classified precisely as HASH_MISMATCH rather
+        # than being flattened into RECOVERY_REQUIRED by the validator.
+        self._verify_active_sources(document)
         report = self.version_repository.validate(state)
         if not report.is_valid:
             raise ReleaseWorkflowError("RECOVERY_REQUIRED", "Canonical state is invalid before release planning")
-        document = state.document
-        active_snapshot = next(item for item in document["snapshots"] if item["id"] == document["active_snapshot"])
-        if active_snapshot.get("status") != "COMPLETE":
-            raise ReleaseWorkflowError("PREVIOUS_BACKUP_INCOMPLETE", "Active snapshot must be COMPLETE before a new release")
-        self._verify_active_sources(document)
 
         if primary_prompt_id not in document["prompts"]:
             raise ReleaseWorkflowError("NO_OP_PRIMARY", f"Unknown PRIMARY prompt: {primary_prompt_id}")
