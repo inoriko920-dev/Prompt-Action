@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import base64
-import binascii
 import hashlib
 import json
 import struct
@@ -48,25 +47,57 @@ def decode_padded(text: str):
         return None, f"{type(exc).__name__}: {exc}"
 
 
-def parse_entry_at(raw: bytes, pos: int):
-    if pos + 30 > len(raw) or raw[pos:pos+4] != LOCAL:
-        return None
+def header_info(raw: bytes, pos: int) -> dict:
+    info = {"offset": pos, "valid_header": False}
+    if pos + 30 > len(raw) or raw[pos:pos + 4] != LOCAL:
+        info["reason"] = "truncated_header"
+        return info
     try:
-        sig, ver, flags, method, mt, md, crc_header, csize, usize, nlen, xlen = struct.unpack_from("<IHHHHHIIIHH", raw, pos)
+        _sig, ver, flags, method, _mt, _md, crc, csize, usize, nlen, xlen = struct.unpack_from("<IHHHHHIIIHH", raw, pos)
     except struct.error:
-        return None
+        info["reason"] = "unpack_failed"
+        return info
     ns = pos + 30
     ne = ns + nlen
     ds = ne + xlen
-    if ne > len(raw) or ds > len(raw):
-        return None
+    if ne > len(raw):
+        info.update({"reason": "truncated_name", "flags": flags, "method": method, "compressed_size": csize, "uncompressed_size": usize})
+        return info
+    name_bytes = raw[ns:ne]
     try:
-        name = raw[ns:ne].decode("utf-8")
+        name = name_bytes.decode("utf-8")
     except UnicodeDecodeError:
-        try:
-            name = raw[ns:ne].decode("cp437")
-        except Exception:
-            return None
+        name = name_bytes.decode("cp437", errors="replace")
+    info.update({
+        "valid_header": True,
+        "name": name,
+        "version": ver,
+        "flags": flags,
+        "method": method,
+        "crc32_header": f"{crc:08x}",
+        "compressed_size": csize,
+        "uncompressed_size": usize,
+        "name_len": nlen,
+        "extra_len": xlen,
+        "data_offset": ds,
+        "available_after_data_offset": max(0, len(raw) - ds),
+        "expected_end": ds + csize if not (flags & 0x08) else None,
+        "bytes_missing_if_fixed_size": max(0, ds + csize - len(raw)) if not (flags & 0x08) else None,
+    })
+    return info
+
+
+def parse_entry_at(raw: bytes, pos: int):
+    meta = header_info(raw, pos)
+    if not meta.get("valid_header"):
+        return None
+    flags = meta["flags"]
+    method = meta["method"]
+    ds = meta["data_offset"]
+    csize = meta["compressed_size"]
+    usize = meta["uncompressed_size"]
+    crc_header = int(meta["crc32_header"], 16)
+    name = meta["name"]
     if method not in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED):
         return None
 
@@ -76,10 +107,7 @@ def parse_entry_at(raw: bytes, pos: int):
             return None
         cdata = raw[ds:de]
         try:
-            if method == zipfile.ZIP_STORED:
-                data = cdata
-            else:
-                data = zlib.decompress(cdata, -15)
+            data = cdata if method == zipfile.ZIP_STORED else zlib.decompress(cdata, -15)
         except zlib.error:
             return None
         if len(data) != usize or (zlib.crc32(data) & 0xFFFFFFFF) != crc_header:
@@ -115,34 +143,47 @@ def parse_entry_at(raw: bytes, pos: int):
 
 def scan(raw: bytes):
     entries = []
+    headers = []
     seen = set()
     start = 0
-    header_count = 0
     while True:
         pos = raw.find(LOCAL, start)
         if pos < 0:
             break
-        header_count += 1
+        meta = header_info(raw, pos)
         entry = parse_entry_at(raw, pos)
+        meta["crc_valid_complete_entry"] = entry is not None
+        if entry is None and meta.get("valid_header") and meta.get("method") == zipfile.ZIP_DEFLATED:
+            ds = meta["data_offset"]
+            obj = zlib.decompressobj(-15)
+            try:
+                partial = obj.decompress(raw[ds:])
+                meta["partial_inflate_bytes"] = len(partial)
+                meta["inflate_eof"] = obj.eof
+                meta["partial_sha256"] = hashlib.sha256(partial).hexdigest() if partial else None
+            except zlib.error as exc:
+                meta["inflate_error"] = str(exc)
+        headers.append(meta)
         if entry is not None:
             key = (entry["name"], hashlib.sha256(entry["data"]).hexdigest())
             if key not in seen:
                 seen.add(key)
                 entries.append(entry)
         start = pos + 4
-    return entries, header_count
+    return entries, headers
 
 
 def add_candidate(candidates: list, label: str, raw: bytes | None, error: str | None, meta: dict):
     item = {"label": label, **meta, "decode_error": error}
     if raw is not None:
-        entries, header_count = scan(raw)
+        entries, headers = scan(raw)
         item.update({
             "decoded_bytes": len(raw),
             "decoded_sha256": hashlib.sha256(raw).hexdigest(),
-            "local_header_count": header_count,
+            "local_header_count": len(headers),
             "crc_valid_entries": len(entries),
             "entry_names": [e["name"] for e in entries],
+            "invalid_or_incomplete_headers": [h for h in headers if not h.get("crc_valid_complete_entry")],
         })
         item["entries"] = entries
     candidates.append(item)
@@ -154,10 +195,6 @@ def source_candidates(prefix: str, count: int):
     joined = "".join(parts)
     raw, err = decode_strict(joined)
     add_candidate(candidates, "joined_strict", raw, err, {"chars": len(joined), "mod4": len(joined) % 4})
-
-    # Some historical uploads were chunked after Base64 encoding; others were
-    # independently Base64-encoded byte chunks. Probe both without trusting
-    # either mode unless ZIP CRC and protected SHA-256 later validate the data.
     raw_parts = []
     all_parts_ok = True
     part_meta = []
@@ -175,8 +212,7 @@ def source_candidates(prefix: str, count: int):
             raw_parts.append(r)
             add_candidate(candidates, f"part_{idx:03d}_{mode}", r, e, {"part": idx, "chars": len(text), "mod4": len(text) % 4})
     if all_parts_ok:
-        combined = b"".join(raw_parts)
-        add_candidate(candidates, "decoded_parts_concatenated", combined, None, {"parts": count})
+        add_candidate(candidates, "decoded_parts_concatenated", b"".join(raw_parts), None, {"parts": count})
     return candidates, part_meta
 
 
@@ -208,6 +244,7 @@ def main() -> int:
             report["missing"].append(pid)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
