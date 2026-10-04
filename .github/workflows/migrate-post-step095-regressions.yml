@@ -1,0 +1,43 @@
+name: Migrate post-STEP09.5 regression contracts
+
+on:
+  push:
+    branches:
+      - 'sol/baseline-reconcile-p3-v2252-20261004'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: ${{ contains(github.event.head_commit.message, '[run-regression-migration]') && !contains(github.event.head_commit.message, '[regression-migrated]') }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+          architecture: x64
+      - name: Apply fail-closed regression migration
+        run: python scripts/dev/migrate_regression_contracts_post_step095.py
+      - name: Diff safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git status --short
+      - name: Commit migrated contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/step02/test_t01_t16_validation.py tests/step03/test_step03_ui_shell.py tests/step04/test_step04_dashboard.py scripts/dev/verify_step05_preflight.py tests/step06/test_step06_per_prompt.py tests/step07/test_step07_backup_recovery.py scripts/dev/verify_step08_preflight.py tests/step08/test_step08_settings.py scripts/dev/verify_step09_preflight.py
+          if git diff --cached --quiet; then
+            echo "No migration changes produced"
+            exit 1
+          fi
+          git commit -m "CI migration: update STEP 02-09 regressions for materialized S001 [regression-migrated]"
+          git push origin HEAD:sol/baseline-reconcile-p3-v2252-20261004
