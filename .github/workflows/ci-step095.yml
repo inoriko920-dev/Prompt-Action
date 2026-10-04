@@ -28,6 +28,8 @@ jobs:
       QT_QUICK_CONTROLS_STYLE: Basic
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with: {python-version: '3.13.16', architecture: x64}
       - name: Verify exact Python
@@ -59,15 +61,28 @@ jobs:
         run: python scripts/dev/capture_step07_evidence.py --output ci-step07-regression-evidence
       - name: Regenerate STEP 08 evidence
         run: python scripts/dev/capture_step08_evidence.py --output ci-step08-regression-evidence
+      - name: Prepare pre-bootstrap fixture for STEP 01-09 regression
+        shell: pwsh
+        run: |
+          git restore --source origin/main -- data/version_history.json
+          if (Test-Path prompts) { Remove-Item prompts -Recurse -Force }
+          if (Test-Path backups) { Remove-Item backups -Recurse -Force }
+          python -c "import hashlib,pathlib; p=pathlib.Path('data/version_history.json'); h=hashlib.sha256(p.read_bytes()).hexdigest(); assert h=='1a0fddf98b000bb908e12e5aa617b42793a399a8dd9cb36e1acf7204ca8465bb', h"
       - name: STEP 01-09 regression
         env:
           STEP03_EVIDENCE_DIR: ${{ github.workspace }}\ci-step03-regression-evidence
           STEP04_EVIDENCE_DIR: ${{ github.workspace }}\ci-step04-regression-evidence
         run: python -m pytest tests/step01 tests/step02 tests/step03 tests/step04 tests/step05 tests/step06 tests/step07 tests/step08 tests/step09 -q
+      - name: Restore STEP 09.5 production state
+        if: always()
+        shell: pwsh
+        run: |
+          git restore --source HEAD -- data/version_history.json prompts backups
       - name: Module integration smoke
         run: python -m prompt_action --smoke-test-ms 180
       - name: Verify STEP 09.5 again
         run: python scripts/dev/verify_step095_bootstrap.py
       - name: Upload evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with: {name: step095-baseline-bootstrap-evidence, path: ci-step095-evidence, retention-days: 30}
