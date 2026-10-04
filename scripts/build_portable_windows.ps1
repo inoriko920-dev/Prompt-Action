@@ -66,14 +66,17 @@ $UiTarget = Join-Path $PortableDir "src\prompt_action\ui"
 New-Item -ItemType Directory -Force (Split-Path $UiTarget -Parent) | Out-Null
 Copy-Item (Join-Path $Root "src\prompt_action\ui") $UiTarget -Recurse -Force
 
-# Include a small read-only diagnostic path for real Windows testing. It checks
-# portable structure/runtime writability and can run the frozen smoke test.
+# Include diagnostic tools for real Windows testing. The self-check is read-only
+# except for its runtime report. The bundle collector intentionally excludes
+# Prompt contents, backup contents, settings, and arbitrary log contents.
 $PortableScripts = Join-Path $PortableDir "scripts"
 New-Item -ItemType Directory -Force $PortableScripts | Out-Null
 Copy-Item (Join-Path $Root "scripts\portable_self_check.ps1") (Join-Path $PortableScripts "portable_self_check.ps1") -Force
 Copy-Item (Join-Path $Root "scripts\portable_self_check_launcher.bat") (Join-Path $PortableDir "Cek Portable.bat") -Force
+Copy-Item (Join-Path $Root "scripts\portable_collect_diagnostics.ps1") (Join-Path $PortableScripts "portable_collect_diagnostics.ps1") -Force
+Copy-Item (Join-Path $Root "scripts\portable_collect_diagnostics_launcher.bat") (Join-Path $PortableDir "Buat Paket Diagnostik.bat") -Force
 
-foreach ($runtimeDir in @("runtime", "runtime\logs", "runtime\temp")) {
+foreach ($runtimeDir in @("runtime", "runtime\logs", "runtime\temp", "runtime\diagnostics")) {
     New-Item -ItemType Directory -Force (Join-Path $PortableDir $runtimeDir) | Out-Null
 }
 
@@ -104,6 +107,12 @@ JIKA APLIKASI TIDAK TERBUKA
 2. Tunggu pemeriksaan selesai.
 3. Buka runtime\logs\portable-self-check.txt untuk melihat hasil diagnosis.
 
+JIKA PERLU MENGIRIM LAPORAN BUG
+1. Klik dua kali Buat Paket Diagnostik.bat.
+2. ZIP diagnostik dibuat di runtime\diagnostics.
+3. Paket hanya berisi metadata build, self-check, metadata EXE, dan indeks nama log.
+4. Isi Prompt, isi backup, settings, dan isi log aplikasi tidak dimasukkan.
+
 CATATAN
 - Folder ini portable. Data, Prompt, backup, settings, dan log berada di folder hasil ekstrak.
 - Jangan pindahkan hanya file EXE; _internal, data, prompts, backups, src, scripts, dan folder lain harus tetap bersama.
@@ -120,7 +129,7 @@ $ReadmeCheck = Get-Content -Path $ReadmePath -Raw
 if ($ReadmeCheck -match '[\x00-\x08\x0B\x0C\x0E-\x1F]') {
     throw "BACA_DULU.txt contains an unexpected control character"
 }
-foreach ($requiredText in @("Jalankan Prompt Action.bat", "Cek Portable.bat", "portable-self-check.txt", "PromptAction.exe", "_internal", "backups", $AppVersion, $PromptSystemLabel)) {
+foreach ($requiredText in @("Jalankan Prompt Action.bat", "Cek Portable.bat", "Buat Paket Diagnostik.bat", "runtime\diagnostics", "portable-self-check.txt", "PromptAction.exe", "_internal", "backups", $AppVersion, $PromptSystemLabel)) {
     if (-not $ReadmeCheck.Contains($requiredText)) {
         throw "BACA_DULU.txt is missing required text: $requiredText"
     }
@@ -133,7 +142,8 @@ Prompt baseline: $PromptSystemLabel
 Build: $BuildLabel
 Python runtime: 3.13.16 x64
 PyInstaller: 6.22.3
-Diagnostics: Cek Portable.bat -> runtime\logs\portable-self-check.txt
+Diagnostics self-check: Cek Portable.bat -> runtime\logs\portable-self-check.txt
+Diagnostics bundle: Buat Paket Diagnostik.bat -> runtime\diagnostics
 "@
 Set-Content -Path (Join-Path $PortableDir "BUILD_INFO.txt") -Value $VersionInfo -Encoding UTF8
 
