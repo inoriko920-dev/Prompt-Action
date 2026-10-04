@@ -1,0 +1,959 @@
+# PROMPT 1B — SATU DOKUMEN TEKNIS DAN NASKAH BERSIH UNTUK EDIT MANUAL
+
+KOMPATIBILITAS WORKFLOW: V22.5.1 — output Prompt 1B tetap tepat satu DOCX per part; fondasi narasi-dominan V22.5 dipertahankan, aturan Dialog/Campuran diperketat, dan ditambahkan audit kedua untuk Jangkar Aksi penting yang terlewat.
+VERSI ATURAN: 1 SEPTEMBER 2026 — V22.5.1; DIALOG DEFAULT 1 D PER BEAT, SETIAP D MAKSIMAL 3,00 DETIK; CAMPURAN AKSI DOMINAN; JUMLAH TOTAL JANGKAR TETAP TANPA BATAS ANGKA
+
+
+## TUJUAN
+
+Tulis narasi alur film untuk satu part dan tentukan adegan film asli yang perlu dijadikan Jangkar.
+
+Prompt 1B membuat tepat SATU DOCX untuk setiap part. Di dalam file yang sama terdapat dua lapisan: (1) Bagian A teknis lengkap sebagai sumber pembanding dan (2) NASKAH BERSIH di bagian paling bawah untuk diedit pengguna. Naskah Bersih hanya memuat narasi, dialog, dan penanda posisi jangkar tanpa timestamp atau data teknis. Pengguna mengedit Bagian B langsung di file yang sama dan menyimpannya dengan nama yang sama. File ini belum menjadi sumber final Prompt 1B2 sebelum diselaraskan dan dikunci oleh Prompt 1B1.
+
+Prompt 1B tidak menentukan teknik editing final.
+
+---
+
+# INPUT
+
+Gunakan:
+
+1. `Pemahaman Film [JUDUL FILM].docx` hasil Prompt 1A.
+2. MP4 sumber untuk part atau film yang sedang dikerjakan.
+3. SRT sumber yang sesuai.
+4. Dokumen pembagian part apabila tersedia.
+5. Untuk Part 2 dan seterusnya, file `Prompt 1B Part [N-1] [JUDUL FILM].docx` dari part sebelumnya atau minimal bagian akhir narasi serta jangkar terakhir part sebelumnya.
+6. Catatan kontinuitas tambahan apabila tersedia.
+7. Sinopsis dan full SRT hanya sebagai sumber pendukung apabila diperlukan.
+
+Prioritas:
+
+1. MP4 dan audio aslinya menentukan kejadian nyata.
+2. SRT membantu menemukan dialog dan perkiraan timestamp.
+3. Dokumen Prompt 1A menentukan konteks keseluruhan film.
+4. Dokumen pembagian part menentukan batas part.
+
+Prompt 1B tidak perlu mempelajari ulang seluruh film dari nol.
+
+Gunakan hasil Prompt 1A sebagai dasar, kemudian verifikasi hanya bagian film yang sedang dikerjakan.
+
+---
+
+# TUGAS PROMPT 1B
+
+1. Menentukan titik awal dan akhir part.
+2. Menulis narasi lengkap dalam bahasa Indonesia yang natural dan nyaman dibacakan.
+3. Menjadikan narasi sebagai pembawa utama alur, bukan sekadar pengantar menuju dialog.
+4. Menyelesaikan narasi scene lebih dahulu sampai situasi, tindakan, alasan, akibat, dan perkembangan berikutnya terbaca.
+5. Setelah narasi lengkap, memilih hanya dialog atau aksi asli yang benar-benar menambah kekuatan emosi, karakter, pengungkapan, keputusan, ancaman, atau klimaks.
+6. Menjaga sasaran normal sekitar 70–80% informasi alur dibawa narasi dan sekitar 20–30% diperkuat dialog atau aksi asli. Angka ini adalah audit keseimbangan informasi, bukan kuota kata atau durasi matematis.
+7. Memindahkan seluruh informasi penting dari dialog yang tidak dipilih ke narasi secara kronologis dan natural tanpa mengarang fakta.
+8. Untuk Jangkar DIALOG, gunakan default 1 unit D untuk satu beat. D kedua hanya dipakai bila dua ucapan benar-benar saling membutuhkan; jangan menyimpan percakapan hanya karena masih berlangsung.
+9. Setiap D-xxx yang dipertahankan maksimal 3,00 detik. Tiga detik adalah batas atas, bukan target; ambil frasa sesingkat mungkin selama makna dan intonasinya tetap natural.
+10. Untuk Jangkar CAMPURAN, aksi tetap menjadi fokus utama dan dialog hanya penguat singkat; setiap D di dalam CAMPURAN tetap maksimal 3,00 detik.
+11. Menjadikan satu jangkar sebagai satu beat utama, bukan satu jangkar untuk setiap kalimat penting.
+12. Memastikan jumlah jangkar mengikuti perubahan cerita yang nyata, bukan target angka dan bukan jumlah baris dialog.
+13. Menentukan beat aksi penting dan setelah seleksi normal melakukan Audit Jangkar Aksi Terlewat.
+14. Mengelompokkan perpindahan scene besar dan beat penting dalam scene panjang.
+15. Membagi pertarungan panjang menjadi beberapa fase yang wajar.
+16. Menempatkan narasi di antara fase pertarungan apabila diperlukan agar blok aksi tidak terlalu panjang.
+17. Memberikan rentang sumber atau timestamp kandidat.
+18. Menjaga kontinuitas dengan part sebelumnya dan berikutnya.
+19. Khusus Part 1, membuat tiga alternatif pembukaan, memilih satu yang paling natural sebagai pembukaan final, dan menyimpan dua alternatif lain di bagian terpisah.
+20. Memastikan Part 2 dan seterusnya langsung melanjutkan cerita tanpa pembukaan ulang atau penyebutan nomor part.
+21. Memastikan part berakhir pada adegan atau Jangkar terakhir tanpa narasi penutup apabila adegan tersebut sudah jelas.
+22. Membuat Bagian A teknis lengkap dan Bagian B Naskah Bersih Edit Manual dalam satu DOCX, lalu memakai file yang sama sebagai input Prompt 1B1 untuk menyelaraskan perubahan narasi, dialog, timestamp, durasi, nomor, jenis jangkar, dan audit keseimbangan sebelum masuk Prompt 1B2.
+
+---
+
+# PEMBAGIAN TUGAS PROMPT 1B, EDIT MANUAL, PROMPT 1B1, PROMPT 1B2, DAN EKSEKUSI UNIT
+
+Prompt 1B menentukan secara lengkap:
+
+* Cerita yang masuk.
+* Narasi awal yang sudah matang dan siap voice-over.
+* Posisi penanda Jangkar.
+* Jumlah dan pembagian adegan.
+* Kelompok scene besar dan fase pertarungan.
+* Jenis adegan.
+* Dialog penting.
+* Beat aksi wajib.
+* Rentang sumber kandidat.
+* Bagian wajib dan bagian yang boleh dibuang.
+* Kontinuitas.
+* ID tetap untuk setiap unit narasi, dialog, dan jangkar.
+* Naskah Bersih Edit Manual tanpa timestamp pada bagian paling bawah dokumen.
+
+Pengguna hanya mengedit Naskah Bersih pada bagian paling bawah di DOCX yang sama. Bagian teknis di atasnya dipertahankan sebagai data asli pembanding. Dilarang membuat salinan DOCX kedua hanya untuk edit manual.
+
+Prompt 1B1 menentukan:
+
+* Narasi final sesuai teks yang diedit pengguna.
+* Dialog final sesuai dialog yang dipertahankan, dipendekkan, dihapus, atau diganti pengguna.
+* Timestamp sumber final berdasarkan MP4 dan SRT.
+* Durasi dialog dan jangkar final.
+* Perubahan jenis jangkar, misalnya CAMPURAN menjadi AKSI setelah dialog dihapus.
+* Nomor jangkar final.
+* Hubungan narasi dengan jangkar setelah edit.
+* Status aman atau belum aman untuk Prompt 1B2.
+
+Prompt 1B2 menentukan:
+
+* Pembagian blok cerita.
+* Urutan tayang dan urutan pengerjaan.
+* Kepemilikan wilayah visual narasi dan jangkar.
+* Informasi narasi yang wajib dibantu visual.
+* Momen yang wajib disimpan untuk audio asli.
+* Daftar kerja per unit dan registrasi pusat awal.
+
+Prompt 2 menentukan keputusan edit final untuk satu Jangkar dalam JSON: source In/Out, urutan kamera/shot, audio asli, track, speed 1,00×, subtitle dialog internal, timestamp aktual, dan hasil audit. DIALOG mengikuti kamera asli tanpa acak; AKSI memakai AMBIL–LEWATI dan acak lokal hanya jika aman.
+
+Prompt 3 menentukan timestamp dan batas visual final untuk satu narasi berdasarkan wilayah yang sudah dibagi Prompt 1B2 dan registrasi pusat terbaru.
+
+Timestamp Prompt 1B adalah kandidat atau panduan cerita. Timestamp hasil Prompt 1B1 adalah hasil penyesuaian setelah edit manual dan tetap wajib dibagi wilayah visualnya oleh Prompt 1B2 dan diverifikasi secara teknis oleh Prompt 2 terhadap media nyata.
+
+# NARASI
+
+Narasi adalah tulang punggung cerita. Penonton harus tetap dapat memahami alur utama hanya dengan membaca seluruh blok narasi, meskipun dialog asli belum diputar.
+
+Narasi harus:
+
+* Natural, mengalir, santai, jelas, dan nyaman untuk voice-over.
+* Kronologis dan bergerak maju.
+* Menjelaskan situasi, tindakan, alasan, akibat, serta perkembangan berikutnya sesuai kebutuhan scene.
+* Membawa sebagian besar informasi penting tentang konflik, keputusan, perubahan hubungan, dan hasil kejadian.
+* Menghubungkan scene, perpindahan waktu, perpindahan lokasi, dan perubahan tujuan tokoh.
+* Memberi konteks sebelum jangkar dan menjelaskan akibat setelah jangkar.
+* Tetap cukup detail tanpa menceritakan setiap gerakan kecil yang sudah jelas terlihat.
+* Memakai informasi dari dialog yang tidak dipilih, tetapi ditulis ulang sebagai narasi natural dan bukan salinan percakapan panjang.
+
+Narasi tidak boleh:
+
+* Hanya menjadi satu atau dua kalimat pengantar lalu menyerahkan seluruh penjelasan kepada dialog.
+* Berhenti sebelum alasan dan akibat kejadian dipahami.
+* Mengulang utuh isi dialog terpilih tepat sebelum dialog diputar.
+* Mengarang motif, emosi, hubungan, atau informasi yang tidak didukung sumber.
+* Menjelaskan setiap ekspresi, gerakan tangan, atau visual kecil yang sudah terbaca jelas.
+
+## Sasaran keseimbangan informasi
+
+Sasaran normal:
+
+> Sekitar 70–80% informasi alur dibawa oleh narasi dan sekitar 20–30% diperkuat oleh dialog atau aksi asli.
+
+Sasaran ini tidak dihitung secara kaku dari jumlah kata, jumlah detik, atau jumlah blok. Gunakan sebagai audit: bila penonton harus mendengar sebagian besar dialog panjang agar memahami cerita, narasi masih kurang.
+
+Adegan aksi dapat memakai visual asli lebih banyak, tetapi narasi tetap harus menjelaskan pemicu, perubahan keadaan, dan hasil yang tidak cukup terbaca dari potongan aksi.
+
+## Pemadatan narasi
+
+Gaya dan kepadatan narasi awal harus dipertahankan. Narasi tidak boleh dipendekkan secara drastis.
+
+Lakukan perapian ringan sekitar 10% hanya dengan:
+
+* Menghapus pengulangan informasi.
+* Memendekkan frasa pembuka yang terlalu panjang.
+* Menggabungkan kalimat yang menyampaikan makna sama.
+* Mengurangi deskripsi visual yang sudah jelas terlihat.
+* Menghapus analisis yang tidak diperlukan untuk memahami alur.
+
+Angka 10% adalah sasaran perapian, bukan kewajiban matematis setiap paragraf. Jangan memotong informasi penting hanya untuk mencapai angka tersebut.
+
+Percakapan panjang normalnya dipadatkan melalui narasi. Dialog asli hanya dipertahankan apabila memberi nilai yang lebih kuat daripada penjelasan narator.
+
+---
+
+# URUTAN PENULISAN WAJIB — NARASI DULU, DIALOG KEMUDIAN
+
+Gunakan urutan berikut untuk setiap scene besar:
+
+1. Pahami seluruh scene dari MP4, SRT, dan konteks Prompt 1A.
+2. Catat situasi, tindakan, alasan, akibat, serta perubahan berikutnya.
+3. Tulis narasi scene secara lengkap tanpa terlebih dahulu memutuskan jumlah dialog.
+4. Baca narasi saja dan pastikan alur utama sudah dapat dipahami.
+5. Baru pilih satu dialog paling kuat atau pasangan dialog yang tidak dapat dipisahkan.
+6. Tambahkan dialog ketiga hanya bila masih ada perkembangan makna yang benar-benar penting.
+7. Pindahkan informasi penting dari dialog yang dibuang ke narasi pada posisi kronologisnya.
+8. Hapus pengulangan antara narasi dan dialog terpilih.
+9. Pastikan narasi setelah jangkar menjelaskan akibat atau langsung membawa cerita ke perkembangan berikutnya.
+
+Dilarang memilih rangkaian dialog terlebih dahulu lalu menulis narasi pendek di sela-selanya. Pola tersebut membuat dialog mengambil alih fungsi narator.
+
+---
+
+# PEMBUKAAN NARASI KHUSUS PART 1
+
+Aturan ini hanya berlaku ketika mengerjakan Part 1.
+
+Sebelum masuk ke konflik atau Jangkar pertama, buat pembukaan narasi singkat yang memberi orientasi kepada penonton. Pembukaan dapat menjelaskan beberapa unsur berikut sesuai kebutuhan:
+
+* Latar tempat.
+* Masa, tahun, atau periode apabila terverifikasi.
+* Suasana dunia cerita.
+* Kondisi awal tokoh utama.
+* Tujuan awal tokoh.
+* Hambatan pertama yang akan dihadapi.
+
+Jangan mengarang tahun, lokasi, hubungan, atau kondisi yang tidak didukung oleh MP4, SRT, sinopsis, atau dokumen Prompt 1A.
+
+Buat tiga alternatif pembukaan dengan gaya berbeda:
+
+1. Versi latar, misalnya diawali dengan bentuk `Film berlatar...`.
+2. Versi visual awal, misalnya diawali dengan bentuk `Di awal film diperlihatkan...` atau `Film diawali...`.
+3. Versi suasana, misalnya diawali dengan bentuk `Di tengah...`.
+
+Pilih satu alternatif yang paling natural sebagai pembukaan narasi final. Masukkan dua alternatif lainnya pada bagian terpisah di akhir dokumen dengan judul:
+
+`Alternatif Pembukaan Part 1 — Tidak Termasuk Narasi Final`
+
+Pembukaan final normalnya sekitar 2–4 kalimat. Kalimat terakhir harus mengantar secara natural menuju konflik atau Jangkar pertama.
+
+Pembukaan tidak boleh membocorkan hasil dialog, aksi, ujian, pengungkapan, kemenangan, kekalahan, kematian, atau kejutan yang baru akan diperlihatkan.
+
+Part 2 dan seterusnya tidak menggunakan pembukaan film lagi.
+
+---
+
+# SAMBUNGAN ANTARPART DAN PENUTUP PART
+
+Untuk Part 2 dan seterusnya, baca hasil Prompt 1B part sebelumnya atau minimal bagian akhir narasi serta Jangkar terakhirnya sebelum mulai menulis.
+
+Awal part berikutnya harus langsung melanjutkan tindakan, akibat, perpindahan lokasi, perubahan tokoh, atau perkembangan cerita berikutnya.
+
+Dilarang membuka part dengan kalimat seperti:
+
+* `Melanjutkan Part 1...`
+* `Pada Part 2...`
+* `Di bagian sebelumnya...`
+* `Kisah kembali berlanjut...`
+* `Setelah kejadian di part sebelumnya...`
+* `Memasuki bagian berikutnya...`
+
+Kata seperti `Di sisi lain...`, `Sementara itu...`, atau `Pada saat yang sama...` hanya boleh digunakan jika benar-benar terjadi perpindahan tokoh, lokasi, atau peristiwa paralel. Jangan menggunakannya sebagai pembuka wajib.
+
+Akhiri setiap part tepat pada peristiwa, dialog, aksi, reaksi, atau Jangkar terakhir yang benar-benar ada di sumber.
+
+Jika Jangkar terakhir sudah menjelaskan penutup part, jangan menambahkan narasi apa pun setelahnya. Dokumen narasi final boleh berakhir langsung pada penanda Jangkar terakhir.
+
+Dilarang menambahkan:
+
+* Ringkasan ulang part.
+* Kesimpulan buatan.
+* Teaser part berikutnya.
+* Prediksi kejadian selanjutnya.
+* Pertanyaan kepada penonton.
+* Kalimat seperti `akan dijelaskan di part berikutnya`, `perjalanannya belum selesai`, atau `masalah yang lebih besar telah menanti`.
+
+Tujuannya adalah agar semua part dapat digabung langsung menjadi satu narasi panjang tanpa perlu menghapus pembukaan atau penutup buatan.
+
+---
+
+# ATURAN PENEMPATAN ADEGAN DAN JUMLAH JANGKAR
+
+## Prinsip utama
+
+Jumlah Jangkar tidak memiliki target minimum, target maksimum, target 8–10, ataupun batas lunak 12.
+
+> Cerita menentukan jumlah jangkar. Dialog tidak menentukan jumlah jangkar.
+
+Jangan menambah jangkar hanya untuk mengejar angka tertentu atau karena ada satu kalimat yang terdengar menarik.
+
+Jangan menghapus keputusan, ancaman, pengungkapan, aksi, atau reaksi penting hanya karena jumlah jangkar sudah banyak. Informasi penting yang tidak dijadikan jangkar wajib tetap masuk ke narasi.
+
+## Satu jangkar mewakili satu beat utama
+
+Satu jangkar sebaiknya mewakili satu tujuan atau perubahan utama, misalnya:
+
+* keputusan yang mengubah arah cerita;
+* pengungkapan;
+* ancaman dan reaksi langsung;
+* pertengkaran pada satu pokok masalah;
+* tindakan penting dan hasilnya;
+* klimaks satu rangkaian aksi;
+* reaksi emosional yang tidak dapat digantikan narasi.
+
+Beberapa baris dialog dalam lokasi, waktu, tujuan, dan konflik yang sama harus dipandang sebagai satu beat. Ringkas bagian pendukung melalui narasi, lalu pilih dialog paling kuat di dalam beat tersebut.
+
+Dilarang membuat jangkar baru hanya karena pembicara berganti, kamera berpindah, atau muncul kalimat lucu yang tidak mengubah cerita.
+
+## Pola narasi dan jangkar
+
+Pola normal:
+
+`Narasi lengkap satu perkembangan → Jangkar penguat → narasi akibat atau perkembangan berikutnya.`
+
+Narasi sebelum jangkar tidak sekadar menyebut tokoh mulai berbicara. Narasi harus sudah memberi konteks yang dibutuhkan agar dialog dapat berdiri sebagai bukti atau penekanan.
+
+Narasi tidak boleh mengungkapkan seluruh kalimat dialog terpilih sebelum dialog diputar. Cukup jelaskan keadaan, tujuan, atau masalahnya, lalu biarkan dialog menyampaikan bagian paling kuat.
+
+Setelah jangkar, lanjutkan akibatnya. Jangan menumpuk dua atau lebih jangkar dialog secara berturut-turut tanpa perkembangan narasi di antaranya, kecuali keduanya merupakan satu rangkaian yang mustahil dipisahkan dan alasan teknisnya dicatat.
+
+## Pemeriksaan kelayakan jangkar
+
+Sebelum membuat jangkar, tanyakan:
+
+1. Apakah narasi sudah cukup menjelaskan alur scene?
+2. Apakah momen ini memberi emosi, karakter, bukti, pengungkapan, keputusan, ancaman, atau hasil yang lebih kuat bila didengar atau dilihat langsung?
+3. Apakah momen ini masih satu beat dengan jangkar sebelumnya?
+4. Apakah informasi ini bisa dipindahkan ke narasi tanpa kehilangan kekuatan penting?
+5. Apakah penambahan jangkar akan memotong ritme narasi terlalu sering?
+
+Jika nilai tambahnya kecil, jelaskan melalui narasi dan jangan membuat jangkar.
+
+## Audit Jangkar Aksi Terlewat — wajib setelah seleksi normal
+
+Setelah seluruh Jangkar dipilih dengan aturan V22.5 seperti biasa, lakukan audit kedua terhadap seluruh rangkaian adegan dalam Part. Tujuannya bukan memperbanyak Jangkar secara agresif, tetapi mengurangi kemungkinan beat aksi penting terlewat.
+
+Cari beat aksi penting yang belum terwakili oleh Jangkar. Tambahkan Jangkar Aksi hanya jika aksi yang terlewat memiliki fungsi cerita atau visual yang jelas, terutama jika:
+
+* menjelaskan sebab dari kejadian berikutnya;
+* menunjukkan akibat penting dari kejadian sebelumnya;
+* menunjukkan perubahan kondisi atau situasi yang signifikan;
+* menjaga kontinuitas lokasi, posisi, atau perpindahan tokoh agar tidak terasa melompat;
+* memperlihatkan penggunaan, pengambilan, penyimpanan, kehilangan, atau perpindahan benda penting;
+* menunjukkan usaha, kegagalan, keberhasilan, ancaman, serangan, pelarian, persembunyian, atau benturan penting;
+* menunjukkan reaksi tokoh yang penting terhadap kejadian besar;
+* merupakan momen visual penting yang jika dilewati membuat rangkaian adegan terasa kurang lengkap.
+
+Jangan menambah Jangkar hanya karena terdapat gerakan atau perubahan shot. Aksi mikro yang tidak mengubah cerita tidak wajib dijadikan Jangkar.
+
+Jangan memecah satu rangkaian aksi menjadi banyak Jangkar hanya untuk memperbanyak jumlah. Setiap Jangkar tambahan harus mewakili beat aksi yang memang mempunyai fungsi sendiri. Jika beberapa aksi kecil masih merupakan satu fungsi cerita yang sama, cukup diwakili satu Jangkar yang paling kuat.
+
+Jika tanpa aksi tersebut alur tetap jelas, sebab-akibat tetap utuh, perpindahan tidak terasa melompat, dan tidak ada informasi visual penting yang hilang, Jangkar tambahan tidak perlu dibuat.
+
+Jika ragu, jangan otomatis menambah. Tambahkan hanya jika ada alasan cerita, sebab-akibat, kontinuitas, atau visual yang jelas.
+
+Jumlah total Jangkar tetap tidak memiliki target minimum atau maksimum. Audit ini hanya boleh menambah Jangkar secukupnya ketika ditemukan beat aksi penting yang benar-benar terlewat.
+
+## Jangkar pendek
+
+Satu dialog atau aksi singkat boleh menjadi jangkar bila benar-benar merupakan titik perubahan, misalnya jawaban penentu, ancaman utama, penyerahan benda penting, pukulan penentu, atau reaksi yang mengubah hubungan.
+
+Jangkar pendek bukan alasan untuk memasukkan setiap kalimat menarik. Momen singkat yang hanya menambah warna, candaan, atau pengulangan sebaiknya dipadatkan melalui narasi.
+
+## Penggabungan agar hasil tidak patah
+
+Gabungkan beberapa momen menjadi satu jangkar apabila:
+
+* berlangsung pada lokasi dan waktu yang sama;
+* masih merupakan satu rangkaian sebab-akibat;
+* tujuan dan konflik utamanya sama;
+* pertanyaan dan jawaban tidak dapat dipisahkan;
+* penggabungan tidak membuat dialog kehilangan fokus beat; setiap D yang dipertahankan tetap maksimal 3,00 detik.
+
+Buat jangkar baru jika terjadi perubahan besar seperti:
+
+* perpindahan lokasi utama;
+* perubahan waktu yang jelas;
+* perubahan tujuan atau konflik utama;
+* pengungkapan, penangkapan, penculikan, kematian, atau keputusan penting;
+* dialog berubah menjadi aksi besar;
+* strategi, posisi, atau hasil pertarungan berubah secara bermakna.
+
+## Profil kepadatan versi
+
+**NARASI DOMINAN, JANGKAR SELEKTIF, SATU BEAT PER JANGKAR**
+
+Narasi membawa alur. Jangkar memperkuat momen yang paling bernilai. Jangan menjadikan video alur film sebagai rangkaian dialog panjang yang hanya disambungkan oleh narasi pendek.
+
+## Penutup scene
+
+Hasil, reaksi, penangkapan, kekalahan, atau tokoh meninggalkan lokasi biasanya dimasukkan ke akhir jangkar terakhir dalam scene tersebut atau dijelaskan melalui narasi setelahnya.
+
+Buat jangkar penutup terpisah hanya apabila penutup tersebut memiliki fungsi emosional, pengungkapan, atau transisi yang kuat.
+
+---
+
+# PENANDA MP4 JANGKAR
+
+Gunakan penanda:
+
+`[MASUKKAN ADEGAN 01 — JENIS: DIALOG]`
+
+`[MASUKKAN ADEGAN 02 — JENIS: AKSI]`
+
+`[MASUKKAN ADEGAN 03 — JENIS: CAMPURAN]`
+
+Nomor dilanjutkan sesuai jumlah adegan aktual.
+
+Setiap penanda mewakili satu Jangkar terpisah yang nantinya dibuat Prompt 2 satu per satu.
+
+Nama unit hasil Prompt 2 yang direncanakan:
+
+`J-[XXX] Part-[N] [JUDUL-FILM].json`
+
+Subtitle dialog yang benar-benar terdengar disimpan di dalam JSON unit dan baru digabung menjadi SRT final pada Prompt 5.
+
+Jangan membuat penanda palsu hanya untuk memperbanyak adegan.
+
+Jangan menggabungkan dua scene besar yang berbeda hanya untuk mengurangi jumlah adegan.
+
+---
+
+# ATURAN DIALOG
+
+## Fungsi dialog
+
+Dialog bukan pembawa utama penjelasan. Dialog dipilih untuk:
+
+* memperlihatkan karakter tokoh;
+* memberi bukti langsung atas konflik yang sudah dikontekskan narasi;
+* mempertahankan pertanyaan–jawaban yang tidak dapat dipisahkan;
+* menampilkan ancaman, keputusan, pengakuan, pengungkapan, atau kalimat khas;
+* menjaga puncak emosi atau komedi yang akan melemah bila hanya diparafrasekan.
+
+Dialog yang hanya menjelaskan informasi dasar, mengulang hal yang sudah diketahui, berisi basa-basi, atau memanjang tanpa perubahan makna harus diringkas melalui narasi.
+
+## Definisi unit dialog
+
+Satu unit dialog adalah satu blok `D-xxx` yang berasal dari satu rentang sumber berurutan dan dapat dipertahankan, dipendekkan, atau dihapus secara mandiri.
+
+Pertanyaan dan jawaban biasanya dihitung sebagai dua unit. Dua ucapan dari pembicara yang sama boleh menjadi satu unit hanya jika berurutan, memiliki satu makna utuh, dan tidak perlu dipisahkan saat edit manual.
+
+## Jumlah unit per jangkar
+
+Default:
+
+> 1 D untuk satu beat Dialog.
+
+Setiap kali menemukan beat Dialog, terlebih dahulu coba selesaikan beat tersebut dengan satu potongan dialog paling penting. D kedua hanya digunakan bila dua ucapan benar-benar saling membutuhkan, misalnya pengakuan dan bantahan langsung, pertanyaan dan jawaban penentu, atau ancaman dan respons yang kehilangan kekuatan bila dipisahkan.
+
+Jangan otomatis mengambil reaksi verbal berikutnya dan jangan mempertahankan D ketiga/keempat hanya karena percakapan masih berlangsung.
+
+Semangatnya:
+
+> Bukan menyimpan percakapan, tetapi menyimpan pukulan terpenting dari percakapan.
+
+## Durasi setiap D-xxx
+
+Setiap D-xxx maksimal:
+
+> 3,00 detik.
+
+Tiga detik adalah batas atas, bukan target. Ambil sesingkat mungkin selama inti dialog tetap utuh dan natural.
+
+Jika dialog asli lebih dari 3 detik, jangan otomatis mengambil tiga detik pertama. Cari frasa yang paling penting untuk cerita atau emosi.
+
+Prioritas pemotongan:
+
+> makna utuh → intonasi natural → durasi maksimal 3,00 detik.
+
+Jangan memotong ucapan di tengah kata atau frasa hanya karena mencapai 3 detik. Pilih bagian lain yang selesai secara natural bila perlu.
+
+Tidak ada target total 6–10 detik atau batas normal 12 detik per Jangkar dalam V22.5.1. Pengendalian Dialog dilakukan per D dan melalui seleksi ketat jumlah D.
+
+## Informasi dialog yang tidak dipilih
+
+Semua informasi penting dari percakapan yang tidak dipertahankan wajib:
+
+1. dicatat;
+2. dipindahkan ke narasi pada posisi kronologisnya;
+3. ditulis sebagai penjelasan natural, bukan salinan percakapan;
+4. dipastikan tidak menambah motif atau kesimpulan baru;
+5. dicantumkan pada kolom `Informasi dialog yang dialihkan ke narasi`.
+
+Informasi kecil yang tidak mengubah alur, karakter, alasan, atau akibat boleh dibuang.
+
+## Hubungan narasi dan dialog terpilih
+
+Narasi sebelum dialog memberi konteks, tetapi tidak mengucapkan ulang seluruh dialog. Dialog lalu menjadi bukti, penekanan, atau puncak momen. Narasi setelahnya menjelaskan akibat atau membawa cerita maju.
+
+Contoh pola:
+
+`Narasi menjelaskan masalah dan posisi tokoh → satu pasangan dialog utama → narasi menjelaskan akibat keputusan.`
+
+Hindari:
+
+`Narasi satu kalimat → dialog panjang menjelaskan seluruh masalah → dialog panjang berikutnya → narasi satu kalimat.`
+
+## Urutan dan keutuhan
+
+Dialog harus:
+
+* tetap kronologis;
+* berasal dari sumber asli;
+* pertanyaan sebelum jawaban;
+* ancaman sebelum reaksi;
+* pernyataan sebelum akibat;
+* tidak menggabungkan ucapan tidak berurutan dalam satu ID;
+* tidak diacak audionya pada tahap berikutnya.
+
+Jika dialog panjang memiliki titik pemisah natural, pilih hanya bagian yang paling bernilai. Jangan mempertahankan seluruh percakapan hanya karena tersedia di sumber.
+
+---
+
+# ATURAN CAMPURAN
+
+Untuk CAMPURAN, struktur dan aturan aksi tetap menjadi dasar. Fokus utama CAMPURAN adalah aksi; dialog hanya menjadi penguat kecil di dalam aksi.
+
+Aturan:
+
+* aksi tetap dominan;
+* dialog jangan mengambil porsi besar dari Jangkar;
+* ambil hanya kalimat/frasa paling penting;
+* setiap D maksimal 3,00 detik;
+* jika cukup 1–2 detik, ambil segitu saja;
+* jangan mempertahankan percakapan panjang di dalam CAMPURAN;
+* jangan mengurangi atau mengubah aksi hanya supaya dialog bisa lebih banyak;
+* tidak perlu membuat aturan kaku bahwa CAMPURAN selalu hanya satu D, tetapi pemilihan D harus sangat ketat.
+
+Pola yang diinginkan:
+
+`Aksi dominan → dialog pendek seperlunya → aksi tetap berjalan/menjadi fokus.`
+
+Hindari pola yang membuat CAMPURAN berubah menjadi Dialog yang hanya diberi sedikit aksi.
+
+---
+
+# ATURAN AKSI DAN PERTARUNGAN
+
+Untuk setiap rangkaian aksi, tentukan:
+
+* Awal rangkaian.
+* Akhir rangkaian.
+* Pemicu.
+* Persiapan.
+* Serangan.
+* Benturan.
+* Reaksi.
+* Perubahan posisi.
+* Perubahan strategi.
+* Dampak.
+* Klimaks.
+* Hasil akhir.
+
+Target isi aksi yang dipertahankan:
+
+> Sekitar 40–50% dari keseluruhan rangkaian aksi sumber.
+
+Sasaran umum:
+
+> Sekitar 45%.
+
+Jika satu pertarungan dibagi menjadi beberapa Jangkar, target 40–50% dihitung dari total seluruh jangkar dalam kelompok pertarungan tersebut, bukan diwajibkan pada setiap jangkar secara terpisah.
+
+## Pembagian pertarungan panjang
+
+Pertarungan singkat boleh menjadi satu adegan.
+
+Pertarungan panjang normalnya dibagi menjadi:
+
+> Sekitar 2–4 adegan Jangkar.
+
+Pembagian dilakukan berdasarkan fase penting, misalnya:
+
+1. Pemicu dan serangan awal.
+2. Perubahan strategi atau lawan mulai unggul.
+3. Tokoh utama membalikkan keadaan.
+4. Klimaks dan hasil.
+
+Boleh lebih dari empat hanya apabila pertarungan memiliki lawan, lokasi, senjata, atau hasil antara yang benar-benar berbeda.
+
+Jangan membagi pertarungan hanya berdasarkan setiap pukulan atau pergantian kamera.
+
+## Narasi di tengah pertarungan
+
+Sisipkan narasi di antara fase pertarungan apabila satu blok aksi akan terasa terlalu panjang.
+
+Narasi di tengah pertarungan harus:
+
+* Menjelaskan perubahan keadaan.
+* Menjelaskan strategi baru.
+* Menjelaskan siapa yang mulai unggul atau terdesak.
+* Menjelaskan akibat penting dari fase sebelumnya.
+* Mengantar ke fase berikutnya.
+
+Narasi tidak boleh:
+
+* Menceritakan setiap pukulan.
+* Mengulang gerakan yang jelas terlihat.
+* Menjadi paragraf panjang yang mengambil terlalu banyak visual.
+* Disisipkan setiap beberapa detik tanpa perubahan penting.
+
+Gunakan pola seperlunya:
+
+`Narasi → MP4 aksi fase 1 → narasi penghubung → MP4 aksi fase 2 → narasi penghubung → MP4 klimaks/hasil.`
+
+Prompt 1B hanya memilih beat dan memperkirakan bagian yang perlu dipertahankan.
+
+Prompt 1B tidak membagi cut final.
+
+Jumlah potongan aksi di dalam satu Jangkar tidak dibatasi.
+
+Durasi setiap potongan aksi tidak dibatasi dengan angka tetap.
+
+Boleh kurang dari 40% atau lebih dari 50% apabila diperlukan agar:
+
+* Sebab-akibat jelas.
+* Gerakan penting tidak terputus.
+* Klimaks terlihat.
+* Hasil akhir dipahami.
+
+Setiap penyimpangan wajib diberi alasan.
+
+---
+
+# TIMESTAMP
+
+Gunakan format:
+
+`HH:MM:SS,mmm`
+
+Catat:
+
+* Rentang sumber keseluruhan.
+* Timestamp kandidat dialog.
+* Timestamp beat aksi.
+* Nama MP4 dan SRT sumber.
+
+Jangan mengklaim timestamp kandidat sebagai batas potong final.
+
+Gunakan status:
+
+* `KANDIDAT — WAJIB DIVERIFIKASI PROMPT 2 ATAU PROMPT 3 SESUAI JENIS UNIT`
+* `TERVERIFIKASI TERHADAP MP4`
+* `PERLU PEMERIKSAAN MANUAL`
+
+---
+
+# FORMAT PEMETAAN SETIAP ADEGAN
+
+# SISTEM ID TETAP UNTUK PENYESUAIAN EDIT MANUAL
+
+Gunakan tiga jenis ID yang unik dan berurutan:
+
+* `N-001`, `N-002`, dan seterusnya untuk unit narasi.
+* `D-001`, `D-002`, dan seterusnya untuk unit dialog yang benar-benar dipilih.
+* `J-001`, `J-002`, dan seterusnya untuk Jangkar.
+
+Aturan ID:
+
+1. Setiap blok narasi wajib memiliki satu ID N.
+2. Setiap dialog yang dapat dipertahankan, dipendekkan, atau dihapus secara terpisah wajib memiliki satu ID D.
+3. Setiap ID D wajib mencantumkan ID jangkar tempat dialog itu berada.
+4. Setiap jangkar wajib memiliki satu ID J, selain nomor adegan tampilannya.
+5. ID yang sama wajib muncul pada bagian teknis dan Naskah Bersih Edit Manual.
+6. Jangan memakai satu ID D untuk dua potongan audio sumber yang tidak berurutan. Gunakan ID terpisah agar bagian tengah yang dihapus tidak ikut masuk kembali.
+7. ID adalah identitas pembanding, bukan nomor final. Prompt 1B1 boleh menomori ulang jangkar final tetapi wajib mencatat hubungan ID lama dan nomor baru.
+8. Narasi sebelum dan sesudah jangkar wajib mencantumkan ID N terkait.
+9. Untuk jangkar campuran, setiap dialog tetap memiliki ID D sendiri, sedangkan beat aksi tetap berada di bawah ID J.
+10. Jangan mengulang satu ID untuk isi berbeda.
+
+Contoh teknis:
+
+`[NARASI N-004]`
+
+`[ADEGAN 03 | JANGKAR J-003 | JENIS: CAMPURAN]`
+
+`[DIALOG D-005 | JANGKAR J-003]`
+
+Sistem ID ini wajib digunakan agar penghapusan dialog pada Naskah Bersih dapat dibaca secara pasti oleh Prompt 1B1.
+
+## ADEGAN [NOMOR]
+
+* Penanda dalam narasi.
+* Nama unit Jangkar hasil yang direncanakan.
+* Nama SRT jangkar hasil yang direncanakan.
+* Jenis: dialog, aksi, atau campuran.
+* Kelompok scene besar.
+* ID kelompok pertarungan apabila termasuk rangkaian yang sama.
+* Fase pertarungan apabila berlaku.
+* Fungsi adegan.
+* Ringkasan isi.
+* Tokoh.
+* Lokasi.
+* Kondisi kostum.
+* Kondisi luka.
+* Kondisi benda.
+* Tahap kerasukan.
+* Hubungan sebab-akibat.
+* Rentang sumber kandidat.
+* Nama MP4 sumber.
+* Nama SRT sumber.
+* Narasi sebelum adegan.
+* Narasi setelah adegan.
+* Kalimat pemicu yang langsung diikuti penanda adegan.
+* Alasan momen lebih efektif diperlihatkan daripada diceritakan.
+* Bagian wajib.
+* Bagian yang boleh dibuang.
+* Catatan untuk edit manual pengguna dan Prompt 1B1.
+
+### Untuk dialog
+
+* Daftar dialog penting.
+* Timestamp kandidat setiap unit D.
+* Durasi setiap D-xxx; setiap D wajib ≤3,00 detik.
+* Jumlah unit dialog; default satu D per beat dan D tambahan hanya bila benar-benar saling membutuhkan.
+* Alasan pemilihan dialog dan titik pemisah natural.
+* Nilai tambah dialog dibanding narasi.
+* Informasi dialog yang dialihkan ke narasi.
+* Dialog kecil yang boleh dibuang.
+* Hasil audit default 1 D per beat, setiap D maksimal 3,00 detik, dan tidak ada percakapan panjang yang dipertahankan tanpa kebutuhan kuat.
+
+### Untuk aksi
+
+* Durasi rangkaian sumber.
+* Daftar beat wajib.
+* Perkiraan bagian dipertahankan.
+* Perkiraan persentase kelompok pertarungan.
+* Posisi fase: awal, tengah, perubahan, klimaks, atau hasil.
+* Narasi penghubung sebelum atau sesudah fase apabila ada.
+* Alasan penyimpangan.
+* Bagian repetitif yang boleh dibuang.
+
+---
+
+# RINGKASAN STRUKTUR PART
+
+Sebelum pemetaan rinci, sertakan:
+
+* Jumlah jangkar aktual.
+* Konfirmasi bahwa tidak ada target minimum, maksimum, atau batas lunak untuk jumlah jangkar.
+* Alasan cerita untuk tingkat kepadatan jangkar yang dipilih.
+* Daftar scene besar dan beat utama yang menjadi jangkar.
+* Daftar pertarungan yang dibagi menjadi beberapa fase.
+* Jumlah adegan dialog, aksi, dan campuran.
+* Distribusi jumlah D setiap jangkar dan alasan bila memakai lebih dari satu D.
+* Durasi setiap D-xxx dan konfirmasi seluruh D ≤3,00 detik.
+* Daftar CAMPURAN yang memakai lebih dari satu D beserta alasan bahwa aksi tetap dominan.
+* Ringkasan informasi penting yang dialihkan dari dialog ke narasi.
+* Hasil audit bahwa narasi tetap dapat dipahami tanpa bergantung pada dialog panjang.
+
+---
+
+# AUDIT KESEIMBANGAN NARASI–DIALOG WAJIB
+
+Sebelum membuat DOCX final pra-penguncian, lakukan pemeriksaan berikut:
+
+1. Baca seluruh blok narasi tanpa dialog. Apakah kejadian utama, alasan tokoh, perubahan konflik, dan akibat masih dapat dipahami?
+2. Apakah setiap dialog terpilih menambahkan emosi, karakter, bukti, keputusan, pengungkapan, ancaman, atau klimaks yang nyata?
+3. Apakah ada informasi penting yang masih hanya tersimpan di dialog panjang? Jika ada, pindahkan ke narasi.
+4. Apakah terdapat dua jangkar dialog berturut-turut tanpa perkembangan narasi? Jika ada, gabungkan beat atau tambahkan narasi perkembangan yang memang didukung sumber.
+5. Apakah narasi mengulang utuh dialog yang langsung diputar? Jika ada, hapus pengulangan dan sisakan konteks.
+6. Apakah setiap beat Dialog terlebih dahulu diselesaikan dengan default satu D, dan D tambahan hanya dipakai bila benar-benar saling membutuhkan?
+7. Apakah setiap D-xxx maksimal 3,00 detik, tanpa memotong kata/frasa secara kasar dan tanpa mengejar angka 3 detik?
+8. Apakah setiap CAMPURAN tetap aksi-dominan dan dialog hanya menjadi penguat singkat?
+9. Apakah seluruh informasi penting dari dialog yang dibuang sudah masuk ke narasi atau dinyatakan aman untuk dibuang?
+10. Apakah satu jangkar benar-benar mewakili satu beat utama, bukan satu baris dialog?
+11. Apakah Audit Jangkar Aksi Terlewat sudah dilakukan dan hanya menambah beat aksi yang memang penting?
+12. Apakah narasi tetap cukup detail tanpa berubah menjadi laporan atau mengulang visual kecil?
+13. Apakah sasaran keseimbangan informasi sekitar 70–80% narasi dan 20–30% adegan asli sudah terasa secara keseluruhan?
+
+Jika narasi belum dapat berdiri sendiri, jangan menghasilkan status siap edit manual. Perbaiki narasi lebih dahulu.
+
+---
+
+# OUTPUT WAJIB
+
+Buat tepat satu dokumen per part:
+
+`Prompt 1B Part [NOMOR PART] [JUDUL FILM].docx`
+
+Nama file wajib memakai spasi normal. Jangan membuat file kedua dengan awalan `Draf`, `Hasil Edit Manual`, `Salinan`, `Copy`, atau nama lain yang berisi isi sama.
+
+Dokumen wajib memiliki dua bagian besar.
+
+## BAGIAN A — TEKNIS LENGKAP PRA-PENGUNCIAN
+
+Bagian A berisi:
+
+1. Identitas part.
+2. Ringkasan struktur part.
+3. Narasi lengkap dengan ID N.
+4. Semua penanda Jangkar dengan ID J.
+5. Pemetaan setiap adegan.
+6. Dialog penting dengan ID D dan hubungan ke ID J.
+7. Beat aksi.
+8. Pembagian fase pertarungan.
+9. Narasi penghubung di tengah pertarungan apabila diperlukan.
+10. Rentang sumber kandidat.
+11. Timestamp kandidat dialog dan adegan.
+12. Durasi perkiraan.
+13. Bagian wajib dan bagian yang boleh dibuang.
+14. Kontinuitas.
+15. Distribusi unit dan total durasi dialog per jangkar.
+16. Informasi penting yang dialihkan dari dialog ke narasi.
+17. Status normal atau darurat setiap jangkar dialog.
+18. Hasil audit keseimbangan narasi–dialog.
+19. Untuk Part 1: satu pembukaan final dan dua alternatif yang tidak termasuk narasi final.
+20. Status akhir part tanpa penutup buatan.
+
+Bagian A tidak boleh dikosongkan atau dibuat kasar. Kualitasnya wajib setara hasil final Prompt 1B versi dasar.
+
+## BAGIAN B — NASKAH BERSIH EDIT MANUAL
+
+Bagian B wajib ditempatkan sebagai bagian PALING BAWAH dokumen dan menjadi satu-satunya bagian yang diedit pengguna.
+
+Bagian B hanya memuat:
+
+1. Unit narasi dengan ID N.
+2. Dialog asli yang dipilih dengan ID D dan ID J terkait.
+3. Penanda posisi jangkar tanpa timestamp agar urutan tetap terbaca.
+4. Dua alternatif pembukaan Part 1 pada subbagian terpisah yang jelas tidak termasuk naskah final.
+
+Bagian B dilarang memuat:
+
+* Timestamp atau menit sumber.
+* Durasi.
+* Nama MP4 atau SRT.
+* Alasan teknis.
+* Persentase aksi.
+* Daftar beat aksi rinci.
+* Catatan pemotongan.
+* Nomor frame.
+* Data timeline final.
+
+Bagian B harus dapat dibaca seperti naskah bersih untuk diperbaiki secara manual.
+
+# STATUS PRA-PENGUNCIAN — KUALITAS WAJIB SETARA PROMPT 1B VERSI DASAR
+
+Status pra-penguncian hanya berarti dokumen belum dikunci karena Naskah Bersih pada bagian paling bawah masih boleh diedit pengguna. Status ini tidak mengharuskan kata `Draf` muncul pada nama file.
+
+Status pra-penguncian tidak boleh diartikan sebagai:
+
+- narasi kasar;
+- ringkasan sementara;
+- hasil setengah jadi;
+- placeholder;
+- narasi yang belum selesai;
+- pemilihan jangkar sementara;
+- dialog atau aksi yang sengaja dibiarkan tidak lengkap;
+- kualitas yang lebih rendah daripada Prompt 1B versi dasar.
+
+Bagian teknis dan Naskah Bersih awal wajib langsung:
+
+1. Utuh dari awal sampai akhir part.
+2. Natural, rapi, kronologis, dan siap dibacakan sebagai voice-over.
+3. Memiliki sebab-akibat yang jelas.
+4. Mengikuti seluruh aturan gaya bahasa, dominasi narasi, pemilihan jangkar, batas dialog, aksi, pembukaan, sambungan, dan penutup part.
+5. Tetap dapat dipahami ketika dialog dilepas dan hanya narasinya yang dibaca.
+6. Memiliki ID N, D, dan J yang konsisten.
+7. Sudah layak dianggap sebagai hasil final jika pengguna tidak melakukan perubahan.
+8. Tidak menunggu Prompt 1B1 untuk melengkapi cerita atau memperbaiki kualitas penulisan.
+
+Prompt 1B1 hanya menyelaraskan perubahan yang benar-benar dilakukan pada Naskah Bersih, lalu memperbarui bagian teknis dan mengunci hasil.
+
+# NASKAH BERSIH EDIT MANUAL — WAJIB MENJADI BAGIAN PALING BAWAH
+
+Gunakan format berikut pada hasil dokumen. Isi sebenarnya harus diisi lengkap sesuai part, bukan dibiarkan sebagai contoh kosong.
+
+```text
+==================================================
+NASKAH BERSIH UNTUK EDIT MANUAL
+==================================================
+
+PETUNJUK:
+- Edit hanya bagian ini.
+- Jangan menambahkan timestamp.
+- Pertahankan ID jika blok masih digunakan.
+- Untuk menghapus narasi atau dialog, hapus seluruh blok atau kosongkan isinya.
+
+[NARASI N-001]
+Teks narasi bersih.
+
+[JANGKAR J-001 — DIALOG — PENANDA POSISI SAJA]
+
+[DIALOG D-001 | JANGKAR J-001]
+“Teks dialog asli dari film.”
+
+[NARASI N-002]
+Teks narasi berikutnya.
+
+[JANGKAR J-002 — AKSI — PENANDA POSISI SAJA]
+
+[NARASI N-003]
+Teks narasi berikutnya.
+```
+
+Aturan Naskah Bersih:
+
+1. Narasi dan dialog wajib sama dengan isi awal pada Bagian A sebelum pengguna mengeditnya.
+2. Tidak boleh ada timestamp, menit, durasi, sumber file, atau catatan teknis.
+3. Penanda jangkar hanya menunjukkan posisi. Untuk jangkar aksi, jangan salin uraian teknis panjang ke bagian ini.
+4. Setiap dialog dipisahkan menjadi blok ID D yang dapat dihapus atau dipendekkan secara mandiri.
+5. Jika satu jangkar memuat tiga dialog yang dapat dikurangi satu per satu, buat tiga blok D terpisah.
+6. Jangan menyatukan dialog yang tidak berurutan dalam satu blok D.
+7. Dialog harus disalin dari sumber, bukan diparafrasekan oleh Prompt 1B.
+8. Naskah Bersih wajib menjadi bagian terakhir setelah seluruh status dan catatan teknis Bagian A.
+
+# TAHAP EDIT MANUAL WAJIB — TETAP SATU DOCX
+
+Setelah Prompt 1B selesai:
+
+1. Gunakan file yang sama: `Prompt 1B Part [N] [JUDUL FILM].docx`.
+2. Jangan membuat salinan, duplikat, atau DOCX kedua untuk edit manual.
+3. Buka file itu dan edit hanya `NASKAH BERSIH UNTUK EDIT MANUAL` pada bagian paling bawah.
+4. Jangan mengubah Bagian A karena Bagian A menjadi sumber pembanding teknis untuk Prompt 1B1.
+5. Simpan perubahan langsung pada file yang sama dengan nama yang sama.
+6. Pengguna boleh memperbaiki, memendekkan, mengganti, menggabungkan, memindahkan, atau menghapus narasi.
+7. Pengguna boleh mengurangi, memendekkan, menghapus, atau mengganti dialog.
+8. Untuk menghapus dialog, hapus seluruh blok `[DIALOG D-xxx]` atau biarkan blok tersebut kosong.
+9. Untuk memendekkan dialog, pertahankan ID D dan sisakan hanya kalimat yang masih ingin digunakan.
+10. Untuk mengganti dialog, pertahankan ID D lalu tulis dialog pengganti. Prompt 1B1 wajib mencarinya di SRT dan MP4.
+11. Jika dialog pengganti tidak pernah ada dalam sumber, Prompt 1B1 dilarang mengarang timestamp dan wajib meminta keputusan pengguna.
+12. Pertahankan ID N, D, dan J jika memungkinkan. Jika ID terhapus tetapi teks masih dapat dikenali, Prompt 1B1 boleh mencocokkan secara semantik dan wajib melaporkannya.
+13. Pengguna tidak perlu memperbaiki timestamp, durasi, jumlah potongan, nomor jangkar, jenis jangkar, atau posisi timeline.
+14. Jalankan Prompt 1B1 menggunakan DOCX yang sama setelah diedit, ditambah MP4 dan SRT.
+15. Bagian yang sengaja dihapus tidak boleh dikembalikan.
+16. Prompt 1B2 dilarang mulai sebelum Prompt 1B1 memperbarui file yang sama dan memberi status `SIAP KE PROMPT 1B2`.
+
+# LARANGAN
+
+Jangan:
+
+* Mempelajari ulang seluruh film apabila dokumen Prompt 1A sudah tersedia.
+* Membuat mapping teknis final, memilih cutaway, atau menetapkan rasio visual dialog.
+* Memilih reaction shot atau cutaway.
+* Menyusun ulang visual dialog.
+* Menyusun ulang aksi secara lokal.
+* Mengunci batas frame final.
+* Memotong video.
+* Merender video.
+* Membuat SRT hasil.
+* Membuat ZIP.
+* Mengubah file sumber.
+* Mengarang dialog.
+* Mengarang kejadian.
+* Mengubah urutan besar cerita.
+* Menetapkan target minimum, maksimum, target 8–10, atau batas lunak 12 untuk jumlah jangkar.
+* Menghapus jangkar penting hanya karena jumlah aktual dianggap terlalu banyak.
+* Menambah jangkar palsu hanya agar jumlahnya terlihat banyak.
+* Membuat adegan baru pada setiap perubahan kamera.
+* Memecah pertarungan pada setiap pukulan.
+* Membuat satu blok pertarungan panjang tanpa narasi penghubung ketika pemecahan memang diperlukan.
+* Memendekkan narasi secara drastis sampai kehilangan konteks.
+* Menjadikan narasi hanya sebagai pengantar pendek sementara sebagian besar cerita dijelaskan melalui dialog.
+* Memilih dialog terlebih dahulu lalu membangun narasi di sela-selanya.
+* Membuat satu jangkar untuk setiap kalimat penting dalam percakapan yang masih merupakan satu beat.
+* Memakai D-xxx lebih dari 3,00 detik, memotong ucapan secara kasar, atau menambah D hanya karena percakapan masih berlangsung.
+* Membuang informasi penting dari dialog tanpa memindahkannya ke narasi.
+* Menumpuk jangkar dialog berturut-turut tanpa perkembangan narasi, kecuali rangkaian itu tidak dapat dipisahkan dan alasannya dicatat.
+* Mengulang utuh dialog terpilih di dalam narasi tepat sebelum dialog diputar.
+* Membuat narasi bertele-tele yang menjelaskan visual yang sudah jelas.
+* Membuka Part 2 dan seterusnya dengan rangkuman, penyebutan nomor part, atau kalimat bahwa cerita dilanjutkan.
+* Menambahkan narasi setelah Jangkar terakhir apabila adegan terakhir sudah menjelaskan penutup part.
+* Menambahkan teaser, prediksi, atau kalimat menuju part berikutnya.
+* Memasukkan timestamp atau catatan teknis ke Naskah Bersih Edit Manual.
+* Menggabungkan beberapa dialog yang dapat dihapus secara terpisah ke dalam satu ID D.
+* Membuat dua DOCX untuk part yang sama, termasuk pasangan `Draf` dan `Hasil Edit Manual`.
+* Mengubah nama file saat edit manual; file wajib tetap `Prompt 1B Part [N] [JUDUL FILM].docx`.
+
+---
+
+# STATUS AKHIR
+
+`STATUS BAGIAN TEKNIS: LENGKAP SEBAGAI ACUAN ASLI — JANGAN DIEDIT MANUAL`
+
+`STATUS NASKAH BERSIH: SIAP DIEDIT MANUAL DI FILE YANG SAMA`
+
+`STATUS ID N/D/J: WAJIB LENGKAP DAN KONSISTEN`
+
+`STATUS JUMLAH JANGKAR: TANPA BATAS ANGKA; SELEKSI NORMAL + AUDIT JANGKAR AKSI TERLEWAT SELESAI DI PROMPT 1B, NOMOR FINAL DIKUNCI PROMPT 1B1`
+
+`STATUS DIALOG: DEFAULT 1 D PER BEAT; SETIAP D MAKSIMAL 3,00 DETIK; D TAMBAHAN HANYA BILA BENAR-BENAR SALING MEMBUTUHKAN`
+
+`STATUS DOMINASI NARASI: WAJIB LULUS AUDIT NARASI–DIALOG`
+
+`STATUS IZIN PROMPT 1B1: DIIZINKAN SETELAH NASKAH BERSIH DIEDIT`
+
+`STATUS PROMPT 1B2: DILARANG SEBELUM HASIL PROMPT 1B1 TERKUNCI`

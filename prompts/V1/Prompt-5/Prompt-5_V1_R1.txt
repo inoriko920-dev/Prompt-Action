@@ -1,0 +1,179 @@
+# PROMPT 5 FINAL — FINALISASI SELURUH PART KE PROJECT FILMORA
+
+VERSI ATURAN: V22.5.1 — FINALISASI DARI JSON TERKUNCI, TANPA KEPUTUSAN KREATIF BARU, OUTPUT 1 ZIP BERISI WFP + EDITDATA + SRT + LAPORAN + REGISTRASI
+
+## TUJUAN
+
+Menggabungkan seluruh keputusan edit yang sudah terkunci menjadi satu timeline Part final, membuat Project Filmora editable, master keputusan edit, subtitle final Jangkar, laporan finalisasi, dan registrasi pusat final.
+
+Prompt 5 hanya dijalankan setelah semua B-xxx berstatus `LOLOS AUDIT — BLOK TERKUNCI`.
+
+## INPUT WAJIB
+
+1. Rencana induk Prompt 1B2.
+2. Semua JSON B-xxx terkunci.
+3. Semua JSON N-xxx dan J-xxx yang direferensikan oleh blok.
+4. Dokumen final Prompt 1B1.
+5. MP4 sumber, SRT dialog sumber, dan audio narasi final yang direferensikan oleh JSON.
+6. FPS/timebase, resolusi, rasio, dan parameter media sumber.
+7. Struktur/template Project Filmora yang diperlukan bila workflow proyek membutuhkannya untuk menghasilkan WFP valid.
+
+Hentikan jika ada blok yang belum lolos atau referensi unit/media penting tidak tersedia.
+
+## SUMBER KEBENARAN FINAL
+
+1. JSON N/J yang sudah lolos audit menentukan source In/Out, urutan visual, track, audio, speed, freeze/hold, dan keputusan unit.
+2. JSON B menentukan urutan dan posisi timeline absolut yang sudah diaudit.
+3. Prompt 5 tidak boleh mengubah keputusan kreatif unit.
+4. Jika ada konflik data, jangan menebak. Kembalikan ke unit/blok asal atau tulis `[MANUAL-CHECK]` bila masalah hanya dapat diselesaikan manual pada tahap Filmora.
+
+## TUGAS UTAMA
+
+1. Verifikasi semua status blok.
+2. Susun seluruh unit sesuai urutan final blok.
+3. Bangun `EditData.json` sebagai master keputusan final seluruh Part.
+4. Terapkan keputusan final tersebut ke Project Filmora WFP tanpa mengubah source timestamp, urutan, speed, mute/enable, freeze/hold, atau relasi N/D/J.
+5. Buat SRT final hanya dari dialog Jangkar yang benar-benar terdengar.
+6. Gabungkan registrasi pusat dari seluruh unit/blok menjadi registrasi final.
+7. Audit timeline final: urutan, overlap, audio, visual, speed, track, subtitle, dan referensi media.
+8. Catat masalah teknis/struktur yang tidak dapat diselesaikan tanpa menebak sebagai `[MANUAL-CHECK]`.
+9. Kemas tepat lima file final ke dalam satu ZIP.
+
+## ATURAN PROJECT FILMORA
+
+- WFP harus editable dan merepresentasikan keputusan EditData final.
+- Jangan membuat keputusan kreatif baru ketika mengubah JSON menjadi WFP.
+- Jangkar tetap speed `1.00x`.
+- Narasi mempertahankan speed/freeze/hold yang sudah diputuskan Prompt 3 dan lolos Prompt 4.
+- Status audio `master/enabled/muted` harus diterapkan sesuai JSON unit.
+- Source In/Out video dan audio harus sesuai keputusan unit.
+- Track dan posisi timeline harus sesuai EditData final.
+- Jika struktur WFP/template yang tersedia tidak cukup untuk memetakan suatu keputusan dengan pasti, jangan mengarang field/UUID/struktur; catat `[MANUAL-CHECK]` di laporan.
+
+## SRT FINAL
+
+- hanya dari Dialog Jangkar yang benar-benar terdengar;
+- gunakan teks subtitle dari JSON J-xxx;
+- geser timestamp ke posisi timeline final;
+- nomor ulang subtitle secara berurutan;
+- jangan memasukkan SRT Narasi;
+- jangan membakar subtitle ke video kecuali ada instruksi terpisah.
+
+## AUDIT FINAL
+
+Periksa:
+
+- semua blok dan unit hadir serta urut;
+- tidak ada source timestamp overlap yang dilarang;
+- tidak ada audio hilang/ganda yang bertentangan dengan JSON;
+- status mute/enable benar;
+- track dan posisi timeline benar;
+- Jangkar 1,00×;
+- Narasi mempertahankan mode `ACAK SATU LOKASI` atau `MODE DARURAT — TANPA ACAK` dan keputusan speed/freeze yang terkunci;
+- Dialog Jangkar mengikuti keputusan kamera asli tanpa acak;
+- Aksi/Campuran mengikuti keputusan AMBIL–LEWATI dan acak lokal hanya jika aman;
+- subtitle sesuai dialog yang terdengar dan tidak tumpang tindih;
+- tidak ada SRT Narasi dalam Final.srt;
+- EditData, WFP, SRT, laporan, dan registrasi saling konsisten;
+- file WFP dapat dibuka bila lingkungan validasi memungkinkan; jika tidak dapat divalidasi otomatis, catat `[MANUAL-CHECK]`.
+
+# OUTPUT FINAL
+
+Outputnya **tepat 1 ZIP final**:
+
+`Paket Final Part-[N] [JUDUL-FILM].zip`
+
+Di dalam ZIP wajib terdapat **5 file**:
+
+**1. Project Filmora**
+
+`Part-[N] [JUDUL-FILM] - Final.wfp`
+
+Berisi project Filmora editable final.
+
+---
+
+**2. Master keputusan edit**
+
+`Part-[N] [JUDUL-FILM] - EditData.json`
+
+Berisi data keputusan edit final seluruh Part, termasuk:
+
+- seluruh unit
+- urutan timeline
+- source In/Out
+- posisi timeline
+- track
+- audio
+- mute/enable
+- speed
+- freeze/hold
+- identitas N/D/J
+- data keputusan final yang diterapkan ke WFP
+
+---
+
+**3. Subtitle final**
+
+`Part-[N] [JUDUL-FILM] - Final.srt`
+
+Berisi subtitle final dari **Jangkar/dialog yang benar-benar terdengar**.
+
+SRT Narasi tidak masuk ke file ini.
+
+---
+
+**4. Laporan finalisasi**
+
+`Part-[N] [JUDUL-FILM] - Laporan Finalisasi.txt`
+
+Berisi hasil audit/finalisasi teknis dan catatan masalah seperti `[MANUAL-CHECK]` bila ada.
+
+---
+
+**5. Registrasi pusat final**
+
+`Registrasi-Pusat-Part-[N]-[JUDUL-FILM] - Final.json`
+
+Berisi registrasi final timestamp/wilayah sumber yang digunakan atau dikunci sepanjang Part.
+
+---
+
+Jadi secara singkat, outputnya adalah:
+
+**Prompt 2**
+→ `J-xxx.json` per Jangkar
+
+**Prompt 3**
+→ `N-xxx.json` per Narasi
+
+**Prompt 4**
+→ `B-xxx.json` per Blok
+
+**Prompt 5**
+→ `1 ZIP final`, berisi:
+
+`Final.wfp`
+`EditData.json`
+`Final.srt`
+`Laporan Finalisasi.txt`
+`Registrasi Pusat Final.json`
+
+Aturan ZIP:
+
+- hasil Prompt 5 selalu lebih dari satu file, sehingga seluruh lima file wajib berada dalam tepat satu ZIP final;
+- jangan membagi hasil ke beberapa ZIP;
+- isi masing-masing file tidak boleh diubah hanya karena dikemas;
+- jangan menambahkan MP4 final ke paket kecuali pengguna memberi instruksi khusus terpisah.
+
+Status akhir:
+
+`FINAL PART SELESAI DAN LULUS AUDIT`
+
+atau
+
+`DIKEMBALIKAN KE PROMPT 4 / [MANUAL-CHECK]`
+
+# LARANGAN
+
+Jangan menjalankan Prompt 5 sebelum semua blok lolos, mengubah urutan cerita, memilih timestamp baru, mengganti visual/audio unit, mengacak ulang, mengubah dialog, memasukkan SRT Narasi, atau menutup masalah kreatif dengan tebakan teknis.

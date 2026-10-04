@@ -1,23 +1,8 @@
 {
-  "txn_id": "BOOTSTRAP-S001-20261003",
-  "phase": "COMMITTED",
-  "system": "V1",
-  "snapshot": "S001",
-  "canonical_revision_before": 1,
-  "canonical_revision_after": 2,
-  "rescue_sha256": "f7ac13dd184df23a72a96854c458ba8cac6fe1c42e2dd7edd0121794a7ccfdb2",
-  "planned_prompt_ids": [
-    "P1A",
-    "P1B",
-    "P1B1",
-    "P1B2",
-    "P2",
-    "P3",
-    "P4",
-    "P5"
-  ],
-  "materialized_files": 8,
+  "status": "COMMITTED",
+  "source_canonical_sha256": "4185ff45aec0eeb056dee8a90617359487b4d215639cad5976761c3618ef6289",
+  "final_canonical_sha256": "e5056eebef5baa597789e0c65cd491d3020933feae579f31798f578c83d8a747",
   "backup_id": "B001",
-  "result": "PASS",
-  "credentials_recorded": false
+  "snapshot": "S001",
+  "final_snapshot_status": "COMPLETE"
 }

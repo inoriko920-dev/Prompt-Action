@@ -1,0 +1,386 @@
+# PROMPT 3 FINAL — EKSEKUSI LANGSUNG SATU NARASI PER PERINTAH
+
+VERSI ATURAN: V22.5.1 — ACAK LOKAL SATU LOKASI FLEKSIBEL 2–5 DETIK, MODE DARURAT TANPA ACAK, VISUAL PRESISI, 0,50× DEFAULT, SPEED/FREEZE TERBATAS PER POTONGAN, SAFE PADDING, DAN HANDOFF KE JANGKAR
+
+## TUJUAN
+
+Mengerjakan tepat satu N-xxx dari daftar kerja Prompt 1B2, mulai dari identifikasi audio aktual dan pemilihan visual yang belum dipakai sampai keputusan edit final dan audit unit, lalu menyimpannya sebagai satu JSON.
+
+Prompt 3 menggantikan fungsi mapping Prompt 3A dan eksekusi visual narasi Prompt 3B lama untuk tingkat unit narasi.
+
+Satu pemanggilan hanya boleh menghasilkan satu unit narasi.
+
+---
+
+# CONTOH PERINTAH
+
+`Kerjakan N-001 Part 1 menggunakan Prompt 3.`
+
+atau:
+
+`Lanjutkan nomor berikutnya dari Daftar Kerja Part 1.`
+
+Setelah satu N-xxx selesai, berhenti.
+
+---
+
+# INPUT WAJIB
+
+1. Dokumen final Prompt 1B1.
+2. Rencana induk Prompt 1B2.
+3. Daftar kerja per unit.
+5. Registrasi pusat terbaru.
+6. MP4 sumber part.
+7. Audio narasi final part.
+8. SRT pasangan audio narasi.
+9. Seluruh jangkar dan narasi yang sudah terkunci pada blok atau part tersebut.
+10. SRT dialog sumber untuk memahami wilayah dialog dan larangan.
+
+Hentikan jika audio narasi final tidak cocok dengan teks Prompt 1B1 atau unit belum boleh dikerjakan menurut daftar ketergantungan.
+
+---
+
+# HIERARKI SUMBER
+
+1. Audio narasi nyata menentukan durasi, jeda, dan timing suara.
+2. Teks final Prompt 1B1 menentukan isi dan urutan narasi.
+3. SRT audio narasi hanya membantu menemukan unit dan frasa; jangan membagi audio secara buta dari timestamp SRT.
+4. MP4 menentukan visual nyata.
+5. Prompt 1B2 menentukan fungsi visual, wilayah kandidat, informasi wajib, dan larangan.
+6. Registrasi pusat menentukan timestamp yang sudah dipakai.
+
+---
+
+# TUGAS UTAMA
+
+1. Temukan audio aktual N-xxx dari waveform dan isi ucapan.
+2. Tentukan batas ucapan nyata, lalu ambil safe padding alami sebelum dan sesudah ucapan.
+3. Pastikan kata awal, kata akhir, napas pendek, dan ekor suara tidak terpotong.
+4. Pecah teks N-xxx menjadi frasa berdasarkan perubahan informasi atau makna.
+5. Untuk setiap frasa, baca hubungan dengan jangkar terkait dari Prompt 1B2.
+6. Klasifikasikan frasa sebagai `VISUAL PRESISI`, `HANDOFF KE J-xxx`, atau `CAMPURAN`.
+7. Periksa timestamp yang sudah terkunci.
+8. Pilih visual yang relevan dan belum dipakai sesuai aturan per frasa.
+9. Untuk `HANDOFF KE J-xxx`, gunakan adegan sebelum jangkar yang masih satu konteks dan jangan mengambil momen inti jangkar.
+11. **Susun visual dengan acak lokal satu lokasi bila aman.** Pengacakan hanya boleh antar-shot/rentang yang berasal dari **tempat/lokasi fisik yang sama** untuk frasa tersebut. Jika pengacakan merusak visual presisi, kontinuitas, sebab-akibat, atau stok satu lokasi tidak memungkinkan susunan acak yang natural, gunakan `MODE DARURAT — TANPA ACAK` dan susun shot secara natural/kronologis. Setiap potongan visual final tetap wajib `2,00–5,00 detik`, lalu maksimal pada detik ke-5 harus berganti ke visual lain yang relevan.
+12. Terapkan `0,50×` sebagai default/maksimum visual narasi. Jika memakai speed di bawah `0,50×` atau intentional freeze/hold, penggunaannya hanya boleh membantu membentuk potongan final 2–5 detik; **tidak boleh mempertahankan visual yang sama lebih dari 5 detik**.
+13. Matikan seluruh audio asli film.
+13. Gunakan audio narasi yang sudah diberi safe padding sebagai audio utama.
+14. Sesuaikan durasi visual final dengan durasi audio setelah safe padding.
+15. Bentuk keputusan edit final N-xxx tanpa merender MP4.
+16. Audit unit per frasa, sambungan ke jangkar, dan batas audio.
+17. Simpan seluruh keputusan, registrasi, SRT referensi, dan catatan eksekusi di dalam satu JSON N-xxx.
+18. Berhenti setelah satu unit.
+20. Berhenti.
+
+---
+
+# ATURAN ACAK LOKAL SATU LOKASI FLEKSIBEL — V22.5
+
+1. **Acak lokal hanya boleh dilakukan antar-shot/rentang dari tempat/lokasi fisik yang sama.** Contoh: jika frasa berlangsung di ruang interogasi, kolam acak hanya berisi shot ruang interogasi tersebut yang aman; jangan mengambil jalan, parkiran, rumah, gedung luar, atau lokasi lain hanya demi variasi.
+2. “Lokasi yang sama” tidak otomatis membolehkan semua shot. Kostum, luka, benda, posisi tokoh, waktu/phase scene, sebab-akibat, spoiler, dan kepemilikan Jangkar tetap harus aman.
+3. Jika narasi secara nyata berpindah lokasi, buat **kolam terpisah per lokasi/frasa**. Pengacakan tidak boleh melompati batas lokasi tersebut.
+4. Satu potongan visual final pada timeline wajib berdurasi **minimal `2,00 detik` dan maksimal `5,00 detik`** setelah seluruh speed, optical flow, atau freeze diterapkan.
+5. Setelah maksimal `5,00 detik`, wajib berganti ke shot/rentang visual lain yang relevan. Tidak boleh mempertahankan satu tampilan visual 6 detik atau lebih hanya karena sudah dibuat slow motion.
+6. **Jangan sengaja mengejar 5 detik.** Panjang setiap shot mengikuti kelengkapan gerakan, relevansi frasa, dan titik potong natural; `5,00 detik` hanya batas maksimum.
+7. `Durasi potongan final` dihitung sejak visual mulai tampil sampai visual berbeda benar-benar masuk. Shot bergerak 3 detik lalu frame terakhir di-freeze 3 detik berarti tampilan visual yang sama 6 detik dan **GAGAL**.
+8. Freeze/hold hanya boleh dipakai bila total bagian bergerak + freeze untuk tampilan itu tetap `2,00–5,00 detik`.
+9. Dilarang membelah satu shot sumber menjadi potongan berurutan yang secara visual masih merupakan kontinuitas/frame yang sama hanya untuk mengakali pergantian 2–5 detik.
+10. Bila tersedia beberapa kandidat aman dari lokasi yang sama, lakukan pemilihan/cutaway/penyusunan ulang **secara selektif**, bukan sekadar timeline sumber lurus yang dipotong berkala.
+11. Pengacakan tidak boleh merusak urutan sebab-akibat, menampilkan reaksi sebelum penyebab, membocorkan kejadian, atau mengambil momen inti Jangkar.
+12. **MODE DARURAT — TANPA ACAK diperbolehkan.** Gunakan mode ini bila stok satu lokasi terlalu terbatas, pengacakan membuat kontinuitas janggal, atau urutan sebab-akibat memang harus kronologis. Dalam mode ini, gunakan susunan sumber/natural yang paling tepat dan jangan memaksa pengacakan.
+13. `MODE DARURAT — TANPA ACAK` **bukan status gagal** dan tidak otomatis menjadi `PERLU REVISI`. Catat alasan mode darurat pada Catatan Eksekusi dan Registrasi Pusat.
+14. Mode darurat hanya membebaskan kewajiban **mengacak**. Aturan visual presisi, lokasi yang benar, larangan wilayah Jangkar, kontinuitas, safe padding, dan **setiap potongan final 2–5 detik** tetap wajib.
+15. Jika N-xxx berdurasi lebih dari 5 detik, gunakan beberapa potongan. Jika sisa akhir <2 detik, atur ulang durasi potongan sebelumnya agar semua potongan, termasuk terakhir, tetap 2–5 detik. Jika audio final <2 detik, gunakan safe padding alami bila tersedia; jika tetap <2 detik, beri status `PERLU REVISI — DURASI N DI BAWAH MINIMUM 2 DETIK`.
+16. Jika bahkan dengan susunan natural/kronologis **tidak tersedia cukup visual relevan dari lokasi yang benar** untuk memenuhi batas 2–5 detik, beri status `PERLU REVISI — STOK VISUAL SATU LOKASI TIDAK CUKUP UNTUK BATAS 2–5 DETIK`. Jangan memakai lokasi lain hanya demi variasi dan jangan meluluskan satu tampilan >5 detik.
+
+---
+
+# ATURAN KECEPATAN — V22.5
+
+1. Ketepatan visual terhadap isi narasi tetap wajib. Batas 2–5 detik tetap harus dipenuhi; pengacakan satu lokasi dilakukan bila aman dan dapat dilepas melalui `MODE DARURAT — TANPA ACAK`.
+2. `0,50×` tetap **kecepatan default sekaligus kecepatan maksimum** untuk visual narasi. Visual narasi 0,75× atau 1,00× tetap dilarang.
+3. Speed di bawah `0,50×` boleh dipakai bila diperlukan agar satu shot sumber menghasilkan potongan final 2–5 detik yang natural.
+4. Intentional freeze/hold boleh dipakai pada frame stabil dan relevan, tetapi total durasi potongan yang berasal dari tampilan visual tersebut tetap maksimal 5 detik.
+5. Pilih frame freeze yang natural: hindari mata setengah berkedip, posisi mulut/anggota tubuh janggal, motion blur berat, atau frame transisi.
+6. **Slow motion/freeze bukan pengganti pergantian visual.** Setelah satu potongan mencapai maksimal 5 detik, tetap wajib pindah ke visual lain yang relevan dari lokasi yang benar; perpindahan tersebut tidak harus berupa acakan jika mode darurat aktif.
+7. Audio narasi tidak diperlambat dan pitch audio narasi tidak diubah.
+8. Optical flow/frame interpolation boleh dipakai jika natural, tetapi tidak boleh digunakan untuk memperpanjang satu tampilan visual melewati 5 detik.
+9. Urutan prioritas: `visual/frasa paling tepat` → `lokasi fisik yang benar` → `kontinuitas/sebab-akibat` → `acak antar-shot satu lokasi bila aman` → `0,50× atau speed <0,50×/freeze seperlunya` → `pastikan setiap potongan final 2–5 detik` → `ganti visual`.
+10. Jika beberapa shot satu lokasi tersedia tetapi tidak aman untuk diacak, gunakan `MODE DARURAT — TANPA ACAK`. `PERLU REVISI` hanya diperlukan bila bahkan susunan natural tidak dapat memenuhi visual yang benar dan batas 2–5 detik; **dilarang memakai lokasi salah demi variasi**.
+
+---
+
+# PRINSIP KECOCOKAN VISUAL — PER FRASA
+
+Prompt 3 tidak boleh memperlakukan satu N-xxx sebagai satu blok visual umum. Teks narasi wajib dibaca per frasa atau per perubahan informasi.
+
+Setiap frasa wajib diberi salah satu status berikut:
+
+1. `VISUAL PRESISI`
+2. `HANDOFF KE J-xxx`
+3. `CAMPURAN` — satu kalimat mengandung bagian yang harus presisi dan bagian yang harus handoff; pecah lagi menjadi subfrasa.
+
+Visual tidak boleh dipilih hanya karena indah, dramatis, masih satu scene, atau belum pernah dipakai. Kecocokan makna dan fungsi frasa lebih tinggi prioritasnya.
+
+---
+
+# ATURAN VISUAL PRESISI
+
+Gunakan `VISUAL PRESISI` jika isi frasa narasi tidak akan dijelaskan, diperlihatkan, atau dibuktikan lagi secara cukup oleh jangkar terkait.
+
+Aturan wajib:
+
+1. Visual harus benar-benar sesuai dengan informasi yang sedang dibacakan.
+2. Perubahan visual harus mengikuti perubahan makna narasi sedekat mungkin.
+3. Jika narasi menyebut urutan beberapa kejadian, visual juga mengikuti urutan tersebut.
+4. Footage generik dari scene yang sama tidak boleh dipakai jika tersedia footage yang lebih tepat.
+5. Visual boleh memakai lebih dari satu shot untuk satu frasa jika diperlukan agar seluruh makna terbaca.
+6. Jangan menunda visual penting terlalu jauh setelah kata atau frasa yang menjelaskannya.
+7. Jangan menampilkan akibat sebelum narasi sampai pada akibat tersebut.
+
+Contoh:
+
+Narasi: `Setelah Mercusuar dibongkar dan proyek pembebasan lahan selesai, Mutia kembali ke kantor untuk menghadiri pengumuman kenaikan jabatan.`
+
+Maka visual harus memetakan informasi yang tersedia secara tepat: konteks pembongkaran/proyek selesai → Mutia kembali/berada di kantor → suasana menuju acara pengumuman.
+
+---
+
+# ATURAN HANDOFF KE JANGKAR
+
+Gunakan `HANDOFF KE J-xxx` jika isi frasa narasi akan langsung dijelaskan, diperlihatkan, atau diperkuat oleh jangkar terkait, terutama jangkar yang tayang setelah N-xxx.
+
+Aturan wajib:
+
+1. Jangan memakai momen inti jangkar, dialog lip-sync utama, punchline, reveal, benturan utama, atau payoff yang sudah menjadi milik J-xxx.
+2. Gunakan **adegan sebelum jangkar** yang masih satu scene, satu konteks, dan sedekat mungkin dengan awal J-xxx.
+3. Prioritaskan persiapan, suasana, reaction aman, establishing lokal, gerak menuju momen jangkar, atau beberapa detik terakhir yang aman sebelum jangkar.
+4. Visual handoff tetap harus masuk akal terhadap frasa narasi; dilarang memakai footage acak hanya untuk menghindari jangkar.
+5. Rentang visual N-xxx wajib berhenti sebelum timestamp visual inti J-xxx dimulai dan tidak boleh tumpang tindih dengan timestamp yang sudah dikunci.
+6. Sambungan akhir N-xxx → awal J-xxx harus terasa sebagai satu rangkaian alami, bukan pengulangan kejadian.
+7. Jika adegan sebelum jangkar tidak cukup atau tidak relevan, cari shot pendukung terdekat dari konteks yang sama. Jika tetap tidak ada, beri status `PERLU REVISI — HANDOFF VISUAL TIDAK CUKUP`; jangan memaksa visual yang salah.
+
+Contoh:
+
+Narasi: `Pak Ruli menepati janjinya dan memperkenalkan Mutia sebagai Manajer Umum baru.`
+Jangkar berikutnya memuat dialog: `Manajer Umum baru kita, Mutia Soejono!`
+
+Maka visual frasa narasi memakai adegan tepat sebelum pengumuman inti Jangkar: suasana acara, Pak Ruli bersiap, Mutia menunggu/bersiap, atau reaction aman sebelum dialog. Momen utama pengumuman disimpan untuk Jangkar.
+
+---
+
+# ATURAN CAMPURAN / SEBAGIAN DIJELASKAN
+
+Jika satu kalimat berisi bagian yang tidak dijelaskan jangkar dan bagian yang akan dijelaskan jangkar:
+
+1. Pecah menjadi subfrasa.
+2. Terapkan `VISUAL PRESISI` pada bagian yang tidak dijelaskan jangkar.
+3. Terapkan `HANDOFF KE J-xxx` pada bagian yang akan dijelaskan jangkar.
+4. Jangan memilih satu jenis visual untuk seluruh kalimat jika fungsi informasinya berbeda.
+
+---
+
+# AKSI PENDUKUNG DALAM VISUAL NARASI
+
+Prompt 3 boleh memakai aksi pendukung, misalnya:
+
+- tokoh berjalan atau berlari menuju tempat;
+- mengambil perlengkapan;
+- menyiapkan kendaraan;
+- mengendalikan kapal;
+- membuka pintu;
+- memindahkan benda;
+- reaksi tanpa dialog penting;
+- gerakan repetitif atau proses menuju kejadian utama.
+
+Syarat:
+
+1. Aksi tetap jelas saat audio asli dimatikan.
+2. Aksi layak dilihat pada `0,50×`; speed <`0,50×` atau intentional freeze/hold boleh dipakai jika natural, tetapi **setiap potongan final tetap 2,00–5,00 detik dan wajib berganti visual setelah maksimal 5,00 detik**.
+3. Aksi bukan benturan, serangan, jatuh, tembakan, teriakan, atau penyelamatan utama yang dialokasikan ke jangkar.
+4. Aksi tidak membutuhkan suara asli untuk terasa benar.
+5. Aksi tidak merusak sebab-akibat atau membocorkan hasil.
+
+Jika potongan terasa buruk tanpa suara asli atau kekuatannya bergantung pada dialog, teriakan, benturan, tembakan, mesin, atau efek suara, jangan gunakan untuk narasi. Potongan tersebut adalah wilayah Prompt 2.
+
+---
+
+# SUMBER DAN URUTAN VISUAL
+
+1. Utamakan wilayah kandidat N-xxx dari Prompt 1B2.
+2. Utamakan footage yang secara kronologis berada di sekitar posisi narasi.
+3. Footage setelah jangkar berikutnya hanya boleh dipakai jika Prompt 1B2 mengizinkan, aman dari spoiler, dan tidak menampilkan akibat sebelum waktunya.
+4. Jangan memakai timestamp aktual yang sudah terkunci.
+5. Jangan memakai frame yang sama pada dua unit.
+6. Lokasi fisik yang sama boleh dipakai dari shot/rentang sumber berbeda selama konteks, fase scene, kontinuitas, dan fungsi visualnya aman. Scene/blok yang sama **tidak cukup** bila lokasi fisiknya berbeda.
+7. Jangan mengulang establishing yang baru saja dipakai kecuali audit menilai pengulangan itu diperlukan.
+8. Pertahankan kontinuitas lokasi, kostum, luka, cuaca, benda, dan posisi tokoh.
+
+---
+
+# PEMOTONGAN DAN ACAK LOKAL SATU LOKASI FLEKSIBEL
+
+1. Potong berdasarkan shot atau gerakan yang tetap terbaca utuh, lalu sesuaikan speed agar potongan final berada pada rentang `2,00–5,00 detik`.
+2. **Tidak ada potongan visual final di bawah `2,00 detik` atau di atas `5,00 detik`.** Aturan ini juga berlaku untuk potongan terakhir N-xxx.
+3. Bila durasi N-xxx membutuhkan lebih dari satu potongan, utamakan variasi shot dari **lokasi fisik yang sama** dan acak secara selektif hanya jika kontinuitas tetap natural.
+4. Jika acakan tidak aman atau tidak memungkinkan, gunakan `MODE DARURAT — TANPA ACAK`; susunan kronologis/natural sah selama setiap potongan tetap 2–5 detik dan visual benar.
+5. Setelah satu potongan mencapai maksimal 5 detik, ganti ke shot/rentang visual lain yang relevan dari lokasi yang benar.
+6. Jangan mengubah urutan sebab-akibat atau menampilkan reaksi sebelum penyebab.
+7. Jangan memotong tepat di tengah gerakan penting jika membuat aksi tidak terbaca; pilih in/out atau shot lain yang lebih aman.
+8. Jangan mengulang shot/frame yang sama secara berurutan dan jangan membuat “pergantian palsu” dari satu shot yang sama.
+9. Sesuaikan kombinasi panjang potongan agar total video sama dengan audio N-xxx setelah safe padding, dengan toleransi teknis wajar, tanpa menyisakan shot akhir <2 detik.
+10. Intentional freeze/hold hanya boleh berada di dalam potongan 2–5 detik dan tidak boleh membuat visual yang sama bertahan >5 detik.
+11. Jangan mengambil shot dari lokasi lain hanya karena kolam lokasi saat ini kurang variatif. Jika lokasi narasi memang berpindah, perpindahan visual mengikuti frasa/cerita dan kemudian menggunakan kolam lokasi baru.
+
+---
+
+# AUDIO — SAFE PADDING WAJIB
+
+1. Audio narasi menjadi audio utama.
+2. Semua audio asli dari footage film wajib dimatikan.
+3. Jangan mencampurkan ambience, dialog, benturan, atau musik asli film ke unit narasi kecuali pengguna memberikan instruksi terpisah.
+4. Jangan memotong kata narasi.
+5. Jangan mengubah kecepatan atau pitch audio narasi.
+6. Timestamp SRT hanya menjadi referensi inti ucapan; **dilarang menjadikannya batas potong final secara buta**.
+7. Periksa waveform dan dengarkan audio nyata untuk menentukan awal serta akhir ucapan.
+8. Ambil ruang audio asli sedikit sebelum ucapan mulai dan sedikit sesudah ucapan selesai agar awal konsonan, napas pendek, ekor kata, dan pelepasan suara tidak terpotong.
+9. Target umum safe padding sebelum ucapan sekitar `0,15–0,35 detik` dan sesudah ucapan sekitar `0,20–0,50 detik`. Angka ini bukan batas kaku; batas hening alami dan keamanan terhadap N sebelumnya/berikutnya lebih tinggi prioritasnya.
+10. Safe padding harus berasal dari ruang audio sumber jika tersedia; jangan menambahkan silence sintetis panjang hanya untuk mengejar angka.
+11. Jangan mengambil bagian kata atau narasi unit sebelum/sesudahnya. Jika gap antarunit sempit, gunakan titik hening aman atau titik tengah gap tanpa overlap audio.
+12. Jika unit dimulai di awal file dan tidak ada ruang sebelum ucapan, gunakan batas file tanpa memaksakan padding negatif.
+13. Jika tidak tersedia batas aman dan pemotongan berisiko memakan kata unit lain, beri status `PERLU REVISI — BATAS AUDIO NARASI TIDAK AMAN`.
+14. Durasi video N-xxx wajib mengikuti durasi **audio final setelah safe padding**, bukan durasi timestamp SRT mentah.
+15. Fade teknis sangat pendek sekitar `5–15 ms` boleh dipakai hanya untuk menghilangkan click/pop; jangan membuat fade yang terdengar sebagai efek kreatif.
+
+---
+
+# SRT REFERENSI NARASI
+
+1. Buat SRT referensi untuk N-xxx dari teks final.
+2. Timeline dimulai dari 00:00:00.
+3. SRT narasi hanya untuk pemeriksaan dan tidak akan dimasukkan ke SRT final Prompt 5.
+4. Jangan membakar subtitle narasi ke video.
+
+---
+
+# AUDIT UNIT WAJIB
+
+Periksa:
+
+- seluruh audio narasi utuh;
+- awal audio tidak memotong huruf/konsonan/napas dan memiliki ruang aman jika sumber memungkinkan;
+- akhir audio tidak memotong ekor kata dan memiliki ruang aman jika sumber memungkinkan;
+- safe padding tidak mengambil kata N sebelum/sesudahnya;
+- durasi video mengikuti audio final setelah safe padding;
+- setiap N-xxx memakai **acak lokal satu lokasi bila aman**, atau tercatat sah sebagai `MODE DARURAT — TANPA ACAK`;
+- **setiap potongan visual final setelah speed/freeze berdurasi `2,00–5,00 detik`, termasuk potongan terakhir**;
+- tidak ada tampilan visual yang sama bertahan lebih dari `5,00 detik`, termasuk kombinasi shot bergerak + freeze;
+- tidak ada pergantian palsu dari pembelahan shot/frame sumber yang sama secara berurutan;
+- jika mode acak digunakan, pengacakan hanya antar-shot dari lokasi fisik yang sama dan bukan sekadar timeline sumber lurus yang dipotong berkala; jika mode darurat digunakan, alasannya jelas dan susunan natural/kronologis tidak dipaksa menjadi acak;
+- visual memakai `0,50×` sebagai default; jika memakai speed <`0,50×` atau intentional freeze/hold, alasannya tepat dan tetap mematuhi batas 2–5 detik;
+- audio film benar-benar mati;
+- setiap frasa `VISUAL PRESISI` benar-benar cocok dengan informasi yang sedang dibacakan;
+- perubahan visual mengikuti perubahan makna narasi;
+- setiap frasa `HANDOFF KE J-xxx` memakai adegan sebelum jangkar yang relevan dan sedekat mungkin;
+- momen inti jangkar tidak dipakai oleh narasi;
+- akhir visual narasi tidak tumpang tindih dengan timestamp jangkar yang sudah dikunci;
+- sambungan N-xxx → J-xxx terasa alami dan tidak mengulang kejadian;
+- aksi pendukung tidak mengambil momen utama jangkar;
+- tidak ada timestamp terpakai ulang;
+- tidak ada spoiler;
+- kontinuitas benar;
+- lokasi fisik visual sesuai frasa; scene/blok yang sama tidak dipakai sebagai alasan untuk melompat ke tempat berbeda;
+- visual tetap relevan;
+- tidak ada frame hitam;
+- tidak ada freeze tidak disengaja; intentional freeze/hold yang direncanakan dan dicatat diperbolehkan **hanya jika total potongan visual tetap 2,00–5,00 detik**;
+- tidak ada artefak slow motion berat;
+- durasi video sama dengan audio narasi dalam toleransi teknis yang wajar.
+
+Jika gagal, revisi audio/visual unit yang sama sebelum menguncinya. Jangan meluluskan unit hanya karena durasi dan codec benar.
+
+---
+
+# OUTPUT WAJIB PER NARASI
+
+Tepat **1 file JSON untuk setiap Narasi**:
+
+`N-[XXX] Part-[N] [JUDUL-FILM].json`
+
+Isi JSON minimal:
+
+- `unit_id`
+- `block_id`
+- `unit_type`
+- `mode`
+- klasifikasi frasa
+- peta frasa narasi
+- identitas file sumber visual
+- referensi audio narasi asli
+- FPS/timebase
+- source In setiap visual
+- source Out setiap visual
+- timestamp presisi frame/tick/seconds
+- posisi mulai setiap visual di timeline unit
+- posisi akhir setiap visual di timeline unit
+- track video
+- track audio
+- safe padding audio narasi
+- status audio asli film
+- speed aktual setiap visual
+- data freeze bila digunakan
+- data hold bila digunakan
+- alasan freeze/hold
+- urutan visual final
+- lokasi fisik visual
+- relasi `HANDOFF KE J-xxx`
+- teks SRT referensi narasi
+- timestamp SRT referensi narasi
+- relasi N/D/J
+- timestamp yang dipesan/dikunci
+- data registrasi pusat
+- catatan eksekusi
+- hasil audit
+- alasan status
+- `status`
+- seluruh data yang diperlukan Prompt 4 dan Prompt 5
+
+Data SRT narasi disimpan **di dalam JSON**, bukan menjadi file SRT output tersendiri.
+
+**Output akhir Prompt 3:**
+
+`1 Narasi = 1 JSON`
+
+Contoh:
+
+`N-001 Part-1 Atlas King.json`
+`N-002 Part-1 Atlas King.json`
+`N-003 Part-1 Atlas King.json`
+
+Aturan output V22.5.1:
+
+- seluruh catatan eksekusi dan pembaruan registrasi pusat unit disimpan di dalam JSON N-xxx;
+- data SRT referensi narasi disimpan di dalam JSON, bukan sebagai file terpisah;
+- Prompt 3 tidak merender MP4 unit dan tidak membuat ZIP per Narasi;
+- karena satu Narasi menghasilkan tepat satu file JSON, file diberikan langsung tanpa ZIP;
+- jika satu perintah khusus menghasilkan dua atau lebih file, seluruh file wajib masuk satu ZIP sesuai Aturan ZIP Output.
+
+# LARANGAN
+
+Jangan:
+
+- Mengerjakan lebih dari satu narasi.
+- Mengubah teks hasil Prompt 1B1.
+- Memakai visual narasi lebih cepat dari `0,50×`.
+- Membiarkan satu potongan visual final <`2,00 detik` atau >`5,00 detik`, termasuk shot final N-xxx.
+- Mempertahankan visual yang sama >`5,00 detik` dengan slow motion, optical flow, freeze/hold, atau pembelahan shot palsu.
+- Memaksa acak ketika shot berasal dari lokasi berbeda atau ketika pengacakan merusak kontinuitas/sebab-akibat.
+- Menganggap `MODE DARURAT — TANPA ACAK` sebagai pelanggaran jika seluruh aturan lain tetap terpenuhi.
+- Menghidupkan audio asli film.
+- Mengambil momen utama jangkar atau memakai momen inti J-xxx pada frasa `HANDOFF`.
+- Memakai visual yang tidak relevan hanya untuk memenuhi durasi.
+- Memakai footage generik jika frasa `VISUAL PRESISI` memiliki visual sumber yang lebih tepat.
+- Memotong audio narasi persis berdasarkan SRT tanpa pemeriksaan waveform dan safe padding.
+- Memakai timestamp yang sudah terkunci.
+- Memasukkan SRT narasi ke subtitle final.
+- Melanjutkan otomatis setelah satu unit selesai.

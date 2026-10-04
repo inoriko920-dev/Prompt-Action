@@ -1,0 +1,463 @@
+# PROMPT 1B2 FINAL — IDENTIFIKASI BLOK, URUTAN KERJA, DAN KEPEMILIKAN VISUAL
+
+VERSI ATURAN: V22.5.1 — PENGATURAN INDUK PER BLOK + PETA VISUAL PER FRASA + KOLAM VISUAL PER LOKASI + ACAK SATU LOKASI FLEKSIBEL 2–5 DETIK + MODE DARURAT TANPA ACAK + PRIORITAS VISUAL PRESISI + HANDOFF KE JANGKAR
+KOMPATIBILITAS NARASI: hasil Prompt 1B/1B1 V22.5.1 dipakai sebagai sumber naskah final. V22.5.1 mempertahankan inti Prompt 3 V22.5 dan menyelaraskan perencanaan Jangkar dengan Dialog tanpa acak, Aksi AMBIL–LEWATI, CAMPURAN aksi-dominan, serta output JSON; Prompt 3 tetap memakai kolam visual **per tempat/lokasi fisik**, acak satu lokasi bila aman, `MODE DARURAT — TANPA ACAK` bila diperlukan, serta audit Prompt 4.
+
+## TUJUAN
+
+Membaca hasil Prompt 1B1 yang sudah final dan mengubahnya menjadi rencana induk pekerjaan visual untuk satu part.
+
+Prompt 1B2 menentukan:
+
+1. Pembagian blok cerita.
+2. Urutan tayang narasi dan jangkar di setiap blok.
+3. Urutan pengerjaan teknis setiap unit.
+4. Kepemilikan wilayah visual antara narasi dan jangkar.
+5. Peta fungsi visual per frasa untuk setiap narasi.
+6. Informasi narasi yang wajib divisualkan secara presisi.
+7. Frasa narasi yang harus melakukan handoff ke jangkar dengan memakai adegan sebelum jangkar.
+8. Momen yang wajib disimpan untuk dialog atau aksi dengan audio asli.
+9. Daftar unit yang akan dikerjakan satu per satu oleh Prompt 2 dan Prompt 3.
+10. Registrasi awal yang dipakai bersama sampai Prompt 5.
+
+Prompt 1B2 tidak mengoreksi kembali naskah hasil edit pengguna, tidak membuat mapping frame final, tidak memotong media, dan tidak merender video.
+
+---
+
+# POSISI DALAM WORKFLOW
+
+Prompt 1A
+↓
+Prompt 1B
+↓
+Edit manual pengguna pada Naskah Bersih
+↓
+Prompt 1B1 — koreksi, sinkronisasi, dan penguncian naskah
+↓
+Pembuatan audio narasi final
+↓
+Prompt 1B2 — identifikasi blok dan pembagian wilayah visual
+↓
+Prompt 2 — satu jangkar per perintah
+Prompt 3 — satu narasi per perintah
+↓
+Prompt 4 — gabung dan audit satu blok
+↓
+Ulangi Prompt 2–4 sampai semua blok lolos
+↓
+Prompt 5 — finalisasi seluruh part
+
+---
+
+# INPUT WAJIB
+
+1. File tunggal `Prompt 1B Part [N] [JUDUL FILM].docx` hasil Prompt 1B1 dengan status `SIAP KE PROMPT 1B2`. Bagian A memuat teknis final, Lampiran Penyesuaian dan Audit memuat riwayat perubahan, dan Bagian B paling bawah memuat Naskah Bersih Final.
+2. MP4 sumber part yang sesuai.
+3. SRT dialog sumber part yang sesuai.
+4. Audio narasi final dan SRT pasangan apabila sudah tersedia.
+5. Hasil Prompt 1A untuk konteks global apabila diperlukan.
+6. Dokumen sambungan part sebelumnya apabila tersedia.
+
+Jika dokumen final Prompt 1B1 belum berstatus `SIAP KE PROMPT 1B2`, hentikan proses.
+
+---
+
+# SUMBER KEBENARAN DAN PRIORITAS
+
+Gunakan prioritas berikut:
+
+1. MP4 dan audio asli menentukan kejadian nyata, gerakan, lip-sync, dan urutan sebab-akibat.
+2. SRT sumber membantu menemukan dialog dan urutan ucapan.
+3. Dokumen final Prompt 1B1 menentukan teks narasi final, dialog terpilih, ID, posisi jangkar, dan urutan cerita.
+4. Laporan Prompt 1B1 menjelaskan perubahan hasil edit manual.
+5. Audio narasi final menentukan durasi aktual unit narasi apabila sudah tersedia.
+6. Prompt 1A menentukan konteks global, bukan keputusan pemotongan.
+
+Jangan memakai draf Prompt 1B atau Naskah Bersih sebelum dikunci sebagai sumber keputusan final.
+
+---
+
+# SISTEM ID
+
+Gunakan:
+
+- `B-xxx` = blok cerita.
+- `N-xxx` = unit narasi.
+- `D-xxx` = unit dialog.
+- `J-xxx` = unit jangkar.
+
+Jangan mengganti ID final Prompt 1B1 kecuali ada kesalahan teknis yang nyata. Jika koreksi ID mutlak diperlukan, laporkan tanpa mengubah isi cerita.
+
+---
+
+# DEFINISI BLOK CERITA
+
+Satu blok adalah rangkaian kecil yang dapat diuji sebagai satu kesatuan, biasanya terdiri dari:
+
+- satu jangkar dengan satu atau beberapa narasi di sekitarnya;
+- beberapa narasi yang mengantar menuju satu jangkar;
+- satu jangkar yang diikuti narasi akibat;
+- atau satu rangkaian pendek lain yang memiliki awal, perkembangan, dan titik uji transisi yang jelas.
+
+Blok tidak boleh dibuat terlalu besar sampai kesalahan sulit dilacak.
+
+Blok tidak boleh dibuat terlalu kecil hanya karena pergantian shot kecil.
+
+---
+
+# DUA URUTAN YANG WAJIB DIBEDAKAN
+
+## A. Urutan tayang
+
+Urutan yang akan dilihat penonton pada hasil final.
+
+Contoh:
+
+`N-001 → N-002 → J-001`
+
+## B. Urutan pengerjaan
+
+Urutan teknis agar visual yang kaku diamankan lebih dahulu.
+
+Contoh:
+
+`J-001 → N-001 → N-002 → Prompt 4 Audit B-001`
+
+Prinsip umum:
+
+- Jangkar dialog dan aksi diprioritaskan lebih dahulu karena audio asli, lip-sync, dan sebab-akibatnya lebih kaku.
+- Narasi dikerjakan setelah wilayah jangkar terkunci karena visual narasi lebih fleksibel.
+- Urutan pengerjaan tidak boleh mengubah urutan tayang final.
+
+Prompt 1B2 boleh menentukan narasi lebih dahulu secara teknis hanya jika tidak ada jangkar yang perlu diamankan atau ketergantungannya memang berlawanan. Alasannya wajib ditulis.
+
+---
+
+# TUGAS UTAMA
+
+## LANGKAH 1 — INVENTARISASI UNIT FINAL
+
+Catat seluruh:
+
+- ID narasi dan teks final.
+- ID dialog dan teks final.
+- ID jangkar dan jenisnya.
+- Posisi penanda jangkar di antara narasi.
+- Timestamp kandidat dari Prompt 1B1.
+- Beat aksi wajib.
+- Jangkar terakhir part.
+- Sambungan dengan part sebelumnya dan berikutnya.
+
+## LANGKAH 2 — VERIFIKASI RINGKAS MP4 DAN SRT
+
+Lihat wilayah sumber yang relevan untuk memahami:
+
+- lokasi dan fase scene;
+- siapa berbicara;
+- bagian yang membutuhkan lip-sync;
+- aksi yang membutuhkan audio asli;
+- persiapan, proses, reaksi, dan akibat;
+- visual yang paling tepat untuk narasi; `0,50×` adalah target/default, tetapi stok presisi boleh direncanakan untuk kecepatan di bawah `0,50×` atau intentional freeze/hold jika dibutuhkan;
+- **jumlah dan variasi shot per tempat/lokasi fisik yang cukup agar Prompt 3 dapat mengganti visual setiap `2,00–5,00 detik`**, termasuk ketika shot diperlambat atau diberi freeze; bedakan kolam bila narasi berpindah lokasi;
+- kemungkinan pengulangan antara narasi dan jangkar.
+
+Prompt 1B2 hanya membuat pembagian wilayah kandidat. Jangan memilih in/out frame final.
+
+## LANGKAH 3 — BAGI PART MENJADI BLOK
+
+Untuk setiap blok, tulis:
+
+- ID blok;
+- ringkasan fungsi cerita;
+- unit yang masuk;
+- urutan tayang;
+- urutan pengerjaan;
+- titik mulai dan titik akhir cerita;
+- alasan pembagian blok.
+
+## LANGKAH 4 — TENTUKAN KEPEMILIKAN VISUAL
+
+Setiap wilayah visual diberi salah satu status:
+
+1. `WAJIB JANGKAR`
+   - dialog dengan mulut terlihat;
+   - teriakan penting;
+   - serangan, benturan, jatuh, tembakan, penyelamatan, atau akibat utama;
+   - momen yang kehilangan kekuatan jika audio asli dimatikan.
+
+2. `PRIORITAS JANGKAR`
+   - reaction shot penting;
+   - detail benda yang menentukan sebab-akibat;
+   - gerakan penghubung yang diperlukan agar jangkar tidak meloncat.
+
+3. `WAJIB NARASI`
+   - informasi penting dalam narasi yang tidak dijelaskan oleh dialog atau jangkar;
+   - lokasi, keadaan, hubungan, proses, atau akibat yang harus dipahami melalui gambar.
+
+4. `FLEKSIBEL NARASI`
+   - establishing;
+   - perjalanan;
+   - aktivitas pendukung;
+   - ekspresi netral;
+   - detail benda;
+   - persiapan aksi;
+   - aksi pendukung yang masih jelas tanpa audio asli dan layak sebagai bahan **acak satu lokasi 2–5 detik** atau susunan natural saat mode darurat; `0,50×`, speed lebih lambat, atau freeze boleh direncanakan hanya di dalam potongan final 2–5 detik dan tidak boleh menahan visual yang sama >5 detik.
+
+5. `DILARANG UNTUK UNIT INI`
+   - membocorkan kejadian berikutnya;
+   - mengulang momen utama unit lain;
+   - memakai kondisi benda, luka, posisi tokoh, atau lokasi yang salah;
+   - mengambil momen yang sudah dialokasikan untuk jangkar lain.
+
+## LANGKAH 5 — BUAT PETA FUNGSI VISUAL PER FRASA
+
+Untuk setiap N-xxx, pecah teks menjadi frasa berdasarkan perubahan informasi atau makna. Jangan memperlakukan seluruh N-xxx sebagai satu fungsi visual umum.
+
+Tandai setiap frasa dengan salah satu status:
+
+1. `VISUAL PRESISI — TIDAK DIJELASKAN JANGKAR`
+   - informasi frasa tidak akan dijelaskan/diperlihatkan lagi secara cukup oleh jangkar;
+   - Prompt 3 wajib memasangkan audio frasa dengan visual yang benar-benar menunjukkan informasi tersebut.
+
+2. `HANDOFF KE J-xxx — DIJELASKAN JANGKAR`
+   - informasi frasa akan langsung dijelaskan/diperlihatkan oleh jangkar terkait;
+   - Prompt 3 memakai adegan sebelum J-xxx yang masih satu konteks dan sedekat mungkin;
+   - momen inti J-xxx tetap disimpan untuk Prompt 2.
+
+3. `CAMPURAN — PECAH SUBFRASA`
+   - satu kalimat memiliki bagian yang wajib presisi dan bagian yang akan dijelaskan jangkar;
+   - pecah lagi agar masing-masing bagian mendapat perlakuan yang benar.
+
+Aturan inti:
+
+> Jika informasi tidak dijelaskan jangkar, visual dan audio narasi wajib dipasangkan secara presisi. Jika informasi akan dijelaskan jangkar, visual narasi memakai adegan sebelum jangkar yang relevan sebagai pengantar dan dilarang mengambil momen inti jangkar.
+
+Untuk setiap status `HANDOFF KE J-xxx`, catat:
+
+- ID jangkar target;
+- konteks adegan sebelum jangkar;
+- wilayah kandidat sebelum jangkar;
+- momen inti jangkar yang dilarang;
+- risiko overlap dengan timestamp jangkar;
+- kriteria sambungan N → J yang dianggap natural.
+
+Prompt 1B2 tidak memilih in/out frame final. Ia hanya menetapkan fungsi, kandidat wilayah, dan larangan agar Prompt 3 tidak menebak dari nol.
+
+## LANGKAH 6 — TENTUKAN BATAS VISUAL JANGKAR DAN NARASI
+
+Untuk setiap J-xxx, tulis:
+
+- momen wajib;
+- audio wajib;
+- area percakapan lokal;
+- ID blok B-xxx;
+- urutan source dan pergantian kamera asli untuk Dialog;
+- wilayah dialog yang harus tetap kronologis dan sinkron;
+- beat aksi;
+- peta shot/kamera Aksi untuk seleksi AMBIL–LEWATI;
+- bagian sebab-akibat yang wajib dilindungi;
+- shot Aksi yang boleh diacak lokal hanya jika aman;
+- shot yang harus disisakan untuk narasi;
+- batas awal dan akhir wilayah kandidat.
+
+Untuk setiap N-xxx, tulis:
+
+- fungsi narasi;
+- peta frasa visual;
+- frasa `VISUAL PRESISI`;
+- frasa `HANDOFF KE J-xxx`;
+- ID jangkar target handoff;
+- informasi wajib visual;
+- jenis visual yang disarankan;
+- wilayah kandidat adegan sebelum jangkar untuk handoff;
+- aksi pendukung yang boleh dipakai;
+- momen inti jangkar yang dilarang;
+- wilayah kandidat utama;
+- risiko spoiler, overlap, atau pengulangan;
+- **kolam visual per lokasi fisik**: kelompokkan kandidat shot/rentang berdasarkan tempat yang sama; jangan mencampur lokasi berbeda hanya karena masih satu scene/blok. Bila satu N-xxx berpindah tempat, buat Kolam Lokasi A, Kolam Lokasi B, dst.;
+- mode penyusunan yang direkomendasikan untuk setiap kolam: `ACAK SATU LOKASI` bila aman atau `MODE DARURAT — TANPA ACAK` bila pengacakan akan merusak kontinuitas/sebab-akibat atau stok terlalu terbatas;
+- perkiraan jumlah potongan final berdasarkan durasi audio N-xxx; pilih jumlah `k` sehingga sebisa mungkin `2k ≤ durasi audio final ≤ 5k`. Jika durasi tidak dapat dibagi menjadi seluruh potongan 2–5 detik (terutama total <2 detik), tandai risiko dan gunakan safe padding alami bila tersedia; jika tetap mustahil, unit wajib `PERLU REVISI`;
+- larangan mengulang shot/frame yang sama secara berurutan atau membelah satu sumber menjadi potongan semu hanya untuk terlihat seperti pergantian visual.
+
+## ATURAN PERSIAPAN KHUSUS UNTUK PROMPT 2 — V22.5.1
+
+1. Untuk setiap Jangkar DIALOG, tandai wilayah source dialog, urutan ucapan, dan pergantian kamera asli. Jangan menyiapkan kolam cutaway acak lintas blok.
+2. Dialog Prompt 2 mengikuti source asli dan cut kamera asli; visual tidak boleh ditukar hanya untuk variasi.
+3. Native short shot pada Dialog boleh tetap <2 detik bila memang merupakan cut kamera asli; jangan merencanakan potongan buatan sangat pendek.
+4. Untuk setiap Jangkar AKSI, petakan kamera/shot asli, fungsi tiap shot, momen sebab-akibat yang wajib dilindungi, dan kandidat shot yang dapat dipilih melalui AMBIL–LEWATI.
+5. Bagian `LEWATI` tetap AVAILABLE/UNCLAIMED untuk Narasi selama tidak dikunci unit lain.
+6. Acak Aksi bukan kewajiban. Tandai hanya kandidat yang boleh diacak lokal jika posisi, arah gerak, benda, sebab-akibat, ruang, dan waktu tetap aman.
+7. Untuk CAMPURAN, rencanakan seperti Aksi; ucapan yang dipertahankan tetap harus sinkron dengan orang dan momen yang benar.
+8. Visual `WAJIB NARASI` tidak boleh dipindahkan ke Jangkar tanpa pengganti yang tetap menjelaskan informasi wajib.
+9. Prompt 1B2 tidak memilih In/Out final; keputusan final dicatat Prompt 2 dalam JSON unit.
+
+## LANGKAH 7 — BUAT DAFTAR KERJA SATU PER SATU
+
+Buat nomor pekerjaan eksplisit:
+
+1. J-001
+2. N-001
+3. N-002
+4. Audit B-001
+5. J-002
+6. N-003
+7. Audit B-002
+
+Daftar mengikuti ketergantungan teknis, bukan semata-mata urutan tayang.
+
+Setiap perintah `lanjut` hanya boleh mengerjakan satu nomor berikutnya.
+
+## LANGKAH 8 — BUAT REGISTRASI PUSAT AWAL
+
+Gunakan field:
+
+- Part.
+- Blok.
+- Unit.
+- Jenis unit.
+- Urutan tayang.
+- Urutan pengerjaan.
+- Status.
+- Mode audio.
+- Kecepatan.
+- Wilayah kandidat visual.
+- Timestamp visual aktual.
+- Timestamp audio aktual.
+- Pemilik visual.
+- Larangan.
+- Informasi wajib visual.
+- Peta fungsi visual per frasa.
+- Target handoff jangkar.
+- Kolam visual per lokasi narasi.
+- Target jumlah potongan visual final.
+- Durasi final setiap potongan visual.
+- Catatan audit.
+- File hasil.
+
+Pada tahap 1B2, `Timestamp visual aktual` dan `Timestamp audio aktual` masih kosong kecuali data telah benar-benar terkunci oleh sumber final sebelumnya.
+
+---
+
+# ATURAN KHUSUS PROMPT 3 V22.5 YANG HARUS DIRENCANAKAN OLEH 1B2
+
+1. Prioritas tertinggi tetap **ketepatan visual terhadap frasa narasi**.
+2. Setiap kandidat Narasi harus dikelompokkan berdasarkan **tempat/lokasi fisik yang sama**, bukan hanya berdasarkan scene/blok.
+3. Jika satu N-xxx atau satu frasa berpindah lokasi, buat kolam terpisah untuk masing-masing lokasi dan tandai titik perpindahannya.
+4. `ACAK SATU LOKASI` adalah mode utama bila tersedia beberapa shot aman dari lokasi yang sama.
+5. Acak satu lokasi tidak boleh merusak kostum, luka, benda, fase scene, sebab-akibat, spoiler, atau kepemilikan momen Jangkar.
+6. `MODE DARURAT — TANPA ACAK` harus direncanakan sebagai opsi sah bila pengacakan tidak natural, urutan harus kronologis, atau stok satu lokasi terlalu terbatas untuk diacak. Mode ini **bukan otomatis PERLU REVISI**.
+7. Mode darurat hanya membebaskan kewajiban mengacak; setiap potongan visual final tetap wajib `2,00–5,00 detik`, visual sama tidak boleh >5 detik, dan visual harus tetap berasal dari lokasi yang benar untuk frasa tersebut.
+8. Setiap potongan visual pada timeline final setelah speed/freeze wajib minimal `2,00 detik` dan maksimal `5,00 detik`, termasuk potongan terakhir.
+9. Setelah satu potongan mencapai maksimal 5 detik, Prompt 3 wajib berganti ke shot/rentang visual lain yang relevan.
+10. Jangan merencanakan semua shot mendekati 5 detik; 5 detik adalah batas maksimum, bukan target.
+11. Slow motion, speed <`0,50×`, optical flow, atau intentional freeze/hold tidak membatalkan kewajiban ganti visual maksimal setiap 5 detik.
+12. Dilarang membelah satu shot/frame yang sama secara berurutan hanya untuk mengakali batas 2–5 detik.
+13. Jika `ACAK SATU LOKASI` dipakai, siapkan shot/cutaway alternatif **dari lokasi fisik yang sama** agar penyusunan selektif dapat dilakukan tanpa menjadi timeline sumber lurus.
+14. Jika satu frasa membutuhkan `VISUAL PRESISI`, siapkan shot presisi/setara dari lokasi yang benar. Jangan memakai lokasi lain hanya demi variasi.
+15. Jika kandidat dari lokasi yang benar tidak cukup untuk **diacak** tetapi masih cukup untuk susunan natural 2–5 detik, tandai `MODE DARURAT — TANPA ACAK`, bukan `PERLU REVISI`.
+16. Jika bahkan susunan natural tidak mempunyai cukup visual satu lokasi yang relevan untuk memenuhi batas 2–5 detik, tandai risiko `STOK VISUAL SATU LOKASI TIDAK CUKUP UNTUK BATAS 2–5 DETIK`.
+17. Kecepatan `0,50×` tetap default dan maksimum visual narasi. Speed di bawah `0,50×` hanya untuk membentuk potongan 2–5 detik yang natural.
+18. Intentional freeze/hold tetap diperbolehkan pada frame stabil/relevan, hanya sebagai bagian dari satu potongan 2–5 detik dan tidak boleh membuat visual sama >5 detik.
+19. Audio asli film pada visual narasi akan dimatikan; audio narasi menjadi audio utama dan speed/pitch audio tidak diubah.
+20. Prompt 3 mengambil safe padding alami berdasarkan waveform; SRT bukan batas potong final.
+21. Durasi visual N-xxx mengikuti audio final setelah safe padding.
+22. Setiap N-xxx wajib memiliki peta fungsi visual per frasa, daftar lokasi yang dipakai, kolam visual per lokasi, dan mode penyusunan yang disarankan.
+23. Frasa `HANDOFF KE J-xxx` tetap memakai adegan sebelum Jangkar yang relevan dan sedekat mungkin; momen inti J-xxx dilarang dipakai Narasi.
+24. Pengacakan pada handoff juga hanya boleh antar-shot dari lokasi fisik yang sama. Jika tidak aman, gunakan susunan natural.
+25. Jika satu kalimat campuran, pecah menjadi subfrasa agar bagian presisi, perpindahan lokasi, dan handoff tidak tercampur.
+26. Aksi pendukung boleh dialokasikan untuk narasi jika tidak membutuhkan audio asli, bukan momen utama Jangkar, tidak merusak sebab-akibat/spoiler, dan dapat ditempatkan sebagai potongan 2–5 detik.
+27. Jika potongan hanya terasa benar bersama suara benturan, tembakan, teriakan, mesin, atau dialog asli, simpan untuk Prompt 2.
+
+---
+
+# FORMAT OUTPUT PER BLOK
+
+## B-[XXX] — [NAMA FUNGSI BLOK]
+
+**Ringkasan cerita:**
+
+**Unit:**
+
+**Urutan tayang:**
+
+**Urutan pengerjaan:**
+
+**Titik mulai cerita:**
+
+**Titik akhir cerita:**
+
+**Jangkar yang diamankan lebih dahulu:**
+
+**Kepemilikan visual:**
+
+- N-xxx:
+- J-xxx:
+
+**Peta fungsi visual per frasa:**
+
+- Frasa `VISUAL PRESISI`:
+- Frasa `HANDOFF KE J-xxx`:
+- Wilayah kandidat adegan sebelum jangkar:
+- Momen inti jangkar yang dilarang:
+
+**Informasi narasi yang wajib dibantu visual:**
+
+**Momen wajib audio asli:**
+
+**Visual fleksibel:**
+
+**Kolam visual per lokasi narasi 2–5 detik:**
+
+- Lokasi A:
+- Lokasi B (jika ada):
+- Mode rekomendasi per lokasi: `ACAK SATU LOKASI` / `MODE DARURAT — TANPA ACAK`
+
+**Perkiraan jumlah potongan visual final:**
+
+**Visual terlarang:**
+
+**Risiko pengulangan/spoiler:**
+
+**Kriteria lolos audit blok:**
+
+---
+
+# OUTPUT WAJIB
+
+Tahap 1B2 menghasilkan empat file kerja:
+
+1. `Rencana-Induk-Blok-dan-Kepemilikan-Visual-Part-[N]-[JUDUL-FILM].docx`
+2. `Daftar-Kerja-Per-Unit-Part-[N]-[JUDUL-FILM].txt`
+3. `Registrasi-Pusat-Part-[N]-[JUDUL-FILM].json`
+4. `Laporan-Audit-1B2-Part-[N]-[JUDUL-FILM].txt`
+
+Karena satu tahap menghasilkan lebih dari satu file, seluruh file 1–4 wajib dikumpulkan ke dalam tepat satu ZIP:
+
+`Paket-1B2-Part-[N]-[JUDUL-FILM].zip`
+
+Jangan membagi hasil 1B2 menjadi beberapa ZIP dan jangan mengubah isi masing-masing file hanya karena dimasukkan ke ZIP.
+
+Status akhir:
+
+- `SIAP KE EKSEKUSI PER UNIT`
+- atau `BELUM SIAP — DATA TIDAK CUKUP`
+
+---
+
+# LARANGAN
+
+Jangan:
+
+- Mengubah narasi final hasil Prompt 1B1.
+- Menghidupkan kembali dialog yang dihapus pengguna.
+- Menambah jangkar baru tanpa dukungan hasil 1B1.
+- Memilih frame final.
+- Membuat mapping potongan mikro seperti Prompt 2A lama.
+- Memotong atau merender media.
+- Mengunci timestamp aktual yang belum diverifikasi.
+- Menentukan visual narasi hanya karena indah tetapi tidak relevan.
+- Mengambil momen audio asli penting untuk narasi.
+- Menjadikan urutan pengerjaan sebagai urutan tayang.
+- Mengerjakan Prompt 2 atau Prompt 3 secara otomatis.
+
+Prompt 1B2 berhenti setelah rencana induk, daftar kerja, dan registrasi pusat selesai.
