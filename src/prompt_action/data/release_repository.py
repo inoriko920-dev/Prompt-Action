@@ -70,7 +70,10 @@ class ReleaseRepository:
         if sha256_bytes(payload) != expected_sha256:
             raise ReleaseWorkflowError("HASH_MISMATCH", "Staged bytes do not match release plan")
         target.parent.mkdir(parents=True, exist_ok=True)
-        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+        # O_BINARY is required on Windows. Without it, CRT text translation can
+        # turn LF bytes into CRLF during os.write(), violating byte-exact release
+        # semantics even though the in-memory payload hash is correct.
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0)
         fd = os.open(target, flags, 0o644)
         try:
             view = memoryview(payload)
