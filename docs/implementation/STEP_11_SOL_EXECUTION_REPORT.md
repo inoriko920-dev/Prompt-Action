@@ -5,9 +5,10 @@ Status: **BLOCKED (ENTRY GATE)**
 ## Current clean base
 - Repo: `inoriko920-dev/Prompt-Action`
 - Official working branch: `sol/step11-backup-engine-release-completion-20261004`
-- Branch was reset to current `main` after PR #11 integration so no stale pre-gate implementation is carried forward.
-- `main` integration merge: `9df20e4caa9d2c5e4ff341c965986bcfe68a35ca`
-- Current `main` HEAD used as STEP 11 base: `ee17e7f293b1b431e06a5b2b99be6c9809a9cb01`
+- Branch was reset/synchronized to current `main` after the validated STEP 09.5 + STEP 10 integration so no stale pre-gate implementation is carried forward.
+- STEP 09.5 + STEP 10 integration merge: `9df20e4caa9d2c5e4ff341c965986bcfe68a35ca`
+- STEP 11 gate documentation merge: `627c9f4af422a235cbb66f9b75fab8fc05ace10f`
+- STEP 11 read-only gate verifier merge: `094ab6d5a7dc752c0d9cbca959ed6f93e5fcbcff`
 
 ## Validation inherited from STEP 01–10
 PR #11 was merged only after all STEP 01–10 workflows passed on the same validated head `8b9346a60cfc37f5120e25ca10f819120ea66f23`.
@@ -19,6 +20,48 @@ Baseline reconciliation is PASS:
 - primary verified: true
 - second copy verified: true
 - no synthetic R2/S002 was created.
+
+## Automated STEP 11 entry-gate verifier
+A read-only gate verifier is now part of `main`:
+
+- script: `scripts/dev/verify_step11_entry_gate.py`
+- tests: `tests/step11_gate/test_step11_entry_gate.py`
+- workflow: `.github/workflows/ci-step11-gate.yml`
+- validated PR: `#13`
+- validated head: `6df2913ed50ab59d62225aad8f2d1dd651c8423e`
+- CI run: `37202731490` — **SUCCESS**
+- evidence artifact: `step11-entry-gate-evidence`
+- artifact ID: `11303507790`
+- artifact digest: `sha256:2e3812e2a8b01c734927b135c39970ec80f9bb7d5513402bdff9ec4672b9fd80`
+
+The verifier checks without mutating production:
+- STEP 09.5 / STEP 10 PASS evidence presence;
+- canonical validity;
+- current Snapshot status;
+- every active Prompt Revision file and SHA-256;
+- unresolved STEP 10 release transaction;
+- unresolved future STEP 11 backup journal if present;
+- primary/second-copy destination separation;
+- destination writability;
+- conservative free-space gate.
+
+Current observed result is intentionally `BLOCKED`, because the live Snapshot is still `S001 / COMPLETE`.
+
+Normal observation command:
+
+```text
+python scripts/dev/verify_step11_entry_gate.py
+```
+
+Strict execution gate for SOL:
+
+```text
+python scripts/dev/verify_step11_entry_gate.py --require-ready
+```
+
+`--require-ready` returns non-zero while the gate is blocked. STEP 11 implementation must not begin until this strict command returns `READY` / exit code 0 against the real live repository.
+
+The CI also proves the verifier is read-only by hashing canonical data, Prompt files, and backup files before and after execution.
 
 ## Live canonical gate
 Current canonical state on `main`:
@@ -63,7 +106,8 @@ Resume STEP 11 only after a genuine user-approved Prompt change is promoted thro
 4. canonical Prompt Revision hashes valid;
 5. current Snapshot status `BACKUP_REQUIRED`;
 6. no unresolved release transaction;
-7. valid/writable primary and second-copy destinations.
+7. valid/writable primary and second-copy destinations;
+8. `python scripts/dev/verify_step11_entry_gate.py --require-ready` returns `READY` with exit code 0.
 
 After that gate opens, implement and validate:
 - deterministic manifest-driven Full Backup ZIP;
