@@ -22,6 +22,8 @@ jobs:
       - name: Fetch historical snapshot source commit
         shell: bash
         run: git fetch origin d23512acd3ae9d6f4877e4d4873eb89b061289ef --depth=1
+      - name: Diagnose historical exact-byte coverage
+        run: python scripts/dev/diagnose_step095_history.py
       - name: Recover bootstrap from CRC-valid protected historical bytes
         run: python scripts/dev/repair_step095_bootstrap_zip.py
       - name: Materialize exact Prompt bytes and canonical state
