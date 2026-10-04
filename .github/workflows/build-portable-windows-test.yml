@@ -60,7 +60,9 @@ jobs:
             "$root\src\prompt_action\ui\qml\App.qml",
             "$root\BACA_DULU.txt",
             "$root\BUILD_INFO.txt",
-            "$root\Jalankan Prompt Action.bat"
+            "$root\Jalankan Prompt Action.bat",
+            "$root\Cek Portable.bat",
+            "$root\scripts\portable_self_check.ps1"
           )
           foreach ($path in $required) {
             if (-not (Test-Path $path)) { throw "Missing portable path: $path" }
@@ -91,10 +93,24 @@ jobs:
               throw "Portable user-facing text contains unexpected control characters"
             }
           }
-          foreach ($requiredText in @("Jalankan Prompt Action.bat", "PromptAction.exe", "_internal", "backups", "0.1.0.dev0", "Prompt Action v22.5.2")) {
+          foreach ($requiredText in @("Jalankan Prompt Action.bat", "Cek Portable.bat", "portable-self-check.txt", "PromptAction.exe", "_internal", "backups", "0.1.0.dev0", "Prompt Action v22.5.2")) {
             if (-not $readme.Contains($requiredText) -and -not $buildInfo.Contains($requiredText)) {
               throw "Portable metadata text missing required value: $requiredText"
             }
+          }
+
+      - name: Run packaged portable self-check
+        shell: pwsh
+        run: |
+          $root = (Resolve-Path "portable-output\Prompt-Action-Portable-Test").Path
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$root\scripts\portable_self_check.ps1" -Root $root -SmokeTest
+          if ($LASTEXITCODE -ne 0) { throw "Portable self-check failed with exit code $LASTEXITCODE" }
+          $report = "$root\runtime\logs\portable-self-check.txt"
+          if (-not (Test-Path $report)) { throw "Portable self-check report missing" }
+          $text = Get-Content $report -Raw
+          if (-not $text.Contains("RESULT: PASS")) { throw "Portable self-check did not report PASS" }
+          foreach ($requiredText in @("ProductName: Prompt Action", "ProductVersion: 0.1.0.dev0", "Smoke test exit code: 0")) {
+            if (-not $text.Contains($requiredText)) { throw "Self-check report missing: $requiredText" }
           }
 
       - name: Smoke test frozen EXE
